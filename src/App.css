@@ -1,77 +1,90 @@
+/* =========================================
+   GLOBAL
+========================================= */
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-<<<<<<< HEAD
 html {
     scroll-behavior: smooth;
 }
 
 body {
     font-family: Arial, sans-serif;
-    background: linear-gradient(
-        135deg,
-        #fdfcf8 0%,
-        #f5f5dc 50%,
-        #f5e6d3 100%
-    );
 
-=======
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #fdfcf8 0%, #f5f5dc 50%, #f5e6d3 100%);
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
+    background:
+        linear-gradient(
+            135deg,
+            #fdfcf8 0%,
+            #f5f5dc 50%,
+            #f5e6d3 100%
+        );
+
     line-height: 1.6;
+
     min-height: 100vh;
+
     width: 100%;
+
     overflow-x: hidden;
+
     position: relative;
+
     color: #333;
-<<<<<<< HEAD
 }
 
-/* LANDING PAGE*/
 
-=======
-    scroll-behavior: smooth;
-}
+/* =========================================
+   GENERAL SECTIONS
+========================================= */
 
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
 section {
     display: flex;
+
     flex-direction: column;
+
     justify-content: center;
+
     align-items: center;
+
     width: 100%;
+
     height: 100vh;
+
     padding: 50px;
+
     text-align: center;
 }
 
-<<<<<<< HEAD
 
-/* NAVIGATION */
+/* =========================================
+   LANDING PAGE NAVIGATION
+========================================= */
 
-=======
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
 nav {
     position: fixed;
+
     top: 0;
+
     margin: 25px 100px;
+
     z-index: 1000;
-<<<<<<< HEAD
 
     width: calc(100% - 200px);
 
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 
     padding: 10px 20px;
 
-    background: rgba(255, 255, 255, 0.8);
+    background:
+        rgba(255, 255, 255, 0.8);
 
     backdrop-filter: blur(40px);
 
@@ -85,48 +98,34 @@ nav {
 }
 
 
-/* LOGO */
+/* =========================================
+   LANDING PAGE LOGO
+========================================= */
 
 .logo-container {
     width: 260px;
 
     display: flex;
+
     justify-content: center;
+
     align-items: center;
 
-=======
-    width: 1450px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #e2dddd;
-    backdrop-filter: blur(40px);
-    box-shadow: 0 4px 30px rgba(220, 20, 60, 0.1);
-    border-bottom: 1px solid rgba(222, 184, 135, 0.3);
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 40px;
-}
-
-.logo-container {
-    width: 260px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
     gap: 5px;
 }
 
 .logo {
     display: flex;
+
     align-items: center;
+
     margin-left: 15px;
 }
 
 .logo img {
     width: 60px;
+
     height: 60px;
-<<<<<<< HEAD
 
     border-radius: 50%;
 
@@ -139,31 +138,20 @@ nav {
 
     margin-left: -12px;
 
-=======
-    border-radius: 50%;
-    background-color: #fff;
-    border: 2px solid white;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    margin-left: -12px;
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
     transition: 0.3s;
 }
 
 .logo img:hover {
     transform: scale(1.1);
-<<<<<<< HEAD
 
     box-shadow:
         0 5px 15px rgba(0, 0, 0, 0.2);
-=======
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
 }
 
 .logo-text {
     font-weight: 700;
+
     font-size: 24px;
-<<<<<<< HEAD
 
     background:
         linear-gradient(
@@ -172,33 +160,26 @@ nav {
             rgb(4, 0, 1)
         );
 
-=======
-    background: linear-gradient(to right, rgb(255, 0, 0), rgb(4, 0, 1));
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
     -webkit-background-clip: text;
+
     color: transparent;
 }
 
-<<<<<<< HEAD
 
-/* NAV LINKS */
+/* =========================================
+   NAVIGATION LINKS
+========================================= */
 
 .nav-links {
     display: flex;
 
     gap: 20px;
 
-=======
-.nav-links {
-    display: flex;
-    gap: 20px;
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
     margin-right: 100px;
 }
 
 .nav-links a {
     text-decoration: none;
-<<<<<<< HEAD
 
     color: #333;
 
@@ -210,7 +191,9 @@ nav {
 }
 
 
-/* LOG IN BUTTON */
+/* =========================================
+   LANDING PAGE LOG IN BUTTON
+========================================= */
 
 .log-container {
     text-align: center;
@@ -235,35 +218,19 @@ nav {
     transition: 0.3s;
 
     cursor: pointer;
-=======
-    color: #333;
-    font-weight: bold;
-    font-size: 16px;
-    padding: 0 15px;
-}
-
-.log-container {
-    text-align: center;
-    background: linear-gradient(to right, rgb(255, 0, 0), rgb(65, 65, 65));
-    color: #fff;
-    padding: 8px 30px;
-    border-radius: 50px;
-    font-weight: bold;
-    font-size: 16px;
-    transition: 0.3s;
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
 }
 
 .log-container:hover {
     transform: scale(1.1);
-<<<<<<< HEAD
 
     box-shadow:
         0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 
-/* HERO */
+/* =========================================
+   LANDING PAGE HERO
+========================================= */
 
 .hero-content {
     display: flex;
@@ -285,7 +252,6 @@ nav {
     text-align: center;
 }
 
-
 .hero-text {
     display: flex;
 
@@ -300,7 +266,6 @@ nav {
     padding-left: 80px;
 }
 
-
 .hero-text h1 {
     font-weight: bold;
 
@@ -308,7 +273,6 @@ nav {
 
     color: #333;
 }
-
 
 .hero-text h1 span {
     background:
@@ -324,59 +288,14 @@ nav {
 }
 
 
-/* HERO IMAGE */
-=======
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.hero-content {
-    display: flex;
-    ;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    height: 400px;
-    margin-bottom: 20px;
-    margin-top: 100px;
-    text-align: center;
-}
-
-.hero-text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    max-width: 900px;
-    padding-left: 80px;
-}
-
-.hero-text h1 {
-    font-weight: bold;
-    font-size: 70px;
-    color: #333;
-}
-
-.hero-text h1 span {
-    background: linear-gradient(to right, rgb(255, 0, 0), rgb(4, 0, 1));
-    -webkit-background-clip: text;
-    color: transparent;
-}
-
-.hero-paragraph {
-    width: 1200px;
-    font-size: 20px;
-    color: #555;
-    line-height: 1.5;
-    text-align: justify;
-}
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
+/* =========================================
+   HERO IMAGE
+========================================= */
 
 .img-container {
     margin-right: 70px;
 }
 
-<<<<<<< HEAD
 .img-container img {
     width: 400px;
 
@@ -391,7 +310,9 @@ nav {
 }
 
 
-/* HERO DESCRIPTION */
+/* =========================================
+   HERO PARAGRAPH
+========================================= */
 
 .hero-paragraph {
     width: 1200px;
@@ -406,7 +327,9 @@ nav {
 }
 
 
-/* HERO BUTTONS */
+/* =========================================
+   LANDING PAGE BUTTONS
+========================================= */
 
 .login-container {
     margin-top: 40px;
@@ -419,28 +342,10 @@ nav {
 
     gap: 20px;
 
-=======
-img {
-    width: 400px;
-    height: 350px;
-    border-radius: 20px;
-    object-fit: cover;
-    border: 5px solid rgb(117, 13, 13);
-
-}
-
-.login-container {
-    margin-top: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
     font-size: 20px;
 }
 
 .login-container .login-btn {
-<<<<<<< HEAD
     background:
         linear-gradient(
             to right,
@@ -462,7 +367,6 @@ img {
 
     cursor: pointer;
 }
-
 
 .login-container .learn-btn {
     background:
@@ -487,7 +391,6 @@ img {
     cursor: pointer;
 }
 
-
 .login-container .login-btn:hover,
 .login-container .learn-btn:hover {
     transform: scale(1.1);
@@ -497,7 +400,9 @@ img {
 }
 
 
-/* HOW IT WORKS */
+/* =========================================
+   HOW IT WORKS
+========================================= */
 
 .how-it-works {
     width: 100%;
@@ -506,7 +411,6 @@ img {
 
     margin-top: 50px;
 }
-
 
 .item-container {
     height: 400px;
@@ -519,7 +423,6 @@ img {
 
     align-items: center;
 }
-
 
 .item-container .item {
     display: flex;
@@ -558,7 +461,6 @@ img {
         box-shadow 0.3s ease;
 }
 
-
 .item-container .item:hover {
     transform: translateY(-10px);
 
@@ -566,13 +468,14 @@ img {
         0 12px 20px rgba(220, 20, 60, 0.2);
 }
 
-
 .arrow-item {
     color: #750d0d;
 }
 
 
-/* ABOUT  */
+/* =========================================
+   ABOUT
+========================================= */
 
 .about {
     width: 100%;
@@ -590,7 +493,6 @@ img {
     font-size: 18px;
 }
 
-
 .about-container {
     height: 400px;
 
@@ -602,7 +504,6 @@ img {
 
     align-items: center;
 }
-
 
 .about-container .about-def {
     text-align: justify;
@@ -630,7 +531,6 @@ img {
 
     font-size: 16px;
 }
-
 
 .about-container .about-item {
     display: flex;
@@ -667,7 +567,6 @@ img {
         box-shadow 0.3s ease;
 }
 
-
 .about-container .about-item:hover {
     transform: translateY(-10px);
 
@@ -676,7 +575,9 @@ img {
 }
 
 
-/* FOOTER*/
+/* =========================================
+   FOOTER
+========================================= */
 
 section.footer {
     height: 100px;
@@ -691,7 +592,11 @@ section.footer {
 }
 
 
-/* LOGIN PAGE */
+/* =========================================================
+   =========================================================
+   LOGIN / SIGN UP PAGE
+   =========================================================
+   ========================================================= */
 
 .login-page {
     min-height: 100vh;
@@ -718,7 +623,9 @@ section.footer {
 }
 
 
-/*  LOGIN DECORATIVE SHAPES */
+/* =========================================
+   DECORATIVE RED SHAPES
+========================================= */
 
 .top-red-shape {
     position: absolute;
@@ -733,7 +640,8 @@ section.footer {
 
     background: #b0000b;
 
-    border-radius: 0 0 0 100%;
+    border-radius:
+        0 0 0 100%;
 }
 
 
@@ -750,11 +658,14 @@ section.footer {
 
     background: #b0000b;
 
-    border-radius: 0 100% 0 0;
+    border-radius:
+        0 100% 0 0;
 }
 
 
-/*  LOGIN LOGO */
+/* =========================================
+   LOGIN PAGE LOGO
+========================================= */
 
 .login-logo {
     position: relative;
@@ -776,13 +687,11 @@ section.footer {
     width: fit-content;
 }
 
-
 .login-logo-images {
     display: flex;
 
     align-items: center;
 }
-
 
 .login-logo-images img {
     width: 70px;
@@ -796,7 +705,6 @@ section.footer {
     margin-left: -8px;
 }
 
-
 .login-logo > span {
     font-size: 38px;
 
@@ -806,7 +714,9 @@ section.footer {
 }
 
 
-/* LOGIN LAYOUT */
+/* =========================================
+   LOGIN LAYOUT
+========================================= */
 
 .login-layout {
     position: relative;
@@ -829,7 +739,9 @@ section.footer {
 }
 
 
-/* LEFT LOGIN CONTENT */
+/* =========================================
+   LOGIN LEFT SIDE
+========================================= */
 
 .login-left {
     width: 48%;
@@ -838,7 +750,6 @@ section.footer {
 
     align-items: center;
 }
-
 
 .login-heading h1 {
     font-size: 54px;
@@ -850,11 +761,9 @@ section.footer {
     color: #272727;
 }
 
-
 .login-heading h1 span {
     color: #bd202b;
 }
-
 
 .login-heading p {
     margin-top: 30px;
@@ -867,7 +776,9 @@ section.footer {
 }
 
 
-/* LOGIN CARD */
+/* =========================================
+   LOGIN CARD
+========================================= */
 
 .login-card {
     width: 600px;
@@ -894,14 +805,15 @@ section.footer {
 }
 
 
-/* HEADER */
+/* =========================================
+   LOGIN CARD HEADER
+========================================= */
 
 .login-card-header {
     text-align: center;
 
     margin-bottom: 35px;
 }
-
 
 .login-card-header h2 {
     font-size: 39px;
@@ -910,7 +822,6 @@ section.footer {
 
     line-height: 1.2;
 }
-
 
 .login-card-header p {
     margin-top: 10px;
@@ -923,19 +834,26 @@ section.footer {
 }
 
 
-/* INPUTS */
+/* =========================================
+   INPUT FIELDS
+========================================= */
 
 .input-group {
     height: 70px;
+
     width: 100%;
 
     display: flex;
+
     align-items: center;
 
-    border: 1px solid #d5d0c7;
+    border:
+        1px solid #d5d0c7;
+
     border-radius: 15px;
 
-    background: rgba(255, 255, 255, 0.45);
+    background:
+        rgba(255, 255, 255, 0.45);
 
     margin-bottom: 20px;
 
@@ -953,14 +871,17 @@ section.footer {
 
 .input-group input {
     width: 100%;
+
     height: 100%;
 
     border: none;
+
     outline: none;
 
     background: transparent;
 
     font-size: 16px;
+
     color: #333;
 }
 
@@ -969,8 +890,9 @@ section.footer {
 }
 
 
-
-/* REMEMBER PASSWORD/FORGOT PASSWORD*/
+/* =========================================
+   REMEMBER ME / FORGOT PASSWORD
+========================================= */
 
 .login-options {
     display: flex;
@@ -979,9 +901,9 @@ section.footer {
 
     align-items: center;
 
-    margin: 8px 5px 25px;
+    margin:
+        8px 5px 25px;
 }
-
 
 .remember {
     display: flex;
@@ -997,7 +919,6 @@ section.footer {
     cursor: pointer;
 }
 
-
 .remember input {
     width: 22px;
 
@@ -1005,7 +926,6 @@ section.footer {
 
     accent-color: #a51b24;
 }
-
 
 .forgot-password {
     border: none;
@@ -1021,13 +941,14 @@ section.footer {
     cursor: pointer;
 }
 
-
 .forgot-password:hover {
     text-decoration: underline;
 }
 
 
-/*  MAIN LOGIN BUTTON */
+/* =========================================
+   MAIN LOGIN BUTTON
+========================================= */
 
 .main-login-btn {
     width: 100%;
@@ -1064,14 +985,12 @@ section.footer {
     transition: 0.3s;
 }
 
-
 .main-login-btn:hover {
     transform: translateY(-2px);
 
     box-shadow:
         0 8px 20px rgba(120, 0, 0, 0.2);
 }
-
 
 .main-login-btn .arrow {
     font-size: 28px;
@@ -1080,7 +999,9 @@ section.footer {
 }
 
 
-/*OR DIVIDER*/
+/* =========================================
+   OR DIVIDER
+========================================= */
 
 .or-divider {
     display: flex;
@@ -1092,7 +1013,6 @@ section.footer {
     margin: 25px 0;
 }
 
-
 .or-divider span {
     height: 1px;
 
@@ -1101,7 +1021,6 @@ section.footer {
     flex: 1;
 }
 
-
 .or-divider p {
     color: #777;
 
@@ -1109,7 +1028,9 @@ section.footer {
 }
 
 
-/*ROLE BUTTONS*/
+/* =========================================
+   STUDENT / FACULTY BUTTONS
+========================================= */
 
 .role-buttons {
     display: flex;
@@ -1117,13 +1038,13 @@ section.footer {
     gap: 18px;
 }
 
-
 .role-btn {
     flex: 1;
 
     height: 65px;
 
-    border: 1px solid #8e2026;
+    border:
+        1px solid #8e2026;
 
     border-radius: 15px;
 
@@ -1141,13 +1062,10 @@ section.footer {
 
     align-items: center;
 
-    gap: 12px;
-
     cursor: pointer;
 
     transition: 0.3s;
 }
-
 
 .role-btn:hover {
     background: #8e2026;
@@ -1156,12 +1074,9 @@ section.footer {
 }
 
 
-.role-icon {
-    font-size: 20px;
-}
-
-
-/* REGISTER */
+/* =========================================
+   REGISTER
+========================================= */
 
 .register-text {
     margin-top: 35px;
@@ -1177,7 +1092,6 @@ section.footer {
     color: #666;
 }
 
-
 .register-text button {
     border: none;
 
@@ -1192,20 +1106,25 @@ section.footer {
     font-size: 15px;
 }
 
-
 .register-text button:hover {
     text-decoration: underline;
 }
 
 
-/* RESPONSIVE */
+/* =========================================================
+   RESPONSIVE DESIGN
+========================================================= */
 
 @media (max-width: 1200px) {
 
-    nav {
-        margin: 20px 40px;
+    /* Landing Page */
 
-        width: calc(100% - 80px);
+    nav {
+        margin:
+            20px 40px;
+
+        width:
+            calc(100% - 80px);
     }
 
     .nav-links {
@@ -1219,6 +1138,9 @@ section.footer {
     .hero-paragraph {
         width: 90%;
     }
+
+
+    /* Login Page */
 
     .login-layout {
         width: 90%;
@@ -1235,6 +1157,8 @@ section.footer {
 
 
 @media (max-width: 900px) {
+
+    /* Login Page */
 
     .login-page {
         overflow-y: auto;
@@ -1278,12 +1202,16 @@ section.footer {
 
 @media (max-width: 600px) {
 
+    /* Landing Page */
+
     nav {
         margin: 15px;
 
-        width: calc(100% - 30px);
+        width:
+            calc(100% - 30px);
 
-        padding: 8px 12px;
+        padding:
+            8px 12px;
     }
 
     .nav-links {
@@ -1304,6 +1232,9 @@ section.footer {
         font-size: 19px;
     }
 
+
+    /* Login Page */
+
     .login-logo {
         margin-left: 20px;
 
@@ -1321,7 +1252,8 @@ section.footer {
     }
 
     .login-card {
-        padding: 35px 25px;
+        padding:
+            35px 25px;
     }
 
     .login-card-header h2 {
@@ -1335,128 +1267,4 @@ section.footer {
     .login-options {
         font-size: 13px;
     }
-=======
-    background: linear-gradient(to right, rgb(255, 0, 0), rgb(65, 65, 65));
-    color: #fff;
-    padding: 10px 30px;
-    border-radius: 50px;
-    font-weight: bold;
-    font-size: 16px;
-    transition: 0.3s;
-}
-
-.login-container .learn-btn {
-    background: linear-gradient(to right, rgb(255, 255, 255), rgb(176, 157, 157));
-    color: #333;
-    padding: 10px 30px;
-    border-radius: 50px;
-    font-weight: bold;
-    font-size: 16px;
-    transition: 0.3s;
-}
-
-.login-container .login-btn:hover,
-.login-container .learn-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.how-it-works{
-    width: 100%;
-    height: 500px;
-    margin-top: 50px;
-}
-
-.item-container {
-    height: 400px;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
-.item-container .item {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 60px;
-    padding: 40px;
-    height: 200px;
-    width: 300px;
-    box-shadow: 0 8px 100px rgba(220, 20, 60, 0.1);
-    border-bottom: 5px solid rgba(101, 19, 19, 0.3);
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    color: #600a0a;
-    font-weight: bold;
-    font-size: 18px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.item-container .item:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 20px rgba(220, 20, 60, 0.2);
-}
-
-.about {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 60px;
-    font-size: 18px;
-}
-
-.about-container {
-    height: 400px;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
-.about-container .about-def{
-    text-align: justify;
-    padding: 20px;
-    height:200px;
-    width: 200px;
-    box-shadow: 0 8px 100px rgba(220, 20, 60, 0.1);
-    border-bottom: 5px solid rgba(101, 19, 19, 0.3);
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    color: #600a0a;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.about-container .about-item{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 80px;
-    width: 200px;
-    margin-bottom: 200px;
-    box-shadow: 0 8px 100px rgba(220, 20, 60, 0.1);
-    border-bottom: 5px solid rgba(101, 19, 19, 0.3);
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    color: #600a0a;
-    font-weight: bold;
-    font-size: 18px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-} 
-
-.about-container .about-item:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 20px rgba(220, 20, 60, 0.2);
-}
-
-section.footer {
-    height: 100px;
-    background-color: #000000;
-    color: #ffffff;
-    padding: 20px;
-    text-align: center;
->>>>>>> 40d0127d445f160112891a618a079be17760b7c7
 }
