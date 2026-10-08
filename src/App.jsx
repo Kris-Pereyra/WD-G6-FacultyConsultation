@@ -5,22 +5,110 @@ import weblogo from './assets/weblogo.jpg'
 import wmsuLogo from './assets/wmsuLogo.png'
 import calendar from './assets/calendar.jpg'
 
-function App() {
-  const [currentPage, setCurrentPage] = useState('home')
 
-  // Go to Login Page
+/* SIMPLE ICONS */
+
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="icon">
+      <path d="M3 10.5L12 3l9 7.5" />
+      <path d="M5 9.5V21h14V9.5" />
+      <path d="M9 21v-7h6v7" />
+    </svg>
+  )
+}
+
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="icon">
+      <circle cx="11" cy="11" r="7" />
+      <path d="M16.5 16.5L21 21" />
+    </svg>
+  )
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="icon">
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M16 3v4M8 3v4M3 10h18" />
+    </svg>
+  )
+}
+
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="icon">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7" />
+    </svg>
+  )
+}
+
+function UsersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="icon">
+      <circle cx="9" cy="8" r="3" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M3 20c0-3.5 2.5-6 6-6s6 2.5 6 6" />
+      <path d="M15 14c3 0 5 2 5 5" />
+    </svg>
+  )
+}
+
+function ClockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="icon">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  )
+}
+
+function BookIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="icon">
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z" />
+      <path d="M4 5.5v16" />
+    </svg>
+  )
+}
+
+function ChevronIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="chevron-icon">
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  )
+}
+
+
+/* APP*/
+
+function App() {
+
+  const [currentPage, setCurrentPage] = useState('home')
+  const [activeDashboardPage, setActiveDashboardPage] = useState('dashboard')
+
+
+  /* NAVIGATION*/
+
   function handleLogin() {
     setCurrentPage('login')
     window.scrollTo(0, 0)
   }
 
-  // Go back to Landing Page
   function handleHome() {
     setCurrentPage('home')
     window.scrollTo(0, 0)
   }
 
-  // Learn More button
+  function handleDashboard() {
+    setCurrentPage('dashboard')
+    setActiveDashboardPage('dashboard')
+    window.scrollTo(0, 0)
+  }
+
   function handleLearnMore() {
     const aboutSection = document.getElementById('about')
 
@@ -31,20 +119,27 @@ function App() {
     }
   }
 
-  // ==========================================
-  // LOGIN PAGE
-  // ==========================================
+
+  /*DASHBOARD NAVIGATION */
+
+  function handleDashboardNavigation(page) {
+    setActiveDashboardPage(page)
+  }
+
+
+  /*LOGIN PAGE */
 
   if (currentPage === 'login') {
+
     return (
       <div className="login-page">
 
-        {/* Decorative Background Shapes */}
         <div className="top-red-shape"></div>
         <div className="bottom-red-shape"></div>
 
 
-        {/* LOGIN PAGE LOGO */}
+        {/* LOGIN LOGO */}
+
         <div
           className="login-logo"
           onClick={handleHome}
@@ -71,13 +166,12 @@ function App() {
         </div>
 
 
-        {/* LOGIN PAGE CONTENT */}
+        {/* LOGIN CONTENT */}
+
         <div className="login-layout">
 
 
-          {/* ==================================
-              LEFT SIDE
-          ================================== */}
+          {/* LEFT SIDE */}
 
           <div className="login-left">
 
@@ -99,7 +193,6 @@ function App() {
 
               </h1>
 
-
               <p>
                 Log in to your account and book academic
                 <br />
@@ -111,14 +204,9 @@ function App() {
           </div>
 
 
-          {/* ==================================
-              RIGHT SIDE LOGIN CARD
-          ================================== */}
+          {/* LOGIN CARD */}
 
           <div className="login-card">
-
-
-            {/* HEADER */}
 
             <div className="login-card-header">
 
@@ -135,8 +223,6 @@ function App() {
             </div>
 
 
-            {/* EMAIL / STUDENT ID */}
-
             <div className="input-group">
 
               <input
@@ -146,8 +232,6 @@ function App() {
 
             </div>
 
-
-            {/* PASSWORD */}
 
             <div className="input-group">
 
@@ -159,15 +243,11 @@ function App() {
             </div>
 
 
-            {/* REMEMBER ME / FORGOT PASSWORD */}
-
             <div className="login-options">
 
               <label className="remember">
 
-                <input
-                  type="checkbox"
-                />
+                <input type="checkbox" />
 
                 <span>
                   Remember me
@@ -186,14 +266,12 @@ function App() {
             </div>
 
 
-            {/* LOGIN BUTTON */}
+            {/* LOGIN GOES TO DASHBOARD */}
 
             <button
               className="main-login-btn"
               type="button"
-              onClick={() =>
-                alert('Login functionality will be added later.')
-              }
+              onClick={handleDashboard}
             >
 
               <span>
@@ -206,8 +284,6 @@ function App() {
 
             </button>
 
-
-            {/* OR */}
 
             <div className="or-divider">
 
@@ -222,16 +298,11 @@ function App() {
             </div>
 
 
-            {/* STUDENT / FACULTY */}
-
             <div className="role-buttons">
 
               <button
                 className="role-btn"
                 type="button"
-                onClick={() =>
-                  alert('Student registration will be added later.')
-                }
               >
                 I'm a Student
               </button>
@@ -240,17 +311,12 @@ function App() {
               <button
                 className="role-btn"
                 type="button"
-                onClick={() =>
-                  alert('Faculty registration will be added later.')
-                }
               >
                 I'm a Faculty
               </button>
 
             </div>
 
-
-            {/* REGISTER */}
 
             <div className="register-text">
 
@@ -260,9 +326,6 @@ function App() {
 
               <button
                 type="button"
-                onClick={() =>
-                  alert('Registration page will be added later.')
-                }
               >
                 Register
               </button>
@@ -278,24 +341,948 @@ function App() {
   }
 
 
-  // ==========================================
-  // LANDING PAGE
-  // ==========================================
+  /* STUDENT DASHBOARD */
+
+  if (currentPage === 'dashboard') {
+
+    return (
+      <div className="dashboard-page">
+
+
+        {/*TOP HEADER */}
+
+        <header className="dashboard-header">
+
+
+          {/* LOGO */}
+
+          <div
+            className="dashboard-logo"
+            onClick={handleHome}
+          >
+
+            <div className="dashboard-logo-images">
+
+              <img
+                src={wmsuLogo}
+                alt="WMSU Logo"
+              />
+
+              <img
+                src={weblogo}
+                alt="ConsultTime Logo"
+              />
+
+            </div>
+
+            <span>
+              ConsultTime
+            </span>
+
+          </div>
+
+
+          {/* TOP NAVIGATION */}
+
+          <div className="dashboard-top-nav">
+
+            <button
+              className={
+                activeDashboardPage === 'dashboard'
+                  ? 'top-nav-btn active'
+                  : 'top-nav-btn'
+              }
+              onClick={() =>
+                handleDashboardNavigation('dashboard')
+              }
+            >
+              Home
+            </button>
+
+
+            <button
+              className={
+                activeDashboardPage === 'faculty'
+                  ? 'top-nav-btn active'
+                  : 'top-nav-btn'
+              }
+              onClick={() =>
+                handleDashboardNavigation('faculty')
+              }
+            >
+              Find Faculty
+            </button>
+
+
+            <button
+              className={
+                activeDashboardPage === 'bookings'
+                  ? 'top-nav-btn active'
+                  : 'top-nav-btn'
+              }
+              onClick={() =>
+                handleDashboardNavigation('bookings')
+              }
+            >
+              My Bookings
+            </button>
+
+
+            <button
+              className={
+                activeDashboardPage === 'profile'
+                  ? 'top-nav-btn active'
+                  : 'top-nav-btn'
+              }
+              onClick={() =>
+                handleDashboardNavigation('profile')
+              }
+            >
+              Profile
+            </button>
+
+          </div>
+
+
+          {/* USER */}
+
+          <div className="dashboard-user">
+
+            <div className="user-avatar">
+              <UserIcon />
+            </div>
+
+            <div className="user-information">
+
+              <strong>
+                Waj Wannah Sanchez
+              </strong>
+
+              <span>
+                Student
+              </span>
+
+            </div>
+
+            <span className="user-arrow">
+              ▼
+            </span>
+
+          </div>
+
+        </header>
+
+
+        {/* DASHBOARD BODY */}
+
+        <div className="dashboard-body">
+
+
+          {/*SIDEBAR*/}
+
+          <aside className="dashboard-sidebar">
+
+
+            <button
+              className={
+                activeDashboardPage === 'dashboard'
+                  ? 'sidebar-btn active'
+                  : 'sidebar-btn'
+              }
+              onClick={() =>
+                handleDashboardNavigation('dashboard')
+              }
+            >
+
+              <HomeIcon />
+
+              <span>
+                Dashboard
+              </span>
+
+            </button>
+
+
+            <button
+              className={
+                activeDashboardPage === 'faculty'
+                  ? 'sidebar-btn active'
+                  : 'sidebar-btn'
+              }
+              onClick={() =>
+                handleDashboardNavigation('faculty')
+              }
+            >
+
+              <SearchIcon />
+
+              <span>
+                Find Faculty
+              </span>
+
+            </button>
+
+
+            <button
+              className={
+                activeDashboardPage === 'bookings'
+                  ? 'sidebar-btn active'
+                  : 'sidebar-btn'
+              }
+              onClick={() =>
+                handleDashboardNavigation('bookings')
+              }
+            >
+
+              <CalendarIcon />
+
+              <span>
+                My Bookings
+              </span>
+
+            </button>
+
+
+            <button
+              className={
+                activeDashboardPage === 'profile'
+                  ? 'sidebar-btn active'
+                  : 'sidebar-btn'
+              }
+              onClick={() =>
+                handleDashboardNavigation('profile')
+              }
+            >
+
+              <UserIcon />
+
+              <span>
+                Profile
+              </span>
+
+            </button>
+
+          </aside>
+
+
+          {/*MAIN DASHBOARD CONTENT*/}
+
+          <main className="dashboard-main">
+
+
+            {/*DASHBOARD HOME */}
+
+            {activeDashboardPage === 'dashboard' && (
+
+              <>
+
+                {/* WELCOME AREA */}
+
+                <div className="dashboard-welcome">
+
+                  <div className="welcome-content">
+
+                    <p className="welcome-small">
+                      Hello,
+                    </p>
+
+                    <h1>
+                      Waj Wannah Sanchez!
+                    </h1>
+
+                    <p className="welcome-description">
+                      Book a consultation with your faculty members
+                      <br />
+                      and get the academic support you need.
+                    </p>
+
+
+                    {/* SEARCH */}
+
+                    <div className="dashboard-search">
+
+                      <div className="search-input">
+
+                        <SearchIcon />
+
+                        <input
+                          type="text"
+                          placeholder="Search faculty by name, subject, or department..."
+                        />
+
+                      </div>
+
+
+                      <button
+                        className="dashboard-search-btn"
+                        onClick={() =>
+                          handleDashboardNavigation('faculty')
+                        }
+                      >
+                        Search
+                      </button>
+
+                    </div>
+
+                  </div>
+
+
+                  {/* DASHBOARD IMAGE */}
+
+                  <div className="dashboard-image">
+
+                    <img
+                      src={calendar}
+                      alt="Consultation schedule"
+                    />
+
+                  </div>
+
+                </div>
+
+
+                {/* STAT CARDS */}
+
+                <div className="stat-grid">
+
+
+                  <div
+                    className="stat-card"
+                    onClick={() =>
+                      handleDashboardNavigation('faculty')
+                    }
+                  >
+
+                    <div className="stat-icon">
+                      <UsersIcon />
+                    </div>
+
+                    <div className="stat-content">
+
+                      <span>
+                        Available Faculty
+                      </span>
+
+                      <strong>
+                        24
+                      </strong>
+
+                    </div>
+
+                    <ChevronIcon />
+
+                  </div>
+
+
+                  <div
+                    className="stat-card"
+                    onClick={() =>
+                      handleDashboardNavigation('bookings')
+                    }
+                  >
+
+                    <div className="stat-icon">
+                      <CalendarIcon />
+                    </div>
+
+                    <div className="stat-content">
+
+                      <span>
+                        Upcoming Consultations
+                      </span>
+
+                      <strong>
+                        1
+                      </strong>
+
+                    </div>
+
+                    <ChevronIcon />
+
+                  </div>
+
+
+                  <div
+                    className="stat-card"
+                    onClick={() =>
+                      handleDashboardNavigation('bookings')
+                    }
+                  >
+
+                    <div className="stat-icon">
+                      <CalendarIcon />
+                    </div>
+
+                    <div className="stat-content">
+
+                      <span>
+                        My Bookings
+                      </span>
+
+                      <strong>
+                        3
+                      </strong>
+
+                    </div>
+
+                    <ChevronIcon />
+
+                  </div>
+
+
+                  <div className="stat-card">
+
+                    <div className="stat-icon">
+                      <ClockIcon />
+                    </div>
+
+                    <div className="stat-content">
+
+                      <span>
+                        Pending Requests
+                      </span>
+
+                      <strong>
+                        1
+                      </strong>
+
+                    </div>
+
+                    <ChevronIcon />
+
+                  </div>
+
+                </div>
+
+
+                {/* LOWER CONTENT */}
+
+                <div className="dashboard-lower">
+
+
+                  {/* FIND FACULTY */}
+
+                  <div className="faculty-section">
+
+                    <div className="section-heading">
+
+                      <h2>
+                        Find a Faculty
+                      </h2>
+
+                      <button
+                        onClick={() =>
+                          handleDashboardNavigation('faculty')
+                        }
+                      >
+                        View All
+                      </button>
+
+                    </div>
+
+
+                    <div className="faculty-grid">
+
+
+                      {/* FACULTY 1 */}
+
+                      <div className="faculty-card">
+
+                        <div className="faculty-avatar avatar-one">
+                          MS
+                        </div>
+
+                        <h3>
+                          Prof. Novie Jozane
+                        </h3>
+
+                        <p className="faculty-department">
+                          Computer Science
+                        </p>
+
+                        <div className="faculty-detail">
+
+                          <CalendarIcon />
+
+                          <span>
+                            Available today
+                            <br />
+                            2:00 PM – 4:00 PM
+                          </span>
+
+                        </div>
+
+                        <div className="faculty-detail">
+
+                          <span className="location-symbol">
+                            ◇
+                          </span>
+
+                          <span>
+                            Faculty Room 204
+                          </span>
+
+                        </div>
+
+                        <button className="availability-btn">
+                          View Availability
+                        </button>
+
+                      </div>
+
+
+                      {/* FACULTY 2 */}
+
+                      <div className="faculty-card">
+
+                        <div className="faculty-avatar avatar-two">
+                          JR
+                        </div>
+
+                        <h3>
+                          Prof. Kris
+                        </h3>
+
+                        <p className="faculty-department">
+                          Information Technology
+                        </p>
+
+                        <div className="faculty-detail">
+
+                          <CalendarIcon />
+
+                          <span>
+                            Available tomorrow
+                            <br />
+                            9:00 AM – 11:00 AM
+                          </span>
+
+                        </div>
+
+                        <div className="faculty-detail">
+
+                          <span className="location-symbol">
+                            ◇
+                          </span>
+
+                          <span>
+                            Faculty Room 101
+                          </span>
+
+                        </div>
+
+                        <button className="availability-btn">
+                          View Availability
+                        </button>
+
+                      </div>
+
+
+                      {/* FACULTY 3 */}
+
+                      <div className="faculty-card">
+
+                        <div className="faculty-avatar avatar-three">
+                          LR
+                        </div>
+
+                        <h3>
+                          Prof. Ian Lim
+                        </h3>
+
+                        <p className="faculty-department">
+                          Mathematics
+                        </p>
+
+                        <div className="faculty-detail">
+
+                          <CalendarIcon />
+
+                          <span>
+                            Available today
+                            <br />
+                            1:00 PM – 3:00 PM
+                          </span>
+
+                        </div>
+
+                        <div className="faculty-detail">
+
+                          <span className="location-symbol">
+                            ◇
+                          </span>
+
+                          <span>
+                            Faculty Room 305
+                          </span>
+
+                        </div>
+
+                        <button className="availability-btn">
+                          View Availability
+                        </button>
+
+                      </div>
+
+
+                      {/* FACULTY 4 */}
+
+                      <div className="faculty-card">
+
+                        <div className="faculty-avatar avatar-four">
+                          CS
+                        </div>
+
+                        <h3>
+                          Prof. Ellice Vicente
+                        </h3>
+
+                        <p className="faculty-department">
+                          Engineering
+                        </p>
+
+                        <div className="faculty-detail">
+
+                          <CalendarIcon />
+
+                          <span>
+                            Available tomorrow
+                            <br />
+                            10:00 AM – 12:00 PM
+                          </span>
+
+                        </div>
+
+                        <div className="faculty-detail">
+
+                          <span className="location-symbol">
+                            ◇
+                          </span>
+
+                          <span>
+                            Engineering Building 2B
+                          </span>
+
+                        </div>
+
+                        <button className="availability-btn">
+                          View Availability
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+
+                  {/* RIGHT COLUMN */}
+
+                  <div className="dashboard-right-column">
+
+
+                    {/* UPCOMING CONSULTATION */}
+
+                    <div className="upcoming-section">
+
+                      <div className="section-heading">
+
+                        <h2>
+                          Upcoming Consultation
+                        </h2>
+
+                        <button
+                          onClick={() =>
+                            handleDashboardNavigation('bookings')
+                          }
+                        >
+                          View All
+                        </button>
+
+                      </div>
+
+
+                      <div className="consultation-card">
+
+                        <div className="consultation-icon">
+                          <CalendarIcon />
+                        </div>
+
+                        <div className="consultation-info">
+
+                          <h3>
+                            Prof. JokJok
+                          </h3>
+
+                          <p>
+                            Computer Science
+                          </p>
+
+                          <div>
+                            October 6, 2026 · 2:00 PM – 2:30 PM
+                          </div>
+
+                          <div>
+                            Faculty Room 204
+                          </div>
+
+                        </div>
+
+                        <span className="confirmed">
+                          Confirmed
+                        </span>
+
+                        <ChevronIcon />
+
+                      </div>
+
+                    </div>
+
+
+                    {/* QUICK ACTIONS */}
+
+                    <div className="quick-actions">
+
+                      <h2>
+                        Quick Actions
+                      </h2>
+
+
+                      <div className="quick-grid">
+
+
+                        <button
+                          className="quick-card"
+                          onClick={() =>
+                            handleDashboardNavigation('faculty')
+                          }
+                        >
+
+                          <div className="quick-icon">
+                            <SearchIcon />
+                          </div>
+
+                          <div>
+
+                            <strong>
+                              Find Faculty
+                            </strong>
+
+                            <span>
+                              Search and filter faculty
+                              <br />
+                              members
+                            </span>
+
+                          </div>
+
+                          <ChevronIcon />
+
+                        </button>
+
+
+                        <button
+                          className="quick-card"
+                          onClick={() =>
+                            handleDashboardNavigation('bookings')
+                          }
+                        >
+
+                          <div className="quick-icon">
+                            <CalendarIcon />
+                          </div>
+
+                          <div>
+
+                            <strong>
+                              My Bookings
+                            </strong>
+
+                            <span>
+                              View and manage
+                              <br />
+                              your consultations
+                            </span>
+
+                          </div>
+
+                          <ChevronIcon />
+
+                        </button>
+
+
+                        <button
+                          className="quick-card"
+                          onClick={() =>
+                            handleDashboardNavigation('profile')
+                          }
+                        >
+
+                          <div className="quick-icon">
+                            <UserIcon />
+                          </div>
+
+                          <div>
+
+                            <strong>
+                              Profile
+                            </strong>
+
+                            <span>
+                              Manage your account
+                              <br />
+                              and information
+                            </span>
+
+                          </div>
+
+                          <ChevronIcon />
+
+                        </button>
+
+
+                        <button
+                          className="quick-card"
+                          onClick={() =>
+                            alert('Contact support will be added later.')
+                          }
+                        >
+
+                          <div className="quick-icon">
+                            <BookIcon />
+                          </div>
+
+                          <div>
+
+                            <strong>
+                              Need Help?
+                            </strong>
+
+                            <span>
+                              Check FAQs or contact
+                              <br />
+                              support
+                            </span>
+
+                          </div>
+
+                          <ChevronIcon />
+
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </>
+
+            )}
+
+
+            {/*FIND FACULTY PAGE*/}
+
+            {activeDashboardPage === 'faculty' && (
+
+              <div className="dashboard-placeholder">
+
+                <h1>
+                  Find Faculty
+                </h1>
+
+                <p>
+                  Search and browse available faculty members.
+                </p>
+
+                <button
+                  onClick={() =>
+                    handleDashboardNavigation('dashboard')
+                  }
+                >
+                  Back to Dashboard
+                </button>
+
+              </div>
+
+            )}
+
+
+            {/* BOOKINGS PAGE */}
+
+            {activeDashboardPage === 'bookings' && (
+
+              <div className="dashboard-placeholder">
+
+                <h1>
+                  My Bookings
+                </h1>
+
+                <p>
+                  View and manage your consultation bookings.
+                </p>
+
+                <button
+                  onClick={() =>
+                    handleDashboardNavigation('dashboard')
+                  }
+                >
+                  Back to Dashboard
+                </button>
+
+              </div>
+
+            )}
+
+
+            {/* PROFILE PAGE*/}
+
+            {activeDashboardPage === 'profile' && (
+
+              <div className="dashboard-placeholder">
+
+                <h1>
+                  Profile
+                </h1>
+
+                <p>
+                  Manage your student account information.
+                </p>
+
+                <button
+                  onClick={() =>
+                    handleDashboardNavigation('dashboard')
+                  }
+                >
+                  Back to Dashboard
+                </button>
+
+              </div>
+
+            )}
+
+          </main>
+
+        </div>
+
+      </div>
+    )
+  }
+
+
+  /* LANDING PAGE */
 
   return (
     <>
 
-      {/* ==================================
-          HERO / LANDING PAGE
-      ================================== */}
-
       <section className="hero">
+
 
         {/* NAVIGATION */}
 
         <nav>
-
-          {/* LOGO */}
 
           <div className="logo-container">
 
@@ -313,15 +1300,12 @@ function App() {
 
             </div>
 
-
             <span className="logo-text">
               ConsultTime
             </span>
 
           </div>
 
-
-          {/* NAVIGATION LINKS */}
 
           <div className="nav-links">
 
@@ -344,28 +1328,21 @@ function App() {
           </div>
 
 
-          {/* LOG IN */}
-
           <div
             className="log-container"
             onClick={handleLogin}
           >
-
             <span>
               Log In
             </span>
-
           </div>
 
         </nav>
 
 
-        {/* HERO CONTENT */}
+        {/* HERO */}
 
         <main className="hero-content">
-
-
-          {/* HERO TEXT */}
 
           <div className="hero-text">
 
@@ -384,8 +1361,6 @@ function App() {
           </div>
 
 
-          {/* HERO IMAGE */}
-
           <div className="img-container">
 
             <img
@@ -397,8 +1372,6 @@ function App() {
 
         </main>
 
-
-        {/* HERO DESCRIPTION */}
 
         <div className="hero-paragraph">
 
@@ -416,11 +1389,7 @@ function App() {
         </div>
 
 
-        {/* HERO BUTTONS */}
-
         <div className="login-container">
-
-          {/* GET STARTED */}
 
           <span
             className="login-btn"
@@ -428,9 +1397,6 @@ function App() {
           >
             Get Started
           </span>
-
-
-          {/* LEARN MORE */}
 
           <span
             className="learn-btn"
@@ -444,9 +1410,7 @@ function App() {
       </section>
 
 
-      {/* ==================================
-          HOW IT WORKS
-      ================================== */}
+      {/* HOW IT WORKS */}
 
       <section
         className="how-it-works"
@@ -457,11 +1421,7 @@ function App() {
           HOW IT WORKS
         </h1>
 
-
         <div className="item-container">
-
-
-          {/* ITEM 1 */}
 
           <div className="item">
 
@@ -477,18 +1437,10 @@ function App() {
           </div>
 
 
-          {/* ARROW */}
-
           <div className="arrow-item">
-
-            <h2>
-              →
-            </h2>
-
+            <h2>→</h2>
           </div>
 
-
-          {/* ITEM 2 */}
 
           <div className="item">
 
@@ -504,18 +1456,10 @@ function App() {
           </div>
 
 
-          {/* ARROW */}
-
           <div className="arrow-item">
-
-            <h2>
-              →
-            </h2>
-
+            <h2>→</h2>
           </div>
 
-
-          {/* ITEM 3 */}
 
           <div className="item">
 
@@ -535,9 +1479,7 @@ function App() {
       </section>
 
 
-      {/* ==================================
-          ABOUT
-      ================================== */}
+      {/* ABOUT */}
 
       <section
         className="about"
@@ -559,110 +1501,76 @@ function App() {
         </div>
 
 
-        {/* ABOUT DEFINITIONS */}
-
         <div className="about-container">
 
-
           <div className="about-def">
-
             <p>
               Helps students and faculty set and organize
               consultation times.
             </p>
-
           </div>
 
-
           <div className="about-def">
-
             <p>
               Allows students to quickly find available
               faculty and suitable consultation schedules.
             </p>
-
           </div>
 
-
           <div className="about-def">
-
             <p>
               Prevents overlapping appointments and
               helps avoid double bookings.
             </p>
-
           </div>
 
-
           <div className="about-def">
-
             <p>
               Lets students reserve an available
               consultation slot with a faculty member.
             </p>
-
           </div>
 
-
           <div className="about-def">
-
             <p>
               Shows the available dates and times when
               faculty members can accommodate consultations.
             </p>
-
           </div>
 
         </div>
 
 
-        {/* ABOUT LABELS */}
-
         <div className="about-container">
 
-
           <div className="about-item">
-
             <h2>
               Scheduling
             </h2>
-
           </div>
 
-
           <div className="about-item">
-
             <h2>
               Search
             </h2>
-
           </div>
 
-
           <div className="about-item">
-
             <h2>
               No Conflicts
             </h2>
-
           </div>
 
-
           <div className="about-item">
-
             <h2>
               Bookings
             </h2>
-
           </div>
 
-
           <div className="about-item">
-
             <h2>
               Faculty Availability
             </h2>
-
           </div>
 
         </div>
@@ -670,9 +1578,7 @@ function App() {
       </section>
 
 
-      {/* ==================================
-          FOOTER
-      ================================== */}
+      {/* FOOTER */}
 
       <section className="footer">
 
