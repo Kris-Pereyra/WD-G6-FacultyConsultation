@@ -1269,10 +1269,47 @@ function App() {
                   </div>
                   <span className="faculty-result-count">
                     {[
-                      { name: 'Prof. Novie Jozane', department: 'Computer Science', subject: 'Programming and software development', availability: 'Available today', time: '2:00 PM – 4:00 PM', room: 'Faculty Room 204', initials: 'NJ', style: 'avatar-one' },
-                      { name: 'Prof. Kris', department: 'Information Technology', subject: 'Networking and information systems', availability: 'Available tomorrow', time: '9:00 AM – 11:00 AM', room: 'Faculty Room 101', initials: 'KR', style: 'avatar-two' },
-                      { name: 'Prof. Ian Lim', department: 'Mathematics', subject: 'Mathematics and statistics', availability: 'Available today', time: '1:00 PM – 3:00 PM', room: 'Faculty Room 305', initials: 'IL', style: 'avatar-three' },
-                      { name: 'Prof. Ellice Vicente', department: 'Engineering', subject: 'Engineering fundamentals', availability: 'Available tomorrow', time: '10:00 AM – 12:00 PM', room: 'Engineering Building 2B', initials: 'EV', style: 'avatar-four' }
+                      { 
+                        name: 'Prof. Novie Jozane', 
+                        department: 'Computer Science', 
+                        subject: 'Programming and software development', 
+                        availability: 'Available today', 
+                        time: '2:00 PM – 4:00 PM', 
+                        room: 'Faculty Room 204', 
+                        initials: 'NJ', 
+                        style: 'avatar-one' 
+                      },
+
+                      { name: 'Prof. Kris', 
+                        department: 'Information Technology', 
+                        subject: 'Networking and information systems', 
+                        availability: 'Available tomorrow', 
+                        time: '9:00 AM – 11:00 AM', 
+                        room: 'Faculty Room 101', 
+                        initials: 'KR', 
+                        style: 'avatar-two' 
+                      },
+
+                      { name: 'Prof. Ian Lim', 
+                        department: 'Mathematics', 
+                        subject: 'Mathematics and statistics', 
+                        availability: 'Available today', 
+                        time: '1:00 PM – 3:00 PM', 
+                        room: 'Faculty Room 305', 
+                        initials: 'IL', 
+                        style: 'avatar-three' 
+                      },
+
+                      { name: 'Prof. Ellice Vicente', 
+                        department: 'Engineering', 
+                        subject: 'Engineering fundamentals',
+                        availability: 'Available tomorrow', 
+                        time: '10:00 AM – 12:00 PM', 
+                        room: 'Engineering Building 2B', 
+                        initials: 'EV', 
+                        style: 'avatar-four' 
+                      }
+                      
                     ].filter((faculty) => {
                       const query = facultySearch.trim().toLowerCase()
                       const matchesQuery = !query || `${faculty.name} ${faculty.department} ${faculty.subject}`.toLowerCase().includes(query)
@@ -1284,10 +1321,47 @@ function App() {
 
                 <div className="faculty-directory-grid">
                   {[
-                    { name: 'Prof. Novie Jozane', department: 'Computer Science', subject: 'Programming and software development', availability: 'Available today', time: '2:00 PM – 4:00 PM', room: 'Faculty Room 204', initials: 'NJ', style: 'avatar-one' },
-                    { name: 'Prof. Kris', department: 'Information Technology', subject: 'Networking and information systems', availability: 'Available tomorrow', time: '9:00 AM – 11:00 AM', room: 'Faculty Room 101', initials: 'KR', style: 'avatar-two' },
-                    { name: 'Prof. Ian Lim', department: 'Mathematics', subject: 'Mathematics and statistics', availability: 'Available today', time: '1:00 PM – 3:00 PM', room: 'Faculty Room 305', initials: 'IL', style: 'avatar-three' },
-                    { name: 'Prof. Ellice Vicente', department: 'Engineering', subject: 'Engineering fundamentals', availability: 'Available tomorrow', time: '10:00 AM – 12:00 PM', room: 'Engineering Building 2B', initials: 'EV', style: 'avatar-four' }
+                    { name: 'Prof. Novie Jozane', 
+                      department: 'Computer Science', 
+                      
+                      subject: 'Programming and software development', 
+                      availability: 'Available today', 
+                      time: '2:00 PM – 4:00 PM', 
+                      room: 'Faculty Room 204', 
+                      initials: 'NJ', 
+                      style: 'avatar-one' 
+                    },
+
+                    { name: 'Prof. Kris', 
+                      department: 'Information Technology', 
+                      subject: 'Networking and information systems', 
+                      availability: 'Available tomorrow', 
+                      time: '9:00 AM – 11:00 AM', 
+                      room: 'Faculty Room 101', 
+                      initials: 'KR', 
+                      style: 'avatar-two' 
+                    },
+
+                    { name: 'Prof. Ian Lim', 
+                      department: 'Mathematics', 
+                      subject: 'Mathematics and statistics', 
+                      availability: 'Available today', 
+                      time: '1:00 PM – 3:00 PM', 
+                      room: 'Faculty Room 305', 
+                      initials: 'IL', 
+                      style: 'avatar-three' 
+                    },
+
+                    { name: 'Prof. Ellice Vicente', 
+                      department: 'Engineering', 
+                      subject: 'Engineering fundamentals', 
+                      availability: 'Available tomorrow', 
+                      time: '10:00 AM – 12:00 PM', 
+                      room: 'Engineering Building 2B', 
+                      initials: 'EV', 
+                      style: 'avatar-four' 
+                    }
+
                   ].filter((faculty) => {
                     const query = facultySearch.trim().toLowerCase()
                     const matchesQuery = !query || `${faculty.name} ${faculty.department} ${faculty.subject}`.toLowerCase().includes(query)
@@ -1329,10 +1403,20 @@ function App() {
                 </div>
 
                 {[
-                  { name: 'Prof. Novie Jozane', department: 'Computer Science', subject: 'Programming and software development' },
-                  { name: 'Prof. Kris', department: 'Information Technology', subject: 'Networking and information systems' },
-                  { name: 'Prof. Ian Lim', department: 'Mathematics', subject: 'Mathematics and statistics' },
-                  { name: 'Prof. Ellice Vicente', department: 'Engineering', subject: 'Engineering fundamentals' }
+                  { name: 'Prof. Novie Jozane', 
+                    department: 'Computer Science', 
+                    subject: 'Programming and software development' },
+                  { name: 'Prof. Kris', 
+                    department: 'Information Technology', 
+                    subject: 'Networking and information systems' },
+                  { name: 'Prof. Ian Lim', 
+                    department: 'Mathematics', 
+                    subject: 'Mathematics and statistics' },
+                  { name: 'Prof. Ellice Vicente', 
+                    department: 'Engineering', 
+                    subject: 'Engineering fundamentals' 
+                  }
+
                 ].filter((faculty) => {
                   const query = facultySearch.trim().toLowerCase()
                   const matchesQuery = !query || `${faculty.name} ${faculty.department} ${faculty.subject}`.toLowerCase().includes(query)
@@ -1356,6 +1440,7 @@ function App() {
 
             {/* BOOKINGS PAGE */}
 
+
             {activeDashboardPage === 'bookings' && (
               <div className="bookings-page">
                 <div className="bookings-page-heading">
@@ -1365,6 +1450,8 @@ function App() {
                     <h1>My Bookings</h1>
                     <p>Keep track of your faculty consultations in one place.</p>
                   </div>
+
+
                 </div>
 
                 <div className="booking-summary-grid">
@@ -1372,10 +1459,12 @@ function App() {
                     <div className="booking-summary-icon"><CalendarIcon /></div>
                     <div><span>All Bookings</span><strong>{bookings.length}</strong></div>
                   </div>
+
                   <div className="booking-summary-card">
                     <div className="booking-summary-icon upcoming"><ClockIcon /></div>
                     <div><span>Upcoming</span><strong>{bookings.filter(booking => booking.status === 'Upcoming').length}</strong></div>
                   </div>
+
                   <div className="booking-summary-card">
                     <div className="booking-summary-icon completed"><BookIcon /></div>
                     <div><span>Completed</span><strong>{bookings.filter(booking => booking.status === 'Completed').length}</strong></div>
@@ -1505,10 +1594,43 @@ function App() {
                   </section>
 
                   <section className="profile-details-card academic-card">
-                    <div className="profile-section-heading"><div><h2>Academic Information</h2><p>Your current school details.</p></div></div>
-                    <div className="profile-academic-item"><span className="profile-academic-icon"><BookIcon /></span><div><small>Program</small><strong>{profileData.course}</strong></div></div>
-                    <div className="profile-academic-item"><span className="profile-academic-icon"><UsersIcon /></span><div><small>Year Level</small><strong>{profileData.yearLevel}</strong></div></div>
-                    <div className="profile-academic-item"><span className="profile-academic-icon"><HomeIcon /></span><div><small>College / Department</small><strong>{profileData.department}</strong></div></div>
+                    <div className="profile-section-heading">
+                      <div>
+                        <h2>Academic Information</h2>
+                        <p>Your current school details.</p>
+                        </div>
+                     </div>
+
+                    <div className="profile-academic-item">
+                      <span className="profile-academic-icon">
+                        <BookIcon />
+                        </span>
+
+                        <div>
+                          <small>Program</small>
+                          <strong>{profileData.course}</strong>
+                          </div>
+                     </div>
+
+                    <div className="profile-academic-item">
+                      <span className="profile-academic-icon">
+                        <UsersIcon />
+                      </span>
+                      <div>
+                        <small>Year Level</small>
+                        <strong>{profileData.yearLevel}</strong>
+                      </div>
+                    </div>
+
+                    <div className="profile-academic-item">
+                      <span className="profile-academic-icon">
+                        <HomeIcon />
+                      </span>
+                      <div>
+                        <small>College / Department</small>
+                        <strong>{profileData.department}</strong>
+                      </div>
+                    </div>
                   </section>
                 </div>
 
