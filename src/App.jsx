@@ -89,6 +89,8 @@ function App() {
 
   const [currentPage, setCurrentPage] = useState('home')
   const [activeDashboardPage, setActiveDashboardPage] = useState('dashboard')
+  const [facultySearch, setFacultySearch] = useState('')
+  const [selectedDepartment, setSelectedDepartment] = useState('All Departments')
 
 
   /* NAVIGATION*/
@@ -1187,23 +1189,147 @@ function App() {
 
             {activeDashboardPage === 'faculty' && (
 
-              <div className="dashboard-placeholder">
+              <div className="find-faculty-page">
 
-                <h1>
-                  Find Faculty
-                </h1>
+                <div className="faculty-page-heading">
+                  <div>
+                    <p className="faculty-eyebrow">CONSULTATION DIRECTORY</p>
+                    <h1>Find Faculty</h1>
+                    <p className="faculty-page-description">
+                      Browse faculty members and find the right person to help with your academic concerns.
+                    </p>
+                  </div>
 
-                <p>
-                  Search and browse available faculty members.
-                </p>
+                  <div className="faculty-heading-icon">
+                    <UsersIcon />
+                  </div>
+                </div>
 
-                <button
-                  onClick={() =>
-                    handleDashboardNavigation('dashboard')
-                  }
-                >
-                  Back to Dashboard
-                </button>
+                <div className="faculty-search-panel">
+                  <div className="faculty-search-field">
+                    <SearchIcon />
+                    <input
+                      type="text"
+                      value={facultySearch}
+                      onChange={(event) => setFacultySearch(event.target.value)}
+                      placeholder="Search by faculty name, subject, or department..."
+                      aria-label="Search faculty"
+                    />
+                  </div>
+
+                  <div className="faculty-filter-field">
+                    <label htmlFor="faculty-department">Department</label>
+                    <select
+                      id="faculty-department"
+                      value={selectedDepartment}
+                      onChange={(event) => setSelectedDepartment(event.target.value)}
+                    >
+                      <option>All Departments</option>
+                      <option>Computer Science</option>
+                      <option>Information Technology</option>
+                      <option>Mathematics</option>
+                      <option>Engineering</option>
+                    </select>
+                  </div>
+
+                  <button
+                    className="faculty-search-submit"
+                    onClick={() => {
+                      const facultyList = document.getElementById('faculty-results')
+                      if (facultyList) facultyList.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }}
+                  >
+                    <SearchIcon />
+                    Search
+                  </button>
+                </div>
+
+                <div className="faculty-results-heading" id="faculty-results">
+                  <div>
+                    <h2>Faculty Members</h2>
+                    <p>Choose a faculty member to view their consultation availability.</p>
+                  </div>
+                  <span className="faculty-result-count">
+                    {[
+                      { name: 'Prof. Novie Jozane', department: 'Computer Science', subject: 'Programming and software development', availability: 'Available today', time: '2:00 PM – 4:00 PM', room: 'Faculty Room 204', initials: 'NJ', style: 'avatar-one' },
+                      { name: 'Prof. Kris', department: 'Information Technology', subject: 'Networking and information systems', availability: 'Available tomorrow', time: '9:00 AM – 11:00 AM', room: 'Faculty Room 101', initials: 'KR', style: 'avatar-two' },
+                      { name: 'Prof. Ian Lim', department: 'Mathematics', subject: 'Mathematics and statistics', availability: 'Available today', time: '1:00 PM – 3:00 PM', room: 'Faculty Room 305', initials: 'IL', style: 'avatar-three' },
+                      { name: 'Prof. Ellice Vicente', department: 'Engineering', subject: 'Engineering fundamentals', availability: 'Available tomorrow', time: '10:00 AM – 12:00 PM', room: 'Engineering Building 2B', initials: 'EV', style: 'avatar-four' }
+                    ].filter((faculty) => {
+                      const query = facultySearch.trim().toLowerCase()
+                      const matchesQuery = !query || `${faculty.name} ${faculty.department} ${faculty.subject}`.toLowerCase().includes(query)
+                      const matchesDepartment = selectedDepartment === 'All Departments' || faculty.department === selectedDepartment
+                      return matchesQuery && matchesDepartment
+                    }).length} results
+                  </span>
+                </div>
+
+                <div className="faculty-directory-grid">
+                  {[
+                    { name: 'Prof. Novie Jozane', department: 'Computer Science', subject: 'Programming and software development', availability: 'Available today', time: '2:00 PM – 4:00 PM', room: 'Faculty Room 204', initials: 'NJ', style: 'avatar-one' },
+                    { name: 'Prof. Kris', department: 'Information Technology', subject: 'Networking and information systems', availability: 'Available tomorrow', time: '9:00 AM – 11:00 AM', room: 'Faculty Room 101', initials: 'KR', style: 'avatar-two' },
+                    { name: 'Prof. Ian Lim', department: 'Mathematics', subject: 'Mathematics and statistics', availability: 'Available today', time: '1:00 PM – 3:00 PM', room: 'Faculty Room 305', initials: 'IL', style: 'avatar-three' },
+                    { name: 'Prof. Ellice Vicente', department: 'Engineering', subject: 'Engineering fundamentals', availability: 'Available tomorrow', time: '10:00 AM – 12:00 PM', room: 'Engineering Building 2B', initials: 'EV', style: 'avatar-four' }
+                  ].filter((faculty) => {
+                    const query = facultySearch.trim().toLowerCase()
+                    const matchesQuery = !query || `${faculty.name} ${faculty.department} ${faculty.subject}`.toLowerCase().includes(query)
+                    const matchesDepartment = selectedDepartment === 'All Departments' || faculty.department === selectedDepartment
+                    return matchesQuery && matchesDepartment
+                  }).map((faculty) => (
+                    <article className="directory-faculty-card" key={faculty.name}>
+                      <div className="directory-card-top">
+                        <div className={`faculty-avatar ${faculty.style}`}>{faculty.initials}</div>
+                        <span className="faculty-status"><span></span> Consultation hours</span>
+                      </div>
+
+                      <h3>{faculty.name}</h3>
+                      <p className="directory-department">{faculty.department}</p>
+                      <p className="directory-subject">{faculty.subject}</p>
+
+                      <div className="directory-detail">
+                        <CalendarIcon />
+                        <div>
+                          <strong>{faculty.availability}</strong>
+                          <span>{faculty.time}</span>
+                        </div>
+                      </div>
+
+                      <div className="directory-detail">
+                        <BookIcon />
+                        <div><span>{faculty.room}</span></div>
+                      </div>
+
+                      <button
+                        className="directory-availability-btn"
+                        onClick={() => alert(`Availability for ${faculty.name} will be shown here.`)}
+                      >
+                        View Availability
+                        <ChevronIcon />
+                      </button>
+                    </article>
+                  ))}
+                </div>
+
+                {[
+                  { name: 'Prof. Novie Jozane', department: 'Computer Science', subject: 'Programming and software development' },
+                  { name: 'Prof. Kris', department: 'Information Technology', subject: 'Networking and information systems' },
+                  { name: 'Prof. Ian Lim', department: 'Mathematics', subject: 'Mathematics and statistics' },
+                  { name: 'Prof. Ellice Vicente', department: 'Engineering', subject: 'Engineering fundamentals' }
+                ].filter((faculty) => {
+                  const query = facultySearch.trim().toLowerCase()
+                  const matchesQuery = !query || `${faculty.name} ${faculty.department} ${faculty.subject}`.toLowerCase().includes(query)
+                  const matchesDepartment = selectedDepartment === 'All Departments' || faculty.department === selectedDepartment
+                  return matchesQuery && matchesDepartment
+                }).length === 0 && (
+                  <div className="faculty-empty-state">
+                    <SearchIcon />
+                    <h3>No faculty members found</h3>
+                    <p>Try another name or choose a different department.</p>
+                    <button onClick={() => { setFacultySearch(''); setSelectedDepartment('All Departments') }}>
+                      Clear filters
+                    </button>
+                  </div>
+                )}
 
               </div>
 
