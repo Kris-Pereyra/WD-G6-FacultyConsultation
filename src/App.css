@@ -2484,3 +2484,5 @@ section.footer {
 .booking-demo-note { margin: 15px 0 0; color: #a09293; font-size: 10px; text-align: center; }
 @media (max-width: 900px) { .bookings-toolbar { align-items: stretch; flex-direction: column; } .bookings-search-field { max-width: none; } .booking-filter-tabs { justify-content: flex-start; } }
 @media (max-width: 650px) { .bookings-page-heading h1 { font-size: 27px; } .bookings-heading-icon { width: 55px; height: 55px; flex-basis: 55px; border-radius: 16px; } .booking-summary-grid { grid-template-columns: 1fr; gap: 10px; } .booking-summary-card { padding: 14px 16px; } .bookings-list-heading { align-items: flex-start; flex-direction: column; } .booking-card { gap: 12px; padding: 13px; } .booking-date-block { width: 62px; min-width: 62px; padding: 10px 5px; } .booking-card-title-row { flex-direction: column-reverse; gap: 8px; } .booking-card-title-row h3 { font-size: 14px; } .booking-details-row { flex-direction: column; gap: 8px; } .booking-filter-tabs button { padding: 9px 10px; } }
+
+

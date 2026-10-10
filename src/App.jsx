@@ -93,6 +93,17 @@ function App() {
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments')
   const [bookingFilter, setBookingFilter] = useState('All Bookings')
   const [bookingSearch, setBookingSearch] = useState('')
+  const [isProfileEditing, setIsProfileEditing] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
+  const [profileData, setProfileData] = useState({
+    fullName: 'Waj Wannah I. Sanchez',
+    studentId: 'Student ID not set',
+    email: 'student@example.com',
+    phone: 'Not provided',
+    course: 'BS Computer Science',
+    yearLevel: '2nd Year',
+    department: 'College of Computing Studies'
+  })
   const [bookings, setBookings] = useState([
     { id: 1, faculty: 'Dr. Novie Jozane', department: 'Computer Science', subject: 'Web Development', date: 'October 14, 2026', time: '10:00 AM - 10:30 AM', location: 'CCS Faculty Room', status: 'Upcoming' },
     { id: 2, faculty: 'Prof. Kris Pereyra', department: 'Information Technology', subject: 'Programming Fundamentals', date: 'October 16, 2026', time: '1:00 PM - 1:30 PM', location: 'Online Consultation', status: 'Upcoming' },
@@ -1455,27 +1466,57 @@ function App() {
             {/* PROFILE PAGE*/}
 
             {activeDashboardPage === 'profile' && (
+              <div className="profile-page">
+                <div className="profile-page-heading">
+                  <div className="profile-heading-icon"><UserIcon /></div>
+                  <div>
+                    <span className="profile-eyebrow">STUDENT ACCOUNT</span>
+                    <h1>My Profile</h1>
+                    <p>View and manage your personal and academic information.</p>
+                  </div>
+                </div>
 
-              <div className="dashboard-placeholder">
+                <section className="profile-overview-card">
+                  <div className="profile-avatar">{profileData.fullName.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase()}</div>
+                  <div className="profile-overview-info">
+                    <h2>{profileData.fullName || 'Student Name'}</h2>
+                    <p>{profileData.course} <span>•</span> {profileData.yearLevel}</p>
+                    <span className="profile-account-badge"><UserIcon /> Student Account</span>
+                  </div>
+                  <button className="profile-edit-button" onClick={() => { setIsProfileEditing(current => !current); setProfileSaved(false) }}>
+                    <UserIcon /> {isProfileEditing ? 'Cancel Edit' : 'Edit Profile'}
+                  </button>
+                </section>
 
-                <h1>
-                  Profile
-                </h1>
+                {profileSaved && <div className="profile-success-message">Your profile changes have been saved for this session.</div>}
 
-                <p>
-                  Manage your student account information.
-                </p>
+                <div className="profile-content-grid">
+                  <section className="profile-details-card">
+                    <div className="profile-section-heading">
+                      <div><h2>Personal Information</h2><p>Keep your contact information up to date.</p></div>
+                    </div>
+                    <div className="profile-fields-grid">
+                      <label className="profile-field"><span>Full Name</span><input value={profileData.fullName} readOnly={!isProfileEditing} onChange={event => setProfileData(current => ({ ...current, fullName: event.target.value }))} /></label>
+                      <label className="profile-field"><span>Student ID</span><input value={profileData.studentId} readOnly={!isProfileEditing} onChange={event => setProfileData(current => ({ ...current, studentId: event.target.value }))} /></label>
+                      <label className="profile-field"><span>Email Address</span><input type="email" value={profileData.email} readOnly={!isProfileEditing} onChange={event => setProfileData(current => ({ ...current, email: event.target.value }))} /></label>
+                      <label className="profile-field"><span>Contact Number</span><input value={profileData.phone} readOnly={!isProfileEditing} onChange={event => setProfileData(current => ({ ...current, phone: event.target.value }))} /></label>
+                    </div>
+                    {isProfileEditing && <div className="profile-form-actions"><button className="profile-discard-button" onClick={() => { setIsProfileEditing(false); setProfileSaved(false) }}>Cancel</button><button className="profile-save-button" onClick={() => { setIsProfileEditing(false); setProfileSaved(true) }}>Save Changes</button></div>}
+                  </section>
 
-                <button
-                  onClick={() =>
-                    handleDashboardNavigation('dashboard')
-                  }
-                >
-                  Back to Dashboard
-                </button>
+                  <section className="profile-details-card academic-card">
+                    <div className="profile-section-heading"><div><h2>Academic Information</h2><p>Your current school details.</p></div></div>
+                    <div className="profile-academic-item"><span className="profile-academic-icon"><BookIcon /></span><div><small>Program</small><strong>{profileData.course}</strong></div></div>
+                    <div className="profile-academic-item"><span className="profile-academic-icon"><UsersIcon /></span><div><small>Year Level</small><strong>{profileData.yearLevel}</strong></div></div>
+                    <div className="profile-academic-item"><span className="profile-academic-icon"><HomeIcon /></span><div><small>College / Department</small><strong>{profileData.department}</strong></div></div>
+                  </section>
+                </div>
 
+                <div className="profile-bottom-row">
+                  <p>Profile details are currently stored in this page preview only.</p>
+                  <button className="profile-back-button" onClick={() => handleDashboardNavigation('dashboard')}><ChevronIcon /> Back to Dashboard</button>
+                </div>
               </div>
-
             )}
 
           </main>
