@@ -91,6 +91,13 @@ function App() {
   const [activeDashboardPage, setActiveDashboardPage] = useState('dashboard')
   const [facultySearch, setFacultySearch] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments')
+  const [bookingFilter, setBookingFilter] = useState('All Bookings')
+  const [bookingSearch, setBookingSearch] = useState('')
+  const [bookings, setBookings] = useState([
+    { id: 1, faculty: 'Dr. Novie Jozane', department: 'Computer Science', subject: 'Web Development', date: 'October 14, 2026', time: '10:00 AM - 10:30 AM', location: 'CCS Faculty Room', status: 'Upcoming' },
+    { id: 2, faculty: 'Prof. Kris Pereyra', department: 'Information Technology', subject: 'Programming Fundamentals', date: 'October 16, 2026', time: '1:00 PM - 1:30 PM', location: 'Online Consultation', status: 'Upcoming' },
+    { id: 3, faculty: 'Engr. Ian Lim', department: 'Computer Science', subject: 'Database Systems', date: 'September 28, 2026', time: '9:00 AM - 9:30 AM', location: 'CCS Room 204', status: 'Completed' }
+  ])
 
 
   /* NAVIGATION*/
@@ -1339,27 +1346,109 @@ function App() {
             {/* BOOKINGS PAGE */}
 
             {activeDashboardPage === 'bookings' && (
+              <div className="bookings-page">
+                <div className="bookings-page-heading">
+                  <div className="bookings-heading-icon"><CalendarIcon /></div>
+                  <div>
+                    <span className="bookings-eyebrow">CONSULTATION SCHEDULE</span>
+                    <h1>My Bookings</h1>
+                    <p>Keep track of your faculty consultations in one place.</p>
+                  </div>
+                </div>
 
-              <div className="dashboard-placeholder">
+                <div className="booking-summary-grid">
+                  <div className="booking-summary-card">
+                    <div className="booking-summary-icon"><CalendarIcon /></div>
+                    <div><span>All Bookings</span><strong>{bookings.length}</strong></div>
+                  </div>
+                  <div className="booking-summary-card">
+                    <div className="booking-summary-icon upcoming"><ClockIcon /></div>
+                    <div><span>Upcoming</span><strong>{bookings.filter(booking => booking.status === 'Upcoming').length}</strong></div>
+                  </div>
+                  <div className="booking-summary-card">
+                    <div className="booking-summary-icon completed"><BookIcon /></div>
+                    <div><span>Completed</span><strong>{bookings.filter(booking => booking.status === 'Completed').length}</strong></div>
+                  </div>
+                </div>
 
-                <h1>
-                  My Bookings
-                </h1>
+                <div className="bookings-toolbar">
+                  <div className="bookings-search-field">
+                    <SearchIcon />
+                    <input
+                      type="text"
+                      placeholder="Search faculty or subject..."
+                      value={bookingSearch}
+                      onChange={(event) => setBookingSearch(event.target.value)}
+                    />
+                  </div>
+                  <div className="booking-filter-tabs">
+                    {['All Bookings', 'Upcoming', 'Completed', 'Cancelled'].map(filter => (
+                      <button
+                        key={filter}
+                        className={bookingFilter === filter ? 'active' : ''}
+                        onClick={() => setBookingFilter(filter)}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                <p>
-                  View and manage your consultation bookings.
-                </p>
+                <div className="bookings-list-heading">
+                  <div><h2>Your consultations</h2><p>Review the details or manage an upcoming booking.</p></div>
+                  <button className="bookings-find-button" onClick={() => handleDashboardNavigation('faculty')}>
+                    <SearchIcon /> Find Faculty
+                  </button>
+                </div>
 
-                <button
-                  onClick={() =>
-                    handleDashboardNavigation('dashboard')
-                  }
-                >
-                  Back to Dashboard
-                </button>
-
+                <div className="booking-cards-list">
+                  {bookings.filter(booking => {
+                    const matchesFilter = bookingFilter === 'All Bookings' || booking.status === bookingFilter
+                    const query = bookingSearch.trim().toLowerCase()
+                    const matchesSearch = !query || `${booking.faculty} ${booking.subject} ${booking.department}`.toLowerCase().includes(query)
+                    return matchesFilter && matchesSearch
+                  }).map(booking => (
+                    <article className="booking-card" key={booking.id}>
+                      <div className="booking-date-block">
+                        <CalendarIcon />
+                        <span>{booking.date.split(',')[0].split(' ')[0].slice(0, 3)}</span>
+                        <strong>{booking.date.split(' ')[1].replace(',', '')}</strong>
+                        <small>{booking.date.split(' ')[2] || ''}</small>
+                      </div>
+                      <div className="booking-card-main">
+                        <div className="booking-card-title-row">
+                          <div><h3>{booking.faculty}</h3><p>{booking.department}</p></div>
+                          <span className={`booking-status status-${booking.status.toLowerCase()}`}>{booking.status}</span>
+                        </div>
+                        <div className="booking-subject"><BookIcon /><span>{booking.subject}</span></div>
+                        <div className="booking-details-row">
+                          <span><ClockIcon />{booking.time}</span>
+                          <span><UserIcon />{booking.location}</span>
+                        </div>
+                        {booking.status === 'Upcoming' && (
+                          <div className="booking-card-actions">
+                            <button className="booking-cancel-button" onClick={() => setBookings(current => current.map(item => item.id === booking.id ? { ...item, status: 'Cancelled' } : item))}>Cancel Booking</button>
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  ))}
+                  {bookings.filter(booking => {
+                    const matchesFilter = bookingFilter === 'All Bookings' || booking.status === bookingFilter
+                    const query = bookingSearch.trim().toLowerCase()
+                    const matchesSearch = !query || `${booking.faculty} ${booking.subject} ${booking.department}`.toLowerCase().includes(query)
+                    return matchesFilter && matchesSearch
+                  }).length === 0 && (
+                    <div className="bookings-empty-state">
+                      <CalendarIcon />
+                      <h3>No bookings found</h3>
+                      <p>There are no consultations matching your search or selected filter.</p>
+                      <button onClick={() => { setBookingSearch(''); setBookingFilter('All Bookings') }}>Clear filters</button>
+                    </div>
+                  )}
+                </div>
+                <p className="booking-demo-note">Sample booking information for interface preview. Changes are only saved while this page remains open.</p>
               </div>
-
             )}
 
 
