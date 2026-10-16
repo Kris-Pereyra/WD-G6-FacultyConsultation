@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import BackendTest from './BackendTest';
 
 import weblogo from './assets/weblogo.jpg'
 import wmsuLogo from './assets/wmsuLogo.png'
@@ -150,212 +151,90 @@ function App() {
   /*LOGIN PAGE */
 
   if (currentPage === 'login') {
-
     return (
-      <div className="login-page">
-
-        <div className="top-red-shape"></div>
-        <div className="bottom-red-shape"></div>
-
-
-        {/* LOGIN LOGO */}
-
-        <div
-          className="login-logo"
-          onClick={handleHome}
-        >
-
-          <div className="login-logo-images">
-
-            <img
-              src={wmsuLogo}
-              alt="WMSU Logo"
-            />
-
-            <img
-              src={weblogo}
-              alt="ConsultTime Logo"
-            />
-
+      <div className="login-page redesigned-login-page">
+        {/* LOGIN NAVIGATION */}
+        <nav className="login-top-nav">
+          <div className="login-nav-brand" onClick={handleHome} role="button" tabIndex={0}>
+            <div className="login-logo-images">
+              <img src={wmsuLogo} alt="WMSU Logo" />
+              <img src={weblogo} alt="ConsultTime Logo" />
+            </div>
+            <span>ConsultTime</span>
           </div>
 
-          <span>
-            ConsultTime
-          </span>
+          <div className="login-nav-links">
+            <button type="button" onClick={handleHome}>Home</button>
+            <button type="button" onClick={handleHome}>How It Works</button>
+            <button type="button" onClick={handleHome}>About</button>
+          </div>
 
-        </div>
-
+          <button className="login-signup-btn" type="button" onClick={() => alert('Student sign-up will be added later.')}>
+            Sign Up
+          </button>
+        </nav>
 
         {/* LOGIN CONTENT */}
+        <main className="redesigned-login-layout">
+          <section className="login-intro-panel">
+            <span className="login-audience-tag">For WMSU students</span>
+            <h1>Your next step to academic support.</h1>
+            <p className="login-intro-description">Connect with your faculty and make time for the guidance you need.</p>
 
-        <div className="login-layout">
+            <img className="login-feature-image" src={calendar} alt="ConsultTime consultation schedule" />
 
-
-          {/* LEFT SIDE */}
-
-          <div className="login-left">
-
-            <div className="login-heading">
-
-              <h1>
-
-                Schedule Consultations.
-
-                <br />
-
-                <span>
-                  Connect With Your
-                </span>
-
-                <br />
-
-                Faculty.
-
-              </h1>
-
-              <p>
-                Log in to your account and book academic
-                <br />
-                consultations with your faculty members.
-              </p>
-
+            <div className="login-benefit-list">
+              <div className="login-benefit-item">
+                <span className="login-benefit-icon"><UsersIcon /></span>
+                <div><strong>Connect with your faculty</strong><p>Find the right person for your questions.</p></div>
+              </div>
+              <div className="login-benefit-item">
+                <span className="login-benefit-icon"><CalendarIcon /></span>
+                <div><strong>Book a convenient time</strong><p>Choose a consultation that fits your schedule.</p></div>
+              </div>
+              <div className="login-benefit-item">
+                <span className="login-benefit-icon"><BookIcon /></span>
+                <div><strong>Stay on top of your bookings</strong><p>Keep your requests and upcoming sessions in one place.</p></div>
+              </div>
             </div>
+            <div className="login-intro-footer">Made for the Western Mindanao State University community.</div>
+          </section>
 
-          </div>
-
-
-          {/* LOGIN CARD */}
-
-          <div className="login-card">
-
+          <section className="login-card redesigned-login-card">
             <div className="login-card-header">
-
-              <h2>
-                Welcome Back!
-              </h2>
-
-              <p>
-                Log in to access your dashboard
-                <br />
-                and manage your consultations.
-              </p>
-
+              <h2>Welcome back!</h2>
+              <p>Log in to manage your consultations and connect with your faculty.</p>
             </div>
 
+            <label className="login-form-label" htmlFor="login-email">University Email <span>*</span></label>
+            <div className="input-group redesigned-input-group">
+              <input id="login-email" type="email" placeholder="Your email @wmsu.edu.ph" />
+            </div>
+            <small className="login-field-hint">Use your official university email address.</small>
 
-            <div className="input-group">
-
-              <input
-                type="text"
-                placeholder="Email or Student/Faculty ID"
-              />
-
+            <label className="login-form-label password-label" htmlFor="login-password">Password <span>*</span></label>
+            <div className="input-group redesigned-input-group">
+              <input id="login-password" type="password" placeholder="Enter your password" />
             </div>
 
-
-            <div className="input-group">
-
-              <input
-                type="password"
-                placeholder="Password"
-              />
-
+            <div className="login-options redesigned-login-options">
+              <label className="remember"><input type="checkbox" /><span>Remember me</span></label>
+              <button className="forgot-password" type="button" onClick={() => alert('Password recovery will be added later.')}>Forgot password?</button>
             </div>
 
+            <button className="main-login-btn redesigned-main-login-btn" type="button" onClick={handleDashboard}>Log In</button>
 
-            <div className="login-options">
-
-              <label className="remember">
-
-                <input type="checkbox" />
-
-                <span>
-                  Remember me
-                </span>
-
-              </label>
-
-
-              <button
-                className="forgot-password"
-                type="button"
-              >
-                Forgot password?
-              </button>
-
+            <div className="register-text redesigned-register-text">
+              <span>New to ConsultTime?</span>
+              <button type="button" onClick={() => alert('Student account registration will be added later.')}>Create a student account</button>
             </div>
+          </section>
+        </main>
 
-
-            {/* LOGIN GOES TO DASHBOARD */}
-
-            <button
-              className="main-login-btn"
-              type="button"
-              onClick={handleDashboard}
-            >
-
-              <span>
-                Log In
-              </span>
-
-              <span className="arrow">
-                →
-              </span>
-
-            </button>
-
-
-            <div className="or-divider">
-
-              <span></span>
-
-              <p>
-                OR
-              </p>
-
-              <span></span>
-
-            </div>
-
-
-            <div className="role-buttons">
-
-              <button
-                className="role-btn"
-                type="button"
-              >
-                I'm a Student
-              </button>
-
-
-              <button
-                className="role-btn"
-                type="button"
-              >
-                I'm a Faculty
-              </button>
-
-            </div>
-
-
-            <div className="register-text">
-
-              <span>
-                Don't have an account?
-              </span>
-
-              <button
-                type="button"
-              >
-                Register
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
+        <footer className="login-page-footer">
+          <span>ConsultTime · Western Mindanao State University</span>
+          <span>Need help? Contact support</span>
+        </footer>
       </div>
     )
   }
@@ -1654,6 +1533,7 @@ function App() {
 
   return (
     <>
+      <BackendTest />
 
       <section className="hero">
 
