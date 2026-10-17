@@ -1970,7 +1970,6 @@ function App() {
 
   return (
     <>
-      <BackendTest />
 
       <section className="hero">
 
