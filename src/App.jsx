@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import BackendTest from './BackendTest';
+/*import BackendTest from './BackendTest';*/
 
 import weblogo from './assets/weblogo.jpg'
 import wmsuLogo from './assets/wmsuLogo.png'
