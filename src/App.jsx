@@ -82,6 +82,57 @@ function ChevronIcon() {
   )
 }
 
+function getUpcomingWeekdays(count) {
+  const dates = []
+  const date = new Date()
+  date.setDate(date.getDate() + 1)
+
+  while (dates.length < count) {
+    if (date.getDay() !== 0 && date.getDay() !== 6) {
+      dates.push({
+        key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
+        label: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+        fullDate: date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      })
+    }
+
+    date.setDate(date.getDate() + 1)
+  }
+
+  return dates
+}
+
+const FACULTY_CONSULTATION_HOURS = '8:00 AM – 5:00 PM'
+
+function getNameFromEmail(email) {
+  const username = email.split('@')[0].split('+')[0]
+  const name = username
+    .replace(/[._-]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ')
+
+  return name || 'Student'
+}
+
+function getTimeSlots() {
+  const slots = []
+  const formatTime = totalMinutes => {
+    const hour = Math.floor(totalMinutes / 60)
+    const displayHour = hour % 12 || 12
+    const period = hour < 12 ? 'AM' : 'PM'
+    return `${displayHour}:${String(totalMinutes % 60).padStart(2, '0')} ${period}`
+  }
+
+  for (let minutes = 8 * 60; minutes + 30 <= 17 * 60; minutes += 30) {
+    slots.push(`${formatTime(minutes)} - ${formatTime(minutes + 30)}`)
+  }
+
+  return slots
+}
+
 
 /* APP*/
 
@@ -95,13 +146,22 @@ function App() {
   const [bookingSearch, setBookingSearch] = useState('')
   const [isProfileEditing, setIsProfileEditing] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [selectedFacultyForBooking, setSelectedFacultyForBooking] = useState(null)
+  const [selectedBookingDate, setSelectedBookingDate] = useState('')
+  const [selectedBookingTime, setSelectedBookingTime] = useState('')
+  const [bookingSubject, setBookingSubject] = useState('')
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
   const [profileData, setProfileData] = useState({
-    fullName: 'Waj Wannah I. Sanchez',
+    fullName: '',
     studentId: 'Student ID not set',
-    email: 'student@example.com',
+    email: '',
     phone: 'Not provided',
     course: 'BS Computer Science',
     yearLevel: '2nd Year',
+    section: 'Not set',
     department: 'College of Computing Studies'
   })
   const [bookings, setBookings] = useState([
@@ -109,6 +169,8 @@ function App() {
     { id: 2, faculty: 'Prof. Kris Pereyra', department: 'Information Technology', subject: 'Programming Fundamentals', date: 'October 16, 2026', time: '1:00 PM - 1:30 PM', location: 'Online Consultation', status: 'Upcoming' },
     { id: 3, faculty: 'Engr. Ian Lim', department: 'Computer Science', subject: 'Database Systems', date: 'September 28, 2026', time: '9:00 AM - 9:30 AM', location: 'CCS Room 204', status: 'Completed' }
   ])
+
+  const availableBookingDates = getUpcomingWeekdays(10)
 
 
   /* NAVIGATION*/
@@ -127,6 +189,89 @@ function App() {
     setCurrentPage('dashboard')
     setActiveDashboardPage('dashboard')
     window.scrollTo(0, 0)
+  }
+
+  function handleLoginSubmit(event) {
+    event.preventDefault()
+
+    const normalizedEmail = loginEmail.trim().toLowerCase()
+    const gmailPattern = /^[a-z0-9]+(?:\.[a-z0-9]+)*(?:\+[a-z0-9]+(?:\.[a-z0-9]+)*)?@gmail\.com$/
+
+    if (!gmailPattern.test(normalizedEmail)) {
+      setLoginError('Enter a valid Gmail address, such as name@gmail.com.')
+      return
+    }
+
+    if (!loginPassword) {
+      setLoginError('Enter your password to continue.')
+      return
+    }
+
+    setProfileData(current => ({
+      ...current,
+      email: normalizedEmail,
+      fullName: getNameFromEmail(normalizedEmail)
+    }))
+    setLoginError('')
+    handleDashboard()
+  }
+
+  function handleLogout() {
+    setIsProfileEditing(false)
+    setProfileSaved(false)
+    setActiveDashboardPage('dashboard')
+    setCurrentPage('home')
+    window.scrollTo(0, 0)
+  }
+
+  function openFacultyAvailability(faculty) {
+    setSelectedFacultyForBooking(faculty)
+    setSelectedBookingDate(availableBookingDates[0]?.key || '')
+    setSelectedBookingTime('')
+    setBookingSubject('')
+  }
+
+  function closeFacultyAvailability() {
+    setSelectedFacultyForBooking(null)
+    setSelectedBookingDate('')
+    setSelectedBookingTime('')
+    setBookingSubject('')
+  }
+
+  function handleCreateBooking(event) {
+    event.preventDefault()
+
+    if (!selectedFacultyForBooking || !selectedBookingDate || !selectedBookingTime || !bookingSubject.trim()) return
+
+    const bookingDate = availableBookingDates.find(date => date.key === selectedBookingDate)
+    if (!bookingDate) return
+
+    const alreadyBooked = bookings.some(booking =>
+      booking.status === 'Upcoming' &&
+      booking.faculty === selectedFacultyForBooking.name &&
+      booking.date === bookingDate.fullDate &&
+      booking.time === selectedBookingTime
+    )
+
+    if (alreadyBooked) {
+      setSelectedBookingTime('')
+      return
+    }
+
+    setBookings(current => [{
+      id: Date.now(),
+      faculty: selectedFacultyForBooking.name,
+      department: selectedFacultyForBooking.department,
+      subject: bookingSubject.trim(),
+      date: bookingDate.fullDate,
+      time: selectedBookingTime,
+      location: selectedFacultyForBooking.room,
+      status: 'Upcoming'
+    }, ...current])
+    closeFacultyAvailability()
+    setBookingFilter('All Bookings')
+    setBookingSearch('')
+    setActiveDashboardPage('bookings')
   }
 
   function handleLearnMore() {
@@ -226,7 +371,7 @@ function App() {
 
           {/* LOGIN CARD */}
 
-          <div className="login-card">
+          <form className="login-card" onSubmit={handleLoginSubmit}>
 
             <div className="login-card-header">
 
@@ -239,6 +384,7 @@ function App() {
                 <br />
                 and manage your consultations.
               </p>
+              <p className="login-demo-note">Demo login: use a valid @gmail.com address. The profile name is generated from the email.</p>
 
             </div>
 
@@ -246,8 +392,12 @@ function App() {
             <div className="input-group">
 
               <input
-                type="text"
-                placeholder="Email or Student/Faculty ID"
+                type="email"
+                autoComplete="username"
+                placeholder="name@gmail.com"
+                value={loginEmail}
+                onChange={event => setLoginEmail(event.target.value)}
+                required
               />
 
             </div>
@@ -257,7 +407,11 @@ function App() {
 
               <input
                 type="password"
+                autoComplete="current-password"
                 placeholder="Password"
+                value={loginPassword}
+                onChange={event => setLoginPassword(event.target.value)}
+                required
               />
 
             </div>
@@ -286,12 +440,11 @@ function App() {
             </div>
 
 
-            {/* LOGIN GOES TO DASHBOARD */}
+            {loginError && <p className="login-error" role="alert">{loginError}</p>}
 
             <button
               className="main-login-btn"
-              type="button"
-              onClick={handleDashboard}
+              type="submit"
             >
 
               <span>
@@ -350,9 +503,9 @@ function App() {
                 Register
               </button>
 
-            </div>
-
           </div>
+
+          </form>
 
         </div>
 
@@ -475,7 +628,7 @@ function App() {
             <div className="user-information">
 
               <strong>
-                Waj Wannah Sanchez
+                {profileData.fullName}
               </strong>
 
               <span>
@@ -484,11 +637,33 @@ function App() {
 
             </div>
 
-            <span className="user-arrow">
+            <button
+              className="user-arrow"
+              type="button"
+              aria-label="Open account menu"
+              aria-expanded={isUserMenuOpen}
+              onClick={() => setIsUserMenuOpen(open => !open)}
+            >
               ▼
-            </span>
+            </button>
 
           </div>
+
+          {isUserMenuOpen && (
+            <div className="dashboard-account-menu" role="menu">
+              <button
+                className="dashboard-logout-button"
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setIsUserMenuOpen(false)
+                  handleLogout()
+                }}
+              >
+                Log Out
+              </button>
+            </div>
+          )}
 
         </header>
 
@@ -607,7 +782,7 @@ function App() {
                     </p>
 
                     <h1>
-                      Waj Wannah Sanchez!
+                      {profileData.fullName}!
                     </h1>
 
                     <p className="welcome-description">
@@ -1274,7 +1449,6 @@ function App() {
                         department: 'Computer Science', 
                         subject: 'Programming and software development', 
                         availability: 'Available today', 
-                        time: '2:00 PM – 4:00 PM', 
                         room: 'Faculty Room 204', 
                         initials: 'NJ', 
                         style: 'avatar-one' 
@@ -1284,7 +1458,6 @@ function App() {
                         department: 'Information Technology', 
                         subject: 'Networking and information systems', 
                         availability: 'Available tomorrow', 
-                        time: '9:00 AM – 11:00 AM', 
                         room: 'Faculty Room 101', 
                         initials: 'KR', 
                         style: 'avatar-two' 
@@ -1294,7 +1467,6 @@ function App() {
                         department: 'Mathematics', 
                         subject: 'Mathematics and statistics', 
                         availability: 'Available today', 
-                        time: '1:00 PM – 3:00 PM', 
                         room: 'Faculty Room 305', 
                         initials: 'IL', 
                         style: 'avatar-three' 
@@ -1304,7 +1476,6 @@ function App() {
                         department: 'Engineering', 
                         subject: 'Engineering fundamentals',
                         availability: 'Available tomorrow', 
-                        time: '10:00 AM – 12:00 PM', 
                         room: 'Engineering Building 2B', 
                         initials: 'EV', 
                         style: 'avatar-four' 
@@ -1326,7 +1497,6 @@ function App() {
                       
                       subject: 'Programming and software development', 
                       availability: 'Available today', 
-                      time: '2:00 PM – 4:00 PM', 
                       room: 'Faculty Room 204', 
                       initials: 'NJ', 
                       style: 'avatar-one' 
@@ -1336,7 +1506,6 @@ function App() {
                       department: 'Information Technology', 
                       subject: 'Networking and information systems', 
                       availability: 'Available tomorrow', 
-                      time: '9:00 AM – 11:00 AM', 
                       room: 'Faculty Room 101', 
                       initials: 'KR', 
                       style: 'avatar-two' 
@@ -1346,7 +1515,6 @@ function App() {
                       department: 'Mathematics', 
                       subject: 'Mathematics and statistics', 
                       availability: 'Available today', 
-                      time: '1:00 PM – 3:00 PM', 
                       room: 'Faculty Room 305', 
                       initials: 'IL', 
                       style: 'avatar-three' 
@@ -1356,7 +1524,6 @@ function App() {
                       department: 'Engineering', 
                       subject: 'Engineering fundamentals', 
                       availability: 'Available tomorrow', 
-                      time: '10:00 AM – 12:00 PM', 
                       room: 'Engineering Building 2B', 
                       initials: 'EV', 
                       style: 'avatar-four' 
@@ -1382,7 +1549,7 @@ function App() {
                         <CalendarIcon />
                         <div>
                           <strong>{faculty.availability}</strong>
-                          <span>{faculty.time}</span>
+                          <span>{FACULTY_CONSULTATION_HOURS}</span>
                         </div>
                       </div>
 
@@ -1393,7 +1560,7 @@ function App() {
 
                       <button
                         className="directory-availability-btn"
-                        onClick={() => alert(`Availability for ${faculty.name} will be shown here.`)}
+                        onClick={() => openFacultyAvailability(faculty)}
                       >
                         View Availability
                         <ChevronIcon />
@@ -1430,6 +1597,116 @@ function App() {
                     <button onClick={() => { setFacultySearch(''); setSelectedDepartment('All Departments') }}>
                       Clear filters
                     </button>
+                  </div>
+                )}
+
+                {selectedFacultyForBooking && (
+                  <div
+                    className="availability-modal-backdrop"
+                    onClick={closeFacultyAvailability}
+                  >
+                    <section
+                      className="availability-modal"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="availability-modal-title"
+                      onClick={event => event.stopPropagation()}
+                    >
+                      <div className="availability-modal-heading">
+                        <div>
+                          <span className="faculty-eyebrow">BOOK A CONSULTATION</span>
+                          <h2 id="availability-modal-title">{selectedFacultyForBooking.name}</h2>
+                          <p>{selectedFacultyForBooking.department} · {selectedFacultyForBooking.room}</p>
+                        </div>
+                        <button
+                          className="availability-modal-close"
+                          type="button"
+                          aria-label="Close availability"
+                          onClick={closeFacultyAvailability}
+                        >
+                          ×
+                        </button>
+                      </div>
+
+                      <form onSubmit={handleCreateBooking}>
+                        <fieldset className="availability-date-fieldset">
+                          <legend>Choose an available date</legend>
+                          <div className="availability-date-list">
+                            {availableBookingDates.map(date => (
+                              <button
+                                className={`availability-date-option${selectedBookingDate === date.key ? ' selected' : ''}`}
+                                key={date.key}
+                                type="button"
+                                aria-pressed={selectedBookingDate === date.key}
+                                onClick={() => {
+                                  setSelectedBookingDate(date.key)
+                                  setSelectedBookingTime('')
+                                }}
+                              >
+                                <span>{date.label.split(',')[0]}</span>
+                                <strong>{date.label.split(' ').slice(1).join(' ')}</strong>
+                              </button>
+                            ))}
+                          </div>
+                        </fieldset>
+
+                        <fieldset className="availability-time-fieldset">
+                          <legend>Choose a 30-minute time slot</legend>
+                          <div className="availability-time-list">
+                            {getTimeSlots().map(time => {
+                              const selectedDate = availableBookingDates.find(date => date.key === selectedBookingDate)
+                              const isBooked = bookings.some(booking =>
+                                booking.status === 'Upcoming' &&
+                                booking.faculty === selectedFacultyForBooking.name &&
+                                booking.date === selectedDate?.fullDate &&
+                                booking.time === time
+                              )
+
+                              return (
+                                <button
+                                  className={`availability-time-option${selectedBookingTime === time ? ' selected' : ''}`}
+                                  key={time}
+                                  type="button"
+                                  disabled={isBooked}
+                                  aria-pressed={selectedBookingTime === time}
+                                  onClick={() => setSelectedBookingTime(time)}
+                                >
+                                  {isBooked ? `${time} · Booked` : time}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </fieldset>
+
+                        <label className="availability-subject-field">
+                          <span>What would you like to discuss?</span>
+                          <textarea
+                            value={bookingSubject}
+                            onChange={event => setBookingSubject(event.target.value)}
+                            placeholder="Enter a subject or brief consultation topic"
+                            rows="3"
+                            required
+                          />
+                        </label>
+
+                        <p className="availability-demo-note">
+                          Dates and time slots are sample availability for this page preview.
+                        </p>
+
+                        <div className="availability-modal-actions">
+                          <button className="availability-cancel-button" type="button" onClick={closeFacultyAvailability}>
+                            Cancel
+                          </button>
+                          <button
+                            className="availability-confirm-button"
+                            type="submit"
+                            disabled={!selectedBookingDate || !selectedBookingTime || !bookingSubject.trim()}
+                          >
+                            Confirm Booking
+                          </button>
+                        </div>
+                      </form>
+                    </section>
                   </div>
                 )}
 
@@ -1585,10 +1862,63 @@ function App() {
                       <div><h2>Personal Information</h2><p>Keep your contact information up to date.</p></div>
                     </div>
                     <div className="profile-fields-grid">
-                      <label className="profile-field"><span>Full Name</span><input value={profileData.fullName} readOnly={!isProfileEditing} onChange={event => setProfileData(current => ({ ...current, fullName: event.target.value }))} /></label>
-                      <label className="profile-field"><span>Student ID</span><input value={profileData.studentId} readOnly={!isProfileEditing} onChange={event => setProfileData(current => ({ ...current, studentId: event.target.value }))} /></label>
-                      <label className="profile-field"><span>Email Address</span><input type="email" value={profileData.email} readOnly={!isProfileEditing} onChange={event => setProfileData(current => ({ ...current, email: event.target.value }))} /></label>
-                      <label className="profile-field"><span>Contact Number</span><input value={profileData.phone} readOnly={!isProfileEditing} onChange={event => setProfileData(current => ({ ...current, phone: event.target.value }))} /></label>
+                      <label className="profile-field">
+                        <span>Full Name</span>
+                        <input
+                          type="text"
+                          autoComplete="name"
+                          value={profileData.fullName}
+                          readOnly={!isProfileEditing}
+                          onChange={event => setProfileData(current => ({ ...current, fullName: event.target.value }))}
+                        />
+                      </label>
+                      <label className="profile-field">
+                        <span>Student ID</span>
+                        <input
+                          type="text"
+                          value={profileData.studentId}
+                          readOnly={!isProfileEditing}
+                          onChange={event => setProfileData(current => ({ ...current, studentId: event.target.value }))}
+                        />
+                      </label>
+                      <label className="profile-field">
+                        <span>Email</span>
+                        <input
+                          type="email"
+                          autoComplete="email"
+                          value={profileData.email}
+                          readOnly={!isProfileEditing}
+                          onChange={event => setProfileData(current => ({ ...current, email: event.target.value }))}
+                        />
+                      </label>
+                      <label className="profile-field">
+                        <span>Contact Number</span>
+                        <input
+                          type="tel"
+                          autoComplete="tel"
+                          value={profileData.phone}
+                          readOnly={!isProfileEditing}
+                          onChange={event => setProfileData(current => ({ ...current, phone: event.target.value }))}
+                        />
+                      </label>
+                      <label className="profile-field">
+                        <span>Year Level</span>
+                        <input
+                          type="text"
+                          value={profileData.yearLevel}
+                          readOnly={!isProfileEditing}
+                          onChange={event => setProfileData(current => ({ ...current, yearLevel: event.target.value }))}
+                        />
+                      </label>
+                      <label className="profile-field">
+                        <span>Section</span>
+                        <input
+                          type="text"
+                          value={profileData.section}
+                          readOnly={!isProfileEditing}
+                          onChange={event => setProfileData(current => ({ ...current, section: event.target.value }))}
+                        />
+                      </label>
                     </div>
                     {isProfileEditing && <div className="profile-form-actions"><button className="profile-discard-button" onClick={() => { setIsProfileEditing(false); setProfileSaved(false) }}>Cancel</button><button className="profile-save-button" onClick={() => { setIsProfileEditing(false); setProfileSaved(true) }}>Save Changes</button></div>}
                   </section>
@@ -1636,7 +1966,10 @@ function App() {
 
                 <div className="profile-bottom-row">
                   <p>Profile details are currently stored in this page preview only.</p>
-                  <button className="profile-back-button" onClick={() => handleDashboardNavigation('dashboard')}><ChevronIcon /> Back to Dashboard</button>
+                  <div className="profile-bottom-actions">
+                    <button className="profile-back-button" onClick={() => handleDashboardNavigation('dashboard')}><ChevronIcon /> Back to Dashboard</button>
+                    <button className="profile-logout-button" onClick={handleLogout}>Log Out</button>
+                  </div>
                 </div>
               </div>
             )}
