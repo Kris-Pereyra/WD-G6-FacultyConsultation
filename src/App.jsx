@@ -83,27 +83,59 @@ function ChevronIcon() {
   )
 }
 
-function getUpcomingWeekdays(count) {
-  const dates = []
-  const date = new Date()
-  date.setDate(date.getDate() + 1)
-
-  while (dates.length < count) {
-    if (date.getDay() !== 0 && date.getDay() !== 6) {
-      dates.push({
-        key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
-        label: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
-        fullDate: date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-      })
-    }
-
-    date.setDate(date.getDate() + 1)
+// Demo schedules only. Replace with faculty-published availability from Express.
+const FACULTY = [
+  { id: 'novie', name: 'Prof. Novie Jozane', department: 'Computer Science', subject: 'Programming and software development', room: 'Faculty Room 204', initials: 'NJ', style: 'avatar-one', days: [1,3], start: 14*60, end: 16*60 },
+  { id: 'kris', name: 'Prof. Kris', department: 'Information Technology', subject: 'Networking and information systems', room: 'Faculty Room 101', initials: 'KR', style: 'avatar-two', days: [2,4], start: 9*60, end: 11*60 },
+  { id: 'ian', name: 'Prof. Ian Lim', department: 'Mathematics', subject: 'Mathematics and statistics', room: 'Faculty Room 305', initials: 'IL', style: 'avatar-three', days: [1,5], start: 13*60, end: 15*60 },
+  { id: 'ellice', name: 'Prof. Ellice Vicente', department: 'Engineering', subject: 'Engineering fundamentals', room: 'Engineering Building 2B', initials: 'EV', style: 'avatar-four', days: [3,5], start: 10*60, end: 12*60 }
+]
+const BOOKING_STATUSES = ['Pending', 'Confirmed', 'Declined', 'Cancelled', 'Completed']
+const isActive = booking => ['Pending', 'Confirmed'].includes(booking.status)
+const formatMinutes = minutes => {
+  const hour = Math.floor(minutes / 60)
+  return (hour % 12 || 12) + ':' + String(minutes % 60).padStart(2, '0') + (hour < 12 ? ' AM' : ' PM')
+}
+function manilaToday() {
+  return new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date())
+}
+function slotStart(dateKey, time) {
+  const match = time.match(/^(\d{1,2}):(\d{2}) (AM|PM)/)
+  if (!match) return NaN
+  const hour = Number(match[1]) % 12 + (match[3] === 'PM' ? 12 : 0)
+  return Date.parse(dateKey + 'T' + String(hour).padStart(2,'0') + ':' + match[2] + ':00+08:00')
+}
+function bookingStart(booking) { return slotStart(booking.dateKey, booking.time) }
+function getTimeSlots(faculty, dateKey) {
+  if (!faculty || !dateKey || !faculty.days.includes(new Date(dateKey+'T12:00:00Z').getUTCDay())) return []
+  const slots = []
+  for (let minute = faculty.start; minute + 30 <= faculty.end; minute += 30) {
+    const time = formatMinutes(minute) + ' - ' + formatMinutes(minute + 30)
+    if (slotStart(dateKey, time) > Date.now()) slots.push(time)
   }
-
+  return slots
+}
+function getFacultyDates(faculty, count = 10) {
+  if (!faculty) return []
+  const dates = []
+  const day = new Date(manilaToday()+'T12:00:00Z')
+  for (let offset = 0; offset < 60 && dates.length < count; offset++) {
+    const key = day.toISOString().slice(0,10)
+    if (getTimeSlots(faculty,key).length) dates.push({key,
+      label: day.toLocaleDateString('en-US',{timeZone:'UTC',weekday:'short',month:'short',day:'numeric'}),
+      fullDate: day.toLocaleDateString('en-US',{timeZone:'UTC',month:'long',day:'numeric',year:'numeric'})})
+    day.setUTCDate(day.getUTCDate()+1)
+  }
   return dates
 }
+function facultyHours(faculty) {
+  return faculty.days.map(day => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day]).join(', ') + ' · ' + formatMinutes(faculty.start) + ' – ' + formatMinutes(faculty.end) + ' (Manila)'
+}
+function hasConflict(bookings, dateKey, time) {
+  const start = slotStart(dateKey,time)
+  return bookings.some(booking => isActive(booking) && Math.abs(bookingStart(booking)-start) < 30*60*1000)
+}
 
-const FACULTY_CONSULTATION_HOURS = '8:00 AM – 5:00 PM'
 
 function getNameFromEmail(email) {
   const username = email.split('@')[0].split('+')[0]
@@ -118,21 +150,6 @@ function getNameFromEmail(email) {
   return name || 'Student'
 }
 
-function getTimeSlots() {
-  const slots = []
-  const formatTime = totalMinutes => {
-    const hour = Math.floor(totalMinutes / 60)
-    const displayHour = hour % 12 || 12
-    const period = hour < 12 ? 'AM' : 'PM'
-    return `${displayHour}:${String(totalMinutes % 60).padStart(2, '0')} ${period}`
-  }
-
-  for (let minutes = 8 * 60; minutes + 30 <= 17 * 60; minutes += 30) {
-    slots.push(`${formatTime(minutes)} - ${formatTime(minutes + 30)}`)
-  }
-
-  return slots
-}
 
 
 /* APP*/
@@ -165,13 +182,16 @@ function App() {
     section: 'Not set',
     department: 'College of Computing Studies'
   })
-  const [bookings, setBookings] = useState([
-    { id: 1, faculty: 'Dr. Novie Jozane', department: 'Computer Science', subject: 'Web Development', date: 'October 14, 2026', time: '10:00 AM - 10:30 AM', location: 'CCS Faculty Room', status: 'Upcoming' },
-    { id: 2, faculty: 'Prof. Kris Pereyra', department: 'Information Technology', subject: 'Programming Fundamentals', date: 'October 16, 2026', time: '1:00 PM - 1:30 PM', location: 'Online Consultation', status: 'Upcoming' },
-    { id: 3, faculty: 'Engr. Ian Lim', department: 'Computer Science', subject: 'Database Systems', date: 'September 28, 2026', time: '9:00 AM - 9:30 AM', location: 'CCS Room 204', status: 'Completed' }
-  ])
+  // In-memory demo data is cleared on logout/reload; never treat this as a database.
+  const [bookings, setBookings] = useState([])
+  const [bookingError, setBookingError] = useState('')
+  const [bookingNotice, setBookingNotice] = useState('')
+  const availableBookingDates = getFacultyDates(selectedFacultyForBooking)
+  const upcomingBookings = bookings.filter(booking => booking.status === 'Confirmed' && bookingStart(booking) > Date.now()).sort((a,b) => bookingStart(a)-bookingStart(b))
+  const nextBooking = upcomingBookings[0]
+  const pendingCount = bookings.filter(booking => booking.status === 'Pending').length
+  const availableFacultyCount = FACULTY.filter(faculty => getFacultyDates(faculty).some(date => getTimeSlots(faculty,date.key).some(time => !hasConflict(bookings,date.key,time)))).length
 
-  const availableBookingDates = getUpcomingWeekdays(10)
 
 
   /* NAVIGATION*/
@@ -222,12 +242,18 @@ function App() {
     setProfileSaved(false)
     setActiveDashboardPage('dashboard')
     setCurrentPage('home')
+    setBookings([])
+    setBookingNotice('')
+    setLoginPassword('')
     window.scrollTo(0, 0)
   }
 
   function openFacultyAvailability(faculty) {
-    setSelectedFacultyForBooking(faculty)
-    setSelectedBookingDate(availableBookingDates[0]?.key || '')
+    const member = FACULTY.find(item => item.name === faculty.name)
+    if (!member) return
+    setBookingError('')
+    setSelectedFacultyForBooking(member)
+    setSelectedBookingDate(getFacultyDates(member)[0]?.key || '')
     setSelectedBookingTime('')
     setBookingSubject('')
   }
@@ -241,38 +267,40 @@ function App() {
 
   function handleCreateBooking(event) {
     event.preventDefault()
-
-    if (!selectedFacultyForBooking || !selectedBookingDate || !selectedBookingTime || !bookingSubject.trim()) return
-
-    const bookingDate = availableBookingDates.find(date => date.key === selectedBookingDate)
-    if (!bookingDate) return
-
-    const alreadyBooked = bookings.some(booking =>
-      booking.status === 'Upcoming' &&
-      booking.faculty === selectedFacultyForBooking.name &&
-      booking.date === bookingDate.fullDate &&
-      booking.time === selectedBookingTime
-    )
-
-    if (alreadyBooked) {
-      setSelectedBookingTime('')
-      return
+    const subject = bookingSubject.trim()
+    if (!selectedFacultyForBooking || !selectedBookingDate || !selectedBookingTime) {
+      setBookingError('Choose a faculty member, date, and time.'); return
     }
-
+    if (subject.length < 5 || subject.length > 300) {
+      setBookingError('Enter a consultation topic between 5 and 300 characters.'); return
+    }
+    const bookingDate = getFacultyDates(selectedFacultyForBooking).find(date => date.key === selectedBookingDate)
+    if (!bookingDate || !getTimeSlots(selectedFacultyForBooking, selectedBookingDate).includes(selectedBookingTime)) {
+      setBookingError('This time is no longer available. Please choose another slot.'); setSelectedBookingTime(''); return
+    }
+    if (hasConflict(bookings,selectedBookingDate,selectedBookingTime)) {
+      setBookingError('You already have a pending or confirmed consultation that overlaps this time.'); return
+    }
     setBookings(current => [{
-      id: Date.now(),
-      faculty: selectedFacultyForBooking.name,
-      department: selectedFacultyForBooking.department,
-      subject: bookingSubject.trim(),
-      date: bookingDate.fullDate,
-      time: selectedBookingTime,
-      location: selectedFacultyForBooking.room,
-      status: 'Upcoming'
+      id: crypto.randomUUID(), facultyId: selectedFacultyForBooking.id,
+      faculty: selectedFacultyForBooking.name, department: selectedFacultyForBooking.department,
+      subject, dateKey: selectedBookingDate, date: bookingDate.fullDate, time: selectedBookingTime,
+      location: selectedFacultyForBooking.room, status: 'Pending', createdAt: new Date().toISOString()
     }, ...current])
     closeFacultyAvailability()
+    setBookingNotice('Request submitted. It remains Pending until the faculty confirms or declines it.')
     setBookingFilter('All Bookings')
     setBookingSearch('')
     setActiveDashboardPage('bookings')
+  }
+
+  function handleCancelBooking(id) {
+    const booking = bookings.find(item => item.id === id)
+    if (!booking || !isActive(booking) || bookingStart(booking) <= Date.now()) return
+    if (!window.confirm('Cancel this consultation request?')) return
+    setBookings(current => current.map(item => item.id === id && isActive(item) && bookingStart(item) > Date.now()
+      ? {...item, status: 'Cancelled', cancelledAt: new Date().toISOString()} : item))
+    setBookingNotice('Booking cancelled. You may request another available time.')
   }
 
   function handleLearnMore() {
@@ -758,6 +786,9 @@ function App() {
                         <input
                           type="text"
                           placeholder="Search faculty by name, subject, or department..."
+                          value={facultySearch}
+                          onChange={event => setFacultySearch(event.target.value)}
+                          onKeyDown={event => { if (event.key === 'Enter') { setSelectedDepartment('All Departments'); handleDashboardNavigation('faculty') } }}
                         />
 
                       </div>
@@ -765,9 +796,7 @@ function App() {
 
                       <button
                         className="dashboard-search-btn"
-                        onClick={() =>
-                          handleDashboardNavigation('faculty')
-                        }
+                        onClick={() => { setSelectedDepartment('All Departments'); handleDashboardNavigation('faculty') }}
                       >
                         Search
                       </button>
@@ -814,7 +843,7 @@ function App() {
                       </span>
 
                       <strong>
-                        24
+                        {availableFacultyCount}
                       </strong>
 
                     </div>
@@ -842,7 +871,7 @@ function App() {
                       </span>
 
                       <strong>
-                        1
+                        {upcomingBookings.length}
                       </strong>
 
                     </div>
@@ -870,7 +899,7 @@ function App() {
                       </span>
 
                       <strong>
-                        3
+                        {bookings.length}
                       </strong>
 
                     </div>
@@ -880,7 +909,7 @@ function App() {
                   </div>
 
 
-                  <div className="stat-card">
+                  <div className="stat-card" onClick={() => { setBookingFilter('Pending'); handleDashboardNavigation('bookings') }}>
 
                     <div className="stat-icon">
                       <ClockIcon />
@@ -893,7 +922,7 @@ function App() {
                       </span>
 
                       <strong>
-                        1
+                        {pendingCount}
                       </strong>
 
                     </div>
@@ -955,9 +984,7 @@ function App() {
                           <CalendarIcon />
 
                           <span>
-                            Available today
-                            <br />
-                            2:00 PM – 4:00 PM
+                            {facultyHours(FACULTY[0])}
                           </span>
 
                         </div>
@@ -1009,9 +1036,7 @@ function App() {
                           <CalendarIcon />
 
                           <span>
-                            Available tomorrow
-                            <br />
-                            9:00 AM – 11:00 AM
+                            {facultyHours(FACULTY[1])}
                           </span>
 
                         </div>
@@ -1063,9 +1088,7 @@ function App() {
                           <CalendarIcon />
 
                           <span>
-                            Available today
-                            <br />
-                            1:00 PM – 3:00 PM
+                            {facultyHours(FACULTY[2])}
                           </span>
 
                         </div>
@@ -1117,9 +1140,7 @@ function App() {
                           <CalendarIcon />
 
                           <span>
-                            Available tomorrow
-                            <br />
-                            10:00 AM – 12:00 PM
+                            {facultyHours(FACULTY[3])}
                           </span>
 
                         </div>
@@ -1180,39 +1201,11 @@ function App() {
                       </div>
 
 
-                      <div className="consultation-card">
-
-                        <div className="consultation-icon">
-                          <CalendarIcon />
-                        </div>
-
-                        <div className="consultation-info">
-
-                          <h3>
-                            Prof. JokJok
-                          </h3>
-
-                          <p>
-                            Computer Science
-                          </p>
-
-                          <div>
-                            October 6, 2026 · 2:00 PM – 2:30 PM
-                          </div>
-
-                          <div>
-                            Faculty Room 204
-                          </div>
-
-                        </div>
-
-                        <span className="confirmed">
-                          Confirmed
-                        </span>
-
-                        <ChevronIcon />
-
-                      </div>
+                      {nextBooking ? <div className="consultation-card">
+                        <div className="consultation-icon"><CalendarIcon /></div>
+                        <div className="consultation-info"><h3>{nextBooking.faculty}</h3><p>{nextBooking.department}</p><div>{nextBooking.date} · {nextBooking.time}</div><div>{nextBooking.location}</div></div>
+                        <span className="confirmed">Confirmed</span>
+                      </div> : <p className="availability-demo-note">No upcoming confirmed consultations. Pending requests appear in My Bookings.</p>}
 
                     </div>
 
@@ -1426,45 +1419,7 @@ function App() {
                     <p>Choose a faculty member to view their consultation availability.</p>
                   </div>
                   <span className="faculty-result-count">
-                    {[
-                      { 
-                        name: 'Prof. Novie Jozane', 
-                        department: 'Computer Science', 
-                        subject: 'Programming and software development', 
-                        availability: 'Available today', 
-                        room: 'Faculty Room 204', 
-                        initials: 'NJ', 
-                        style: 'avatar-one' 
-                      },
-
-                      { name: 'Prof. Kris', 
-                        department: 'Information Technology', 
-                        subject: 'Networking and information systems', 
-                        availability: 'Available tomorrow', 
-                        room: 'Faculty Room 101', 
-                        initials: 'KR', 
-                        style: 'avatar-two' 
-                      },
-
-                      { name: 'Prof. Ian Lim', 
-                        department: 'Mathematics', 
-                        subject: 'Mathematics and statistics', 
-                        availability: 'Available today', 
-                        room: 'Faculty Room 305', 
-                        initials: 'IL', 
-                        style: 'avatar-three' 
-                      },
-
-                      { name: 'Prof. Ellice Vicente', 
-                        department: 'Engineering', 
-                        subject: 'Engineering fundamentals',
-                        availability: 'Available tomorrow', 
-                        room: 'Engineering Building 2B', 
-                        initials: 'EV', 
-                        style: 'avatar-four' 
-                      }
-                      
-                    ].filter((faculty) => {
+                    {FACULTY.filter((faculty) => {
                       const query = facultySearch.trim().toLowerCase()
                       const matchesQuery = !query || `${faculty.name} ${faculty.department} ${faculty.subject}`.toLowerCase().includes(query)
                       const matchesDepartment = selectedDepartment === 'All Departments' || faculty.department === selectedDepartment
@@ -1474,45 +1429,7 @@ function App() {
                 </div>
 
                 <div className="faculty-directory-grid">
-                  {[
-                    { name: 'Prof. Novie Jozane', 
-                      department: 'Computer Science', 
-                      
-                      subject: 'Programming and software development', 
-                      availability: 'Available today', 
-                      room: 'Faculty Room 204', 
-                      initials: 'NJ', 
-                      style: 'avatar-one' 
-                    },
-
-                    { name: 'Prof. Kris', 
-                      department: 'Information Technology', 
-                      subject: 'Networking and information systems', 
-                      availability: 'Available tomorrow', 
-                      room: 'Faculty Room 101', 
-                      initials: 'KR', 
-                      style: 'avatar-two' 
-                    },
-
-                    { name: 'Prof. Ian Lim', 
-                      department: 'Mathematics', 
-                      subject: 'Mathematics and statistics', 
-                      availability: 'Available today', 
-                      room: 'Faculty Room 305', 
-                      initials: 'IL', 
-                      style: 'avatar-three' 
-                    },
-
-                    { name: 'Prof. Ellice Vicente', 
-                      department: 'Engineering', 
-                      subject: 'Engineering fundamentals', 
-                      availability: 'Available tomorrow', 
-                      room: 'Engineering Building 2B', 
-                      initials: 'EV', 
-                      style: 'avatar-four' 
-                    }
-
-                  ].filter((faculty) => {
+                  {FACULTY.filter((faculty) => {
                     const query = facultySearch.trim().toLowerCase()
                     const matchesQuery = !query || `${faculty.name} ${faculty.department} ${faculty.subject}`.toLowerCase().includes(query)
                     const matchesDepartment = selectedDepartment === 'All Departments' || faculty.department === selectedDepartment
@@ -1531,8 +1448,8 @@ function App() {
                       <div className="directory-detail">
                         <CalendarIcon />
                         <div>
-                          <strong>{faculty.availability}</strong>
-                          <span>{FACULTY_CONSULTATION_HOURS}</span>
+                          <strong>{getFacultyDates(faculty)[0]?.label || 'No published slots'}</strong>
+                          <span>{facultyHours(faculty)}</span>
                         </div>
                       </div>
 
@@ -1552,22 +1469,7 @@ function App() {
                   ))}
                 </div>
 
-                {[
-                  { name: 'Prof. Novie Jozane', 
-                    department: 'Computer Science', 
-                    subject: 'Programming and software development' },
-                  { name: 'Prof. Kris', 
-                    department: 'Information Technology', 
-                    subject: 'Networking and information systems' },
-                  { name: 'Prof. Ian Lim', 
-                    department: 'Mathematics', 
-                    subject: 'Mathematics and statistics' },
-                  { name: 'Prof. Ellice Vicente', 
-                    department: 'Engineering', 
-                    subject: 'Engineering fundamentals' 
-                  }
-
-                ].filter((faculty) => {
+                {FACULTY.filter((faculty) => {
                   const query = facultySearch.trim().toLowerCase()
                   const matchesQuery = !query || `${faculty.name} ${faculty.department} ${faculty.subject}`.toLowerCase().includes(query)
                   const matchesDepartment = selectedDepartment === 'All Departments' || faculty.department === selectedDepartment
@@ -1641,14 +1543,8 @@ function App() {
                     <fieldset className="availability-time-fieldset">
                       <legend>Choose a 30-minute time slot</legend>
                       <div className="availability-time-list">
-                        {getTimeSlots().map(time => {
-                          const selectedDate = availableBookingDates.find(date => date.key === selectedBookingDate)
-                          const isBooked = bookings.some(booking =>
-                            booking.status === 'Upcoming' &&
-                            booking.faculty === selectedFacultyForBooking.name &&
-                            booking.date === selectedDate?.fullDate &&
-                            booking.time === time
-                          )
+                        {getTimeSlots(selectedFacultyForBooking, selectedBookingDate).map(time => {
+                          const isBooked = hasConflict(bookings, selectedBookingDate, time)
 
                           return (
                             <button
@@ -1673,14 +1569,18 @@ function App() {
                         onChange={event => setBookingSubject(event.target.value)}
                         placeholder="Enter a subject or brief consultation topic"
                         rows="3"
+                        minLength={5}
+                        maxLength={300}
                         required
                       />
                     </label>
 
                     <p className="availability-demo-note">
-                      Dates and time slots are sample availability for this page preview.
+                      Faculty-specific demo schedules · Asia/Manila. Requests need faculty approval.
                     </p>
 
+                    {bookingError && <p className="booking-validation-error" role="alert">{bookingError}</p>}
+                    {!availableBookingDates.length && <p role="status">No published availability. Please try another faculty member.</p>}
                     <div className="availability-modal-actions">
                       <button className="availability-cancel-button" type="button" onClick={closeFacultyAvailability}>
                         Cancel
@@ -1690,7 +1590,7 @@ function App() {
                         type="submit"
                         disabled={!selectedBookingDate || !selectedBookingTime || !bookingSubject.trim()}
                       >
-                        Confirm Booking
+                        Submit Request
                       </button>
                     </div>
                   </form>
@@ -1714,6 +1614,7 @@ function App() {
 
                 </div>
 
+                {bookingNotice && <p className="booking-notice" role="status">{bookingNotice}</p>}
                 <div className="booking-summary-grid">
                   <div className="booking-summary-card">
                     <div className="booking-summary-icon"><CalendarIcon /></div>
@@ -1722,7 +1623,7 @@ function App() {
 
                   <div className="booking-summary-card">
                     <div className="booking-summary-icon upcoming"><ClockIcon /></div>
-                    <div><span>Upcoming</span><strong>{bookings.filter(booking => booking.status === 'Upcoming').length}</strong></div>
+                    <div><span>Upcoming</span><strong>{upcomingBookings.length}</strong></div>
                   </div>
 
                   <div className="booking-summary-card">
@@ -1742,7 +1643,7 @@ function App() {
                     />
                   </div>
                   <div className="booking-filter-tabs">
-                    {['All Bookings', 'Upcoming', 'Completed', 'Cancelled'].map(filter => (
+                    {['All Bookings', ...BOOKING_STATUSES].map(filter => (
                       <button
                         key={filter}
                         className={bookingFilter === filter ? 'active' : ''}
@@ -1765,7 +1666,7 @@ function App() {
                   {bookings.filter(booking => {
                     const matchesFilter = bookingFilter === 'All Bookings' || booking.status === bookingFilter
                     const query = bookingSearch.trim().toLowerCase()
-                    const matchesSearch = !query || `${booking.faculty} ${booking.subject} ${booking.department}`.toLowerCase().includes(query)
+                    const matchesSearch = !query || `${booking.faculty} ${booking.subject} ${booking.department} ${booking.status} ${booking.date} ${booking.time} ${booking.location}`.toLowerCase().includes(query)
                     return matchesFilter && matchesSearch
                   }).map(booking => (
                     <article className="booking-card" key={booking.id}>
@@ -1785,9 +1686,9 @@ function App() {
                           <span><ClockIcon />{booking.time}</span>
                           <span><UserIcon />{booking.location}</span>
                         </div>
-                        {booking.status === 'Upcoming' && (
+                        {isActive(booking) && bookingStart(booking) > Date.now() && (
                           <div className="booking-card-actions">
-                            <button className="booking-cancel-button" onClick={() => setBookings(current => current.map(item => item.id === booking.id ? { ...item, status: 'Cancelled' } : item))}>Cancel Booking</button>
+                            <button className="booking-cancel-button" onClick={() => handleCancelBooking(booking.id)}>Cancel Booking</button>
                           </div>
                         )}
                       </div>
@@ -1796,7 +1697,7 @@ function App() {
                   {bookings.filter(booking => {
                     const matchesFilter = bookingFilter === 'All Bookings' || booking.status === bookingFilter
                     const query = bookingSearch.trim().toLowerCase()
-                    const matchesSearch = !query || `${booking.faculty} ${booking.subject} ${booking.department}`.toLowerCase().includes(query)
+                    const matchesSearch = !query || `${booking.faculty} ${booking.subject} ${booking.department} ${booking.status} ${booking.date} ${booking.time} ${booking.location}`.toLowerCase().includes(query)
                     return matchesFilter && matchesSearch
                   }).length === 0 && (
                     <div className="bookings-empty-state">
@@ -1807,7 +1708,7 @@ function App() {
                     </div>
                   )}
                 </div>
-                <p className="booking-demo-note">Sample booking information for interface preview. Changes are only saved while this page remains open.</p>
+                <p className="booking-demo-note">Demo only: requests are kept in memory until logout or reload. Faculty decisions, shared availability, and permanent saving require the backend and faculty dashboard.</p>
               </div>
             )}
 
@@ -1979,7 +1880,6 @@ function App() {
         <nav>
 
           <div className="logo-container">
-
             <div className="logo">
 
               <img
@@ -1991,7 +1891,6 @@ function App() {
                 src={weblogo}
                 alt="ConsultTime Logo"
               />
-
             </div>
 
             <span className="logo-text">
@@ -1999,7 +1898,6 @@ function App() {
             </span>
 
           </div>
-
 
           <div className="nav-links">
 
