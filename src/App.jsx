@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import BackendTest from './BackendTest';
 
 import weblogo from './assets/weblogo.jpg'
 import wmsuLogo from './assets/wmsuLogo.png'
@@ -294,224 +295,178 @@ function App() {
 
   /*LOGIN PAGE */
 
+ 
+  /*LOGIN PAGE */
+
   if (currentPage === 'login') {
-
     return (
-      <div className="login-page">
-
-        <div className="top-red-shape"></div>
-        <div className="bottom-red-shape"></div>
-
-
-        {/* LOGIN LOGO */}
-
-        <div
-          className="login-logo"
-          onClick={handleHome}
-        >
-
-          <div className="login-logo-images">
-
-            <img
-              src={wmsuLogo}
-              alt="WMSU Logo"
-            />
-
-            <img
-              src={weblogo}
-              alt="ConsultTime Logo"
-            />
-
+      <div className="login-page redesigned-login-page">
+        {/* LOGIN NAVIGATION */}
+        <nav className="login-top-nav">
+          <div className="login-nav-brand" onClick={handleHome} role="button" tabIndex={0}>
+            <div className="login-logo-images">
+              <img src={wmsuLogo} alt="WMSU Logo" />
+              <img src={weblogo} alt="ConsultTime Logo" />
+            </div>
+            <span>ConsultTime</span>
           </div>
 
-          <span>
-            ConsultTime
-          </span>
+          <div className="login-nav-links">
+            <button type="button" onClick={handleHome}>Home</button>
+            <button type="button" onClick={handleHome}>How It Works</button>
+            <button type="button" onClick={handleHome}>About</button>
+          </div>
 
-        </div>
-
+          <button
+            className="login-signup-btn"
+            type="button"
+            onClick={() => alert('Student sign-up will be added later.')}
+          >
+            Sign Up
+          </button>
+        </nav>
 
         {/* LOGIN CONTENT */}
+        <main className="redesigned-login-layout">
+          <section className="login-intro-panel">
+            <span className="login-audience-tag">For WMSU students</span>
+            <h1>Your next step to academic support.</h1>
+            <p className="login-intro-description">
+              Connect with your faculty and make time for the guidance you need.
+            </p>
 
-        <div className="login-layout">
+            <img
+              className="login-feature-image"
+              src={calendar}
+              alt="ConsultTime consultation schedule"
+            />
 
+            <div className="login-benefit-list">
+              <div className="login-benefit-item">
+                <span className="login-benefit-icon"><UsersIcon /></span>
+                <div>
+                  <strong>Connect with your faculty</strong>
+                  <p>Find the right person for your questions.</p>
+                </div>
+              </div>
 
-          {/* LEFT SIDE */}
+              <div className="login-benefit-item">
+                <span className="login-benefit-icon"><CalendarIcon /></span>
+                <div>
+                  <strong>Book a convenient time</strong>
+                  <p>Choose a consultation that fits your schedule.</p>
+                </div>
+              </div>
 
-          <div className="login-left">
-
-            <div className="login-heading">
-
-              <h1>
-
-                Schedule Consultations.
-
-                <br />
-
-                <span>
-                  Connect With Your
-                </span>
-
-                <br />
-
-                Faculty.
-
-              </h1>
-
-              <p>
-                Log in to your account and book academic
-                <br />
-                consultations with your faculty members.
-              </p>
-
+              <div className="login-benefit-item">
+                <span className="login-benefit-icon"><BookIcon /></span>
+                <div>
+                  <strong>Stay on top of your bookings</strong>
+                  <p>Keep your requests and upcoming sessions in one place.</p>
+                </div>
+              </div>
             </div>
 
-          </div>
-
+            <div className="login-intro-footer">
+              Made for the Western Mindanao State University community.
+            </div>
+          </section>
 
           {/* LOGIN CARD */}
-
-          <form className="login-card" onSubmit={handleLoginSubmit}>
-
+          <form className="login-card redesigned-login-card" onSubmit={handleLoginSubmit}>
             <div className="login-card-header">
-
-              <h2>
-                Welcome Back!
-              </h2>
-
-              <p>
-                Log in to access your dashboard
-                <br />
-                and manage your consultations.
-              </p>
-              <p className="login-demo-note">Demo login: use a valid @gmail.com address. The profile name is generated from the email.</p>
-
+              <h2>Welcome back!</h2>
+              <p>Log in to manage your consultations and connect with your faculty.</p>
             </div>
 
+            <label className="login-form-label" htmlFor="login-email">
+              Email <span>*</span>
+            </label>
 
-            <div className="input-group">
-
+            <div className="input-group redesigned-input-group">
               <input
+                id="login-email"
                 type="email"
                 autoComplete="username"
                 placeholder="name@gmail.com"
                 value={loginEmail}
-                onChange={event => setLoginEmail(event.target.value)}
+                onChange={event => {
+                  setLoginEmail(event.target.value);
+                  setLoginError('');
+                }}
                 required
               />
-
             </div>
 
+            <small className="login-field-hint">
+              Use a valid Gmail address for the demo login.
+            </small>
 
-            <div className="input-group">
+            <label className="login-form-label password-label" htmlFor="login-password">
+              Password <span>*</span>
+            </label>
 
+            <div className="input-group redesigned-input-group">
               <input
+                id="login-password"
                 type="password"
                 autoComplete="current-password"
-                placeholder="Password"
+                placeholder="Enter your password"
                 value={loginPassword}
-                onChange={event => setLoginPassword(event.target.value)}
+                onChange={event => {
+                  setLoginPassword(event.target.value);
+                  setLoginError('');
+                }}
                 required
               />
-
             </div>
 
-
-            <div className="login-options">
-
+            <div className="login-options redesigned-login-options">
               <label className="remember">
-
                 <input type="checkbox" />
-
-                <span>
-                  Remember me
-                </span>
-
+                <span>Remember me</span>
               </label>
-
 
               <button
                 className="forgot-password"
                 type="button"
+                onClick={() => alert('Password recovery will be added later.')}
               >
                 Forgot password?
               </button>
-
             </div>
 
-
-            {loginError && <p className="login-error" role="alert">{loginError}</p>}
+            {loginError && (
+              <p className="login-error" role="alert">{loginError}</p>
+            )}
 
             <button
-              className="main-login-btn"
+              className="main-login-btn redesigned-main-login-btn"
               type="submit"
             >
-
-              <span>
-                Log In
-              </span>
-
-              <span className="arrow">
-                →
-              </span>
-
+              Log In
             </button>
 
-
-            <div className="or-divider">
-
-              <span></span>
-
-              <p>
-                OR
-              </p>
-
-              <span></span>
-
+            <div className="register-text redesigned-register-text">
+              <span>New to ConsultTime?</span>
+              <button
+                type="button"
+                onClick={() => alert('Student account registration will be added later.')}
+              >
+                Create a student account
+              </button>
             </div>
-
-
-            <div className="role-buttons">
-
-              <button
-                className="role-btn"
-                type="button"
-              >
-                I'm a Student
-              </button>
-
-
-              <button
-                className="role-btn"
-                type="button"
-              >
-                I'm a Faculty
-              </button>
-
-            </div>
-
-
-            <div className="register-text">
-
-              <span>
-                Don't have an account?
-              </span>
-
-              <button
-                type="button"
-              >
-                Register
-              </button>
-
-          </div>
-
           </form>
+        </main>
 
-        </div>
-
+        <footer className="login-page-footer">
+          <span>ConsultTime · Western Mindanao State University</span>
+          <span>Need help? Contact support</span>
+        </footer>
       </div>
-    )
+    );
   }
+
 
 
   /* STUDENT DASHBOARD */
@@ -2015,6 +1970,7 @@ function App() {
 
   return (
     <>
+      <BackendTest />
 
       <section className="hero">
 
