@@ -477,8 +477,6 @@ function App() {
   }
 
 
-  /*LOGIN PAGE */
-
  
   /*LOGIN PAGE */
 
@@ -501,7 +499,7 @@ function App() {
             <a href="#about" onClick={event => { event.preventDefault(); handleHome() }}>About</a>
           </div>
 
-          <div className="log-container" onClick={handleSignup} role="button" tabIndex={0}>
+          <div className="pagebtn" onClick={handleSignup} role="button" tabIndex={0}>
             <span>Sign Up</span>
           </div>
         </nav>
@@ -517,7 +515,7 @@ function App() {
 
             <img
               className="login-feature-image"
-              src={calendar}
+              src={pic1}
               alt="ConsultTime consultation schedule"
             />
 
@@ -677,7 +675,7 @@ function App() {
             <a href="#about" onClick={event => { event.preventDefault(); handleHome() }}>About</a>
           </div>
 
-          <div className="log-container" onClick={handleLogin} role="button" tabIndex={0}>
+          <div className="pagebtn" onClick={handleLogin} role="button" tabIndex={0}>
             <span>Sign In</span>
           </div>
         </nav>
@@ -692,7 +690,7 @@ function App() {
 
             <img
               className="login-feature-image"
-              src={calendar}
+              src={pic1}
               alt="ConsultTime consultation schedule"
             />
 

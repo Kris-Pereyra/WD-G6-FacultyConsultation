@@ -3697,10 +3697,8 @@ section.footer {
     }
 }
 
- HEAD
+/*LOGIN*/
 
-
-/* REDESIGNED LOGIN PAGE ONLY */
 .redesigned-login-page {
     --u0: clamp(0.55px, min(calc(100vw / 960), calc((100vh - 130px) / 640)), 1.8px);
     --u: var(--u0);
@@ -3713,7 +3711,6 @@ section.footer {
     font-family: "Inter", Arial, sans-serif;
     overflow-x: hidden;
 }
-
 
 .redesigned-login-page nav .log-container {
     white-space: nowrap;
@@ -3730,18 +3727,35 @@ section.footer {
     }
 }
 
-
-.redesigned-login-layout { 
-    width:150%; 
-    max-width:100px; 
-    margin:38px auto 24px; 
-    display:grid; 
-    grid-template-columns:minmax(2100px, .78fr) minmax(390px, 1.22fr); 
-    gap:clamp(35px, 8.5vw, 100px); 
-    align-items:center; 
-    flex:1; 
+.pagebtn{
+    text-align: center;
+    background: #fff;
+    color: #932121;
+    padding: 8px 25px;
+    border-radius: 50px;
+    border: 2px solid #932121 ;
+    font-weight: bold;
+    font-size: 16px;
+    transition: 0.3s;
 }
 
+.pagebtn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background: #ecc6c6;;
+}
+
+.redesigned-login-layout {
+    width: 100%;
+    max-width: calc(var(--u0) * 796.4);
+    margin: calc(var(--u) * 35) auto 0;
+    display: grid;
+    grid-template-columns: calc(var(--u) * 264) calc(var(--u0) * 442.4);
+    justify-content: start;
+    column-gap: calc(var(--u) * 90);
+    align-items: center;
+    flex: 0 0 auto;
+}
 
 .login-intro-panel {
     display: block;
@@ -3853,7 +3867,6 @@ section.footer {
     font-size: calc(var(--u) * 7.8);
     line-height: calc(var(--u) * 12);
 }
-
 
 .redesigned-login-card {
     --u: calc(var(--u0) * 1.12);
@@ -4062,11 +4075,7 @@ section.footer {
     line-height: calc(var(--u) * 10);
 }
 
-
-
-/*
-   SIGN-UP PAGE
-*/
+/*SIGN UP*/
 
 .signup-page {
     --u0: clamp(0.55px, min(calc(100vw / 1020), calc((100vh - 130px) / 710)), 1.8px);
@@ -4354,8 +4363,6 @@ section.footer {
     text-decoration: underline;
 }
 
-/* ---------- Login: small screens ---------- */
-
 @media (max-width: 900px) {
     .redesigned-login-page {
         --u0: 1.2px;
@@ -4420,8 +4427,6 @@ section.footer {
 }
 
 @media (max-width: 600px) {
-
-@media (max-width: 600px) {
     .availability-modal {
         max-height: 92vh;
         padding: 20px 16px;
@@ -4444,7 +4449,8 @@ section.footer {
         flex-direction: column-reverse;
     }
 
-.availability-cancel-button,
-.availability-confirm-button {
-    width: 100%;
+    .availability-cancel-button,
+    .availability-confirm-button {
+        width: 100%;
+    }
 }
