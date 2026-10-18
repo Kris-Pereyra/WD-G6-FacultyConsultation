@@ -3697,8 +3697,10 @@ section.footer {
     }
 }
 
-/* LOGIN PAGE*/
+ HEAD
 
+
+/* REDESIGNED LOGIN PAGE ONLY */
 .redesigned-login-page {
     --u0: clamp(0.55px, min(calc(100vw / 960), calc((100vh - 130px) / 640)), 1.8px);
     --u: var(--u0);
@@ -3729,16 +3731,15 @@ section.footer {
 }
 
 
-.redesigned-login-layout {
-    width: 100%;
-    max-width: calc(var(--u0) * 796.4);
-    margin: calc(var(--u) * 35) auto 0;
-    display: grid;
-    grid-template-columns: calc(var(--u) * 264) calc(var(--u0) * 442.4);
-    justify-content: start;
-    column-gap: calc(var(--u) * 90);
-    align-items: center;
-    flex: 0 0 auto;
+.redesigned-login-layout { 
+    width:150%; 
+    max-width:100px; 
+    margin:38px auto 24px; 
+    display:grid; 
+    grid-template-columns:minmax(2100px, .78fr) minmax(390px, 1.22fr); 
+    gap:clamp(35px, 8.5vw, 100px); 
+    align-items:center; 
+    flex:1; 
 }
 
 
@@ -4419,6 +4420,8 @@ section.footer {
 }
 
 @media (max-width: 600px) {
+
+@media (max-width: 600px) {
     .availability-modal {
         max-height: 92vh;
         padding: 20px 16px;
@@ -4441,8 +4444,7 @@ section.footer {
         flex-direction: column-reverse;
     }
 
-    .availability-cancel-button,
-    .availability-confirm-button {
-        width: 100%;
-    }
+.availability-cancel-button,
+.availability-confirm-button {
+    width: 100%;
 }
