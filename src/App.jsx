@@ -1019,7 +1019,14 @@ function App() {
 
                         </div>
 
-                        <button className="availability-btn">
+                        <button
+                          className="availability-btn"
+                          onClick={() => openFacultyAvailability({
+                            name: 'Prof. Novie Jozane',
+                            department: 'Computer Science',
+                            room: 'Faculty Room 204'
+                          })}
+                        >
                           View Availability
                         </button>
 
@@ -1066,7 +1073,14 @@ function App() {
 
                         </div>
 
-                        <button className="availability-btn">
+                        <button
+                          className="availability-btn"
+                          onClick={() => openFacultyAvailability({
+                            name: 'Prof. Kris',
+                            department: 'Information Technology',
+                            room: 'Faculty Room 101'
+                          })}
+                        >
                           View Availability
                         </button>
 
@@ -1113,7 +1127,14 @@ function App() {
 
                         </div>
 
-                        <button className="availability-btn">
+                        <button
+                          className="availability-btn"
+                          onClick={() => openFacultyAvailability({
+                            name: 'Prof. Ian Lim',
+                            department: 'Mathematics',
+                            room: 'Faculty Room 305'
+                          })}
+                        >
                           View Availability
                         </button>
 
@@ -1160,7 +1181,14 @@ function App() {
 
                         </div>
 
-                        <button className="availability-btn">
+                        <button
+                          className="availability-btn"
+                          onClick={() => openFacultyAvailability({
+                            name: 'Prof. Ellice Vicente',
+                            department: 'Engineering',
+                            room: 'Engineering Building 2B'
+                          })}
+                        >
                           View Availability
                         </button>
 
@@ -1600,120 +1628,120 @@ function App() {
                   </div>
                 )}
 
-                {selectedFacultyForBooking && (
-                  <div
-                    className="availability-modal-backdrop"
-                    onClick={closeFacultyAvailability}
-                  >
-                    <section
-                      className="availability-modal"
-                      role="dialog"
-                      aria-modal="true"
-                      aria-labelledby="availability-modal-title"
-                      onClick={event => event.stopPropagation()}
-                    >
-                      <div className="availability-modal-heading">
-                        <div>
-                          <span className="faculty-eyebrow">BOOK A CONSULTATION</span>
-                          <h2 id="availability-modal-title">{selectedFacultyForBooking.name}</h2>
-                          <p>{selectedFacultyForBooking.department} · {selectedFacultyForBooking.room}</p>
-                        </div>
-                        <button
-                          className="availability-modal-close"
-                          type="button"
-                          aria-label="Close availability"
-                          onClick={closeFacultyAvailability}
-                        >
-                          ×
-                        </button>
-                      </div>
-
-                      <form onSubmit={handleCreateBooking}>
-                        <fieldset className="availability-date-fieldset">
-                          <legend>Choose an available date</legend>
-                          <div className="availability-date-list">
-                            {availableBookingDates.map(date => (
-                              <button
-                                className={`availability-date-option${selectedBookingDate === date.key ? ' selected' : ''}`}
-                                key={date.key}
-                                type="button"
-                                aria-pressed={selectedBookingDate === date.key}
-                                onClick={() => {
-                                  setSelectedBookingDate(date.key)
-                                  setSelectedBookingTime('')
-                                }}
-                              >
-                                <span>{date.label.split(',')[0]}</span>
-                                <strong>{date.label.split(' ').slice(1).join(' ')}</strong>
-                              </button>
-                            ))}
-                          </div>
-                        </fieldset>
-
-                        <fieldset className="availability-time-fieldset">
-                          <legend>Choose a 30-minute time slot</legend>
-                          <div className="availability-time-list">
-                            {getTimeSlots().map(time => {
-                              const selectedDate = availableBookingDates.find(date => date.key === selectedBookingDate)
-                              const isBooked = bookings.some(booking =>
-                                booking.status === 'Upcoming' &&
-                                booking.faculty === selectedFacultyForBooking.name &&
-                                booking.date === selectedDate?.fullDate &&
-                                booking.time === time
-                              )
-
-                              return (
-                                <button
-                                  className={`availability-time-option${selectedBookingTime === time ? ' selected' : ''}`}
-                                  key={time}
-                                  type="button"
-                                  disabled={isBooked}
-                                  aria-pressed={selectedBookingTime === time}
-                                  onClick={() => setSelectedBookingTime(time)}
-                                >
-                                  {isBooked ? `${time} · Booked` : time}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        </fieldset>
-
-                        <label className="availability-subject-field">
-                          <span>What would you like to discuss?</span>
-                          <textarea
-                            value={bookingSubject}
-                            onChange={event => setBookingSubject(event.target.value)}
-                            placeholder="Enter a subject or brief consultation topic"
-                            rows="3"
-                            required
-                          />
-                        </label>
-
-                        <p className="availability-demo-note">
-                          Dates and time slots are sample availability for this page preview.
-                        </p>
-
-                        <div className="availability-modal-actions">
-                          <button className="availability-cancel-button" type="button" onClick={closeFacultyAvailability}>
-                            Cancel
-                          </button>
-                          <button
-                            className="availability-confirm-button"
-                            type="submit"
-                            disabled={!selectedBookingDate || !selectedBookingTime || !bookingSubject.trim()}
-                          >
-                            Confirm Booking
-                          </button>
-                        </div>
-                      </form>
-                    </section>
-                  </div>
-                )}
-
               </div>
 
             )}
 
+
+            {selectedFacultyForBooking && (
+              <div
+                className="availability-modal-backdrop"
+                onClick={closeFacultyAvailability}
+              >
+                <section
+                  className="availability-modal"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="availability-modal-title"
+                  onClick={event => event.stopPropagation()}
+                >
+                  <div className="availability-modal-heading">
+                    <div>
+                      <span className="faculty-eyebrow">BOOK A CONSULTATION</span>
+                      <h2 id="availability-modal-title">{selectedFacultyForBooking.name}</h2>
+                      <p>{selectedFacultyForBooking.department} · {selectedFacultyForBooking.room}</p>
+                    </div>
+                    <button
+                      className="availability-modal-close"
+                      type="button"
+                      aria-label="Close availability"
+                      onClick={closeFacultyAvailability}
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleCreateBooking}>
+                    <fieldset className="availability-date-fieldset">
+                      <legend>Choose date to consult</legend>
+                      <div className="availability-date-list">
+                        {availableBookingDates.map(date => (
+                          <button
+                            className={`availability-date-option${selectedBookingDate === date.key ? ' selected' : ''}`}
+                            key={date.key}
+                            type="button"
+                            aria-pressed={selectedBookingDate === date.key}
+                            onClick={() => {
+                              setSelectedBookingDate(date.key)
+                              setSelectedBookingTime('')
+                            }}
+                          >
+                            <span>{date.label.split(',')[0]}</span>
+                            <strong>{date.label.split(' ').slice(1).join(' ')}</strong>
+                          </button>
+                        ))}
+                      </div>
+                    </fieldset>
+
+                    <fieldset className="availability-time-fieldset">
+                      <legend>Choose a 30-minute time slot</legend>
+                      <div className="availability-time-list">
+                        {getTimeSlots().map(time => {
+                          const selectedDate = availableBookingDates.find(date => date.key === selectedBookingDate)
+                          const isBooked = bookings.some(booking =>
+                            booking.status === 'Upcoming' &&
+                            booking.faculty === selectedFacultyForBooking.name &&
+                            booking.date === selectedDate?.fullDate &&
+                            booking.time === time
+                          )
+
+                          return (
+                            <button
+                              className={`availability-time-option${selectedBookingTime === time ? ' selected' : ''}`}
+                              key={time}
+                              type="button"
+                              disabled={isBooked}
+                              aria-pressed={selectedBookingTime === time}
+                              onClick={() => setSelectedBookingTime(time)}
+                            >
+                              {isBooked ? `${time} · Booked` : time}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </fieldset>
+
+                    <label className="availability-subject-field">
+                      <span>What would you like to discuss?</span>
+                      <textarea
+                        value={bookingSubject}
+                        onChange={event => setBookingSubject(event.target.value)}
+                        placeholder="Enter a subject or brief consultation topic"
+                        rows="3"
+                        required
+                      />
+                    </label>
+
+                    <p className="availability-demo-note">
+                      Dates and time slots are sample availability for this page preview.
+                    </p>
+
+                    <div className="availability-modal-actions">
+                      <button className="availability-cancel-button" type="button" onClick={closeFacultyAvailability}>
+                        Cancel
+                      </button>
+                      <button
+                        className="availability-confirm-button"
+                        type="submit"
+                        disabled={!selectedBookingDate || !selectedBookingTime || !bookingSubject.trim()}
+                      >
+                        Confirm Booking
+                      </button>
+                    </div>
+                  </form>
+                </section>
+              </div>
+            )}
 
             {/* BOOKINGS PAGE */}
 
