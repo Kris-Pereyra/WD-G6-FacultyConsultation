@@ -5,6 +5,7 @@ import BackendTest from './BackendTest';
 import weblogo from './assets/weblogo.jpg'
 import wmsuLogo from './assets/wmsuLogo.png'
 import calendar from './assets/calendar.jpg'
+import pic1 from './assets/pic1.jpg'
 
 
 /* SIMPLE ICONS */
@@ -83,6 +84,100 @@ function ChevronIcon() {
   )
 }
 
+function Svg({ children, className = 'icon' }) {
+  return <svg viewBox="0 0 24 24" className={className}>{children}</svg>
+}
+
+function LoginUsersIcon() {
+  return (
+    <Svg>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </Svg>
+  )
+}
+
+function LoginCalendarIcon() {
+  return (
+    <Svg>
+      <path d="M8 2v4" /><path d="M16 2v4" />
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M3 10h18" />
+      <path d="M8 14h.01" /><path d="M12 14h.01" /><path d="M16 14h.01" />
+      <path d="M8 18h.01" /><path d="M12 18h.01" /><path d="M16 18h.01" />
+    </Svg>
+  )
+}
+
+function LoginClipboardIcon() {
+  return (
+    <Svg>
+      <rect x="8" y="2" width="8" height="4" rx="1" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <path d="m9 14 2 2 4-4" />
+    </Svg>
+  )
+}
+
+function UserOutlineIcon() {
+  return (
+    <Svg>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7" />
+    </Svg>
+  )
+}
+
+function GraduationCapIcon() {
+  return (
+    <Svg>
+      <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+      <path d="M22 10v6" />
+      <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
+    </Svg>
+  )
+}
+
+function LockIcon() {
+  return (
+    <Svg>
+      <circle cx="12" cy="16" r="1" />
+      <rect x="3" y="10" width="18" height="12" rx="2" />
+      <path d="M7 10V7a5 5 0 0 1 10 0v3" />
+    </Svg>
+  )
+}
+
+function ChevronDownIcon({ className = 'icon select-chevron' }) {
+  return (
+    <Svg className={className}>
+      <path d="m6 9 6 6 6-6" />
+    </Svg>
+  )
+}
+
+function EyeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="icon">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+function EyeOffIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="icon">
+      <path d="M17.9 17.9A10.4 10.4 0 0 1 12 19c-6.5 0-10-7-10-7a17.7 17.7 0 0 1 4.1-5" />
+      <path d="M9.9 5.2A9.6 9.6 0 0 1 12 5c6.5 0 10 7 10 7a17.8 17.8 0 0 1-2.2 3.2" />
+      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+      <path d="M3 3l18 18" />
+    </svg>
+  )
+}
+
 function getUpcomingWeekdays(count) {
   const dates = []
   const date = new Date()
@@ -155,6 +250,15 @@ function App() {
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
+  const [showLoginPassword, setShowLoginPassword] = useState(false)
+  const emptySignup = {
+    fullName: '', studentId: '', email: '', phone: '',
+    program: '', yearLevel: '', password: '', confirmPassword: '', agree: false
+  }
+  const [signupForm, setSignupForm] = useState(emptySignup)
+  const [signupErrors, setSignupErrors] = useState({})
+  const [showSignupPassword, setShowSignupPassword] = useState(false)
+  const [showSignupConfirm, setShowSignupConfirm] = useState(false)
   const [profileData, setProfileData] = useState({
     fullName: '',
     studentId: 'Student ID not set',
@@ -181,6 +285,58 @@ function App() {
     window.scrollTo(0, 0)
   }
 
+  function handleSignup() {
+    setSignupErrors({})
+    setCurrentPage('signup')
+    window.scrollTo(0, 0)
+  }
+
+  function updateSignup(field, value) {
+    setSignupForm(current => ({ ...current, [field]: value }))
+    setSignupErrors(current => ({ ...current, [field]: '' }))
+  }
+
+  function handleSignupSubmit(event) {
+    event.preventDefault()
+
+    const f = signupForm
+    const email = f.email.trim().toLowerCase()
+    const errors = {}
+
+    if (f.fullName.trim().length < 2) errors.fullName = 'Enter your full name.'
+    if (!f.studentId.trim()) errors.studentId = 'Enter your student ID.'
+    if (!/^[a-z0-9._%+-]+@(?:wmsu\.edu\.ph|gmail\.com)$/.test(email)) {
+      errors.email = 'Enter your university email, such as name@wmsu.edu.ph.'
+    }
+    if (!/^(09|\+639)\d{9}$/.test(f.phone.replace(/[\s-]/g, ''))) {
+      errors.phone = 'Enter a valid mobile number, such as 09123456789.'
+    }
+    if (!f.program) errors.program = 'Select your program.'
+    if (!f.yearLevel) errors.yearLevel = 'Select your year level.'
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(f.password)) {
+      errors.password = 'Use 8+ characters with uppercase, lowercase and a number.'
+    }
+    if (f.confirmPassword !== f.password || !f.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match.'
+    }
+    if (!f.agree) errors.agree = 'Please accept the Terms of Service and Privacy Policy.'
+
+    setSignupErrors(errors)
+    if (Object.keys(errors).length > 0) return
+
+    setProfileData(current => ({
+      ...current,
+      fullName: f.fullName.trim(),
+      studentId: f.studentId.trim(),
+      email,
+      phone: f.phone.trim(),
+      course: f.program,
+      yearLevel: f.yearLevel
+    }))
+    setSignupForm(emptySignup)
+    handleDashboard()
+  }
+
   function handleHome() {
     setCurrentPage('home')
     window.scrollTo(0, 0)
@@ -196,10 +352,10 @@ function App() {
     event.preventDefault()
 
     const normalizedEmail = loginEmail.trim().toLowerCase()
-    const gmailPattern = /^[a-z0-9]+(?:\.[a-z0-9]+)*(?:\+[a-z0-9]+(?:\.[a-z0-9]+)*)?@gmail\.com$/
+    const emailPattern = /^[a-z0-9._%+-]+@(?:wmsu\.edu\.ph|gmail\.com)$/
 
-    if (!gmailPattern.test(normalizedEmail)) {
-      setLoginError('Enter a valid Gmail address, such as name@gmail.com.')
+    if (!emailPattern.test(normalizedEmail)) {
+      setLoginError('Enter your university email, such as name@wmsu.edu.ph.')
       return
     }
 
@@ -302,28 +458,24 @@ function App() {
     return (
       <div className="login-page redesigned-login-page">
         {/* LOGIN NAVIGATION */}
-        <nav className="login-top-nav">
-          <div className="login-nav-brand" onClick={handleHome} role="button" tabIndex={0}>
-            <div className="login-logo-images">
+        <nav>
+          <div className="logo-container" onClick={handleHome} role="button" tabIndex={0}>
+            <div className="logo">
               <img src={wmsuLogo} alt="WMSU Logo" />
               <img src={weblogo} alt="ConsultTime Logo" />
             </div>
-            <span>ConsultTime</span>
+            <span className="logo-text">ConsultTime</span>
           </div>
 
-          <div className="login-nav-links">
-            <button type="button" onClick={handleHome}>Home</button>
-            <button type="button" onClick={handleHome}>How It Works</button>
-            <button type="button" onClick={handleHome}>About</button>
+          <div className="nav-links">
+            <a href="#" onClick={event => { event.preventDefault(); handleHome() }}>Home</a>
+            <a href="#how-it-works" onClick={event => { event.preventDefault(); handleHome() }}>How it Works</a>
+            <a href="#about" onClick={event => { event.preventDefault(); handleHome() }}>About</a>
           </div>
 
-          <button
-            className="login-signup-btn"
-            type="button"
-            onClick={() => alert('Student sign-up will be added later.')}
-          >
-            Sign Up
-          </button>
+          <div className="log-container" onClick={handleSignup} role="button" tabIndex={0}>
+            <span>Sign Up</span>
+          </div>
         </nav>
 
         {/* LOGIN CONTENT */}
@@ -343,7 +495,7 @@ function App() {
 
             <div className="login-benefit-list">
               <div className="login-benefit-item">
-                <span className="login-benefit-icon"><UsersIcon /></span>
+                <span className="login-benefit-icon"><LoginUsersIcon /></span>
                 <div>
                   <strong>Connect with your faculty</strong>
                   <p>Find the right person for your questions.</p>
@@ -351,7 +503,7 @@ function App() {
               </div>
 
               <div className="login-benefit-item">
-                <span className="login-benefit-icon"><CalendarIcon /></span>
+                <span className="login-benefit-icon"><LoginCalendarIcon /></span>
                 <div>
                   <strong>Book a convenient time</strong>
                   <p>Choose a consultation that fits your schedule.</p>
@@ -359,7 +511,7 @@ function App() {
               </div>
 
               <div className="login-benefit-item">
-                <span className="login-benefit-icon"><BookIcon /></span>
+                <span className="login-benefit-icon"><LoginClipboardIcon /></span>
                 <div>
                   <strong>Stay on top of your bookings</strong>
                   <p>Keep your requests and upcoming sessions in one place.</p>
@@ -380,7 +532,7 @@ function App() {
             </div>
 
             <label className="login-form-label" htmlFor="login-email">
-              Email <span>*</span>
+              University Email <span>*</span>
             </label>
 
             <div className="input-group redesigned-input-group">
@@ -388,7 +540,7 @@ function App() {
                 id="login-email"
                 type="email"
                 autoComplete="username"
-                placeholder="name@gmail.com"
+                placeholder="Your email @wmsu.edu.ph"
                 value={loginEmail}
                 onChange={event => {
                   setLoginEmail(event.target.value);
@@ -399,7 +551,7 @@ function App() {
             </div>
 
             <small className="login-field-hint">
-              Use a valid Gmail address for the demo login.
+              Use your official university email address.
             </small>
 
             <label className="login-form-label password-label" htmlFor="login-password">
@@ -409,7 +561,7 @@ function App() {
             <div className="input-group redesigned-input-group">
               <input
                 id="login-password"
-                type="password"
+                type={showLoginPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 placeholder="Enter your password"
                 value={loginPassword}
@@ -419,6 +571,14 @@ function App() {
                 }}
                 required
               />
+              <button
+                className="password-toggle"
+                type="button"
+                aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowLoginPassword(show => !show)}
+              >
+                {showLoginPassword ? <EyeIcon /> : <EyeOffIcon />}
+              </button>
             </div>
 
             <div className="login-options redesigned-login-options">
@@ -451,7 +611,7 @@ function App() {
               <span>New to ConsultTime?</span>
               <button
                 type="button"
-                onClick={() => alert('Student account registration will be added later.')}
+                onClick={handleSignup}
               >
                 Create a student account
               </button>
@@ -465,6 +625,209 @@ function App() {
         </footer>
       </div>
     );
+  }
+
+
+
+  /* SIGN UP PAGE */
+
+  if (currentPage === 'signup') {
+    return (
+      <div className="login-page redesigned-login-page signup-page">
+        <nav>
+          <div className="logo-container" onClick={handleHome} role="button" tabIndex={0}>
+            <div className="logo">
+              <img src={wmsuLogo} alt="WMSU Logo" />
+              <img src={weblogo} alt="ConsultTime Logo" />
+            </div>
+            <span className="logo-text">ConsultTime</span>
+          </div>
+
+          <div className="nav-links">
+            <a href="#" onClick={event => { event.preventDefault(); handleHome() }}>Home</a>
+            <a href="#how-it-works" onClick={event => { event.preventDefault(); handleHome() }}>How it Works</a>
+            <a href="#about" onClick={event => { event.preventDefault(); handleHome() }}>About</a>
+          </div>
+
+          <div className="log-container" onClick={handleLogin} role="button" tabIndex={0}>
+            <span>Sign In</span>
+          </div>
+        </nav>
+
+        <main className="signup-layout">
+          <section className="login-intro-panel">
+            <span className="login-audience-tag">For WMSU students</span>
+            <h1>Your next step to academic support.</h1>
+            <p className="login-intro-description">
+              Join ConsultTime to connect with your faculty and make time for the guidance you need.
+            </p>
+
+            <img
+              className="login-feature-image"
+              src={calendar}
+              alt="ConsultTime consultation schedule"
+            />
+
+            <div className="login-benefit-list">
+              <div className="login-benefit-item">
+                <span className="login-benefit-icon"><LoginUsersIcon /></span>
+                <div>
+                  <strong>Connect with your faculty</strong>
+                  <p>Find the right person for your questions.</p>
+                </div>
+              </div>
+              <div className="login-benefit-item">
+                <span className="login-benefit-icon"><LoginCalendarIcon /></span>
+                <div>
+                  <strong>Book a convenient time</strong>
+                  <p>Choose a consultation that fits your schedule.</p>
+                </div>
+              </div>
+              <div className="login-benefit-item">
+                <span className="login-benefit-icon"><LoginClipboardIcon /></span>
+                <div>
+                  <strong>Stay on top of your bookings</strong>
+                  <p>Keep your requests and upcoming sessions in one place.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="login-intro-footer">
+              Made for the Western Mindanao University community.
+            </div>
+          </section>
+
+          <form className="signup-card" onSubmit={handleSignupSubmit} noValidate>
+            <div className="signup-card-header">
+              <h2>Create your student account</h2>
+              <p>Enter your details to get started. All fields are required.</p>
+            </div>
+
+            <h3 className="signup-section"><UserOutlineIcon /> Personal Information</h3>
+            <div className="signup-grid">
+                <div className="signup-field">
+                  <label className="signup-label" htmlFor="su-fullName">Full Name <span>*</span></label>
+                  <div className={`signup-input${signupErrors.fullName ? ' has-error' : ''}`}>
+                    <input id="su-fullName" type="text" placeholder="Enter your full name" value={signupForm.fullName} onChange={event => updateSignup('fullName', event.target.value)} />
+                  </div>
+                  {signupErrors.fullName && <p className="signup-error">{signupErrors.fullName}</p>}
+                </div>
+                <div className="signup-field">
+                  <label className="signup-label" htmlFor="su-studentId">Student ID <span>*</span></label>
+                  <div className={`signup-input${signupErrors.studentId ? ' has-error' : ''}`}>
+                    <input id="su-studentId" type="text" placeholder="Enter your student ID" value={signupForm.studentId} onChange={event => updateSignup('studentId', event.target.value)} />
+                  </div>
+                  {signupErrors.studentId && <p className="signup-error">{signupErrors.studentId}</p>}
+                </div>
+                <div className="signup-field">
+                  <label className="signup-label" htmlFor="su-email">University Email <span>*</span></label>
+                  <div className={`signup-input${signupErrors.email ? ' has-error' : ''}`}>
+                    <input id="su-email" type="email" placeholder="Your email @wmsu.edu.ph" value={signupForm.email} onChange={event => updateSignup('email', event.target.value)} />
+                  </div>
+                  {signupErrors.email && <p className="signup-error">{signupErrors.email}</p>}
+                </div>
+                <div className="signup-field">
+                  <label className="signup-label" htmlFor="su-phone">Contact Number <span>*</span></label>
+                  <div className={`signup-input${signupErrors.phone ? ' has-error' : ''}`}>
+                    <input id="su-phone" type="tel" placeholder="Enter your contact number" value={signupForm.phone} onChange={event => updateSignup('phone', event.target.value)} />
+                  </div>
+                  {signupErrors.phone && <p className="signup-error">{signupErrors.phone}</p>}
+                </div>
+            </div>
+            <p className="signup-hint">Use your official university email address to register.</p>
+
+            <h3 className="signup-section"><GraduationCapIcon /> Academic Information</h3>
+            <div className="signup-grid">
+                <div className="signup-field">
+                  <label className="signup-label" htmlFor="su-program">Program <span>*</span></label>
+                  <div className={`signup-input signup-select${signupErrors.program ? ' has-error' : ''}`}>
+                    <select id="su-program" className={signupForm.program ? '' : 'is-placeholder'} value={signupForm.program} onChange={event => updateSignup('program', event.target.value)}>
+                      <option value="" disabled>Select your program</option>
+                      <option value="Associate in Computer Technology">Associate in Computer Technology</option>
+                      <option value="BS Computer Science">BS Computer Science</option>
+                      <option value="BS Information Technology">BS Information Technology</option>
+                      <option value="BS Information Systems">BS Information Systems</option>
+                      <option value="Bachelor of Secondary Education">Bachelor of Secondary Education</option>
+                      <option value="BS Nursing">BS Nursing</option>
+                      <option value="BS Civil Engineering">BS Civil Engineering</option>
+                      <option value="BS Business Administration">BS Business Administration</option>
+                    </select>
+                    <ChevronDownIcon />
+                  </div>
+                  {signupErrors.program && <p className="signup-error">{signupErrors.program}</p>}
+                </div>
+                <div className="signup-field">
+                  <label className="signup-label" htmlFor="su-yearLevel">Year Level <span>*</span></label>
+                  <div className={`signup-input signup-select${signupErrors.yearLevel ? ' has-error' : ''}`}>
+                    <select id="su-yearLevel" className={signupForm.yearLevel ? '' : 'is-placeholder'} value={signupForm.yearLevel} onChange={event => updateSignup('yearLevel', event.target.value)}>
+                      <option value="" disabled>Select your year level</option>
+                      <option value="1st Year">1st Year</option>
+                      <option value="2nd Year">2nd Year</option>
+                      <option value="3rd Year">3rd Year</option>
+                      <option value="4th Year">4th Year</option>
+                      <option value="5th Year">5th Year</option>
+                    </select>
+                    <ChevronDownIcon />
+                  </div>
+                  {signupErrors.yearLevel && <p className="signup-error">{signupErrors.yearLevel}</p>}
+                </div>
+            </div>
+
+            <h3 className="signup-section"><LockIcon /> Account Security</h3>
+            <div className="signup-grid">
+                <div className="signup-field">
+                  <label className="signup-label" htmlFor="su-password">Password <span>*</span></label>
+                  <div className={`signup-input${signupErrors.password ? ' has-error' : ''}`}>
+                    <input id="su-password" type={showSignupPassword ? 'text' : 'password'} placeholder="Create a password" value={signupForm.password} onChange={event => updateSignup('password', event.target.value)} />
+                    <button className="password-toggle" type="button" aria-label={showSignupPassword ? 'Hide password' : 'Show password'} onClick={() => setShowSignupPassword(v => !v)}>
+                      {showSignupPassword ? <EyeIcon /> : <EyeOffIcon />}
+                    </button>
+                  </div>
+                  {signupErrors.password && <p className="signup-error">{signupErrors.password}</p>}
+                </div>
+                <div className="signup-field">
+                  <label className="signup-label" htmlFor="su-confirmPassword">Confirm Password <span>*</span></label>
+                  <div className={`signup-input${signupErrors.confirmPassword ? ' has-error' : ''}`}>
+                    <input id="su-confirmPassword" type={showSignupConfirm ? 'text' : 'password'} placeholder="Re-enter your password" value={signupForm.confirmPassword} onChange={event => updateSignup('confirmPassword', event.target.value)} />
+                    <button className="password-toggle" type="button" aria-label={showSignupConfirm ? 'Hide password' : 'Show password'} onClick={() => setShowSignupConfirm(v => !v)}>
+                      {showSignupConfirm ? <EyeIcon /> : <EyeOffIcon />}
+                    </button>
+                  </div>
+                  {signupErrors.confirmPassword && <p className="signup-error">{signupErrors.confirmPassword}</p>}
+                </div>
+            </div>
+            <p className="signup-hint after-grid">
+              Use at least 8 characters, including uppercase and lowercase letters and a number.
+            </p>
+
+            <div className="signup-terms-wrap">
+              <label className="signup-terms">
+                <input
+                  type="checkbox"
+                  checked={signupForm.agree}
+                  onChange={event => updateSignup('agree', event.target.checked)}
+                />
+                <span>
+                  I agree to the <a className="signup-link" href="#terms" onClick={event => event.preventDefault()}>Terms of Service</a> and <a className="signup-link" href="#privacy" onClick={event => event.preventDefault()}>Privacy Policy</a>.
+                </span>
+              </label>
+              {signupErrors.agree && <p className="signup-error">{signupErrors.agree}</p>}
+            </div>
+
+            <button className="signup-submit" type="submit">Create Account</button>
+
+            <p className="signup-alt">
+              Already have an account? <button type="button" onClick={handleLogin}>Sign In</button>
+            </p>
+          </form>
+        </main>
+
+        <footer className="login-page-footer">
+          <span>ConsultTime · Western Mindanao State University</span>
+          <span>Need help? Contact support</span>
+        </footer>
+      </div>
+    )
   }
 
 
@@ -1986,10 +2349,6 @@ function App() {
 
             <a href="#about">
               About
-            </a>
-
-            <a href="#">
-              Register
             </a>
 
           </div>
