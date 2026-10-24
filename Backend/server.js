@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -9,26 +8,11 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const PORT = 5000;
 const JWT_SECRET = 'faculty-consultation-secret-key-2026'; // change later if you want
-=======
-
-require('dotenv').config();
-
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-
-const app = express();
-const PORT = 5000;
->>>>>>> e8e43613ca780079425c65c97ff9cc44feef705a
 
 app.use(cors());
 app.use(express.json());
 
-<<<<<<< HEAD
 // PostgreSQL connection
-=======
-// PostgreSQL database connection
->>>>>>> e8e43613ca780079425c65c97ff9cc44feef705a
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -37,7 +21,6 @@ const pool = new Pool({
   port: Number(process.env.DB_PORT),
 });
 
-<<<<<<< HEAD
 // Test connection
 pool.query('SELECT NOW()')
   .then(() => console.log('✅ PostgreSQL connected successfully!'))
@@ -272,46 +255,5 @@ app.patch('/api/bookings/:id/status', async (req, res) => {
     console.error(err);
     res.status(500).json({ message: 'Failed to update status' });
   }
-=======
-// Test database connection
-pool.query('SELECT NOW()')
-  .then(() => {
-    console.log('PostgreSQL database connected successfully!');
-  })
-  .catch((error) => {
-    console.error('PostgreSQL connection failed:', error.message);
-  });
-
-// Test API route
-app.get('/api/message', (req, res) => {
-  res.json({
-    message: 'Hello from the backend!'
-  });
-});
-
-// Test database API route
-app.get('/api/db-test', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW() AS current_time');
-
-    res.json({
-      message: 'Database connection successful!',
-      time: result.rows[0].current_time
-    });
-  } catch (error) {
-    console.error('Database query failed:', error.message);
-    res.status(500).json({
-      message: 'Database connection failed.'
-    });
-  }
-});
-
-app.get('/', (req, res) => {
-  res.send('Backend server is running!');
-});
-
-app.listen(PORT, () => {
-  console.log(`Backend server running at http://localhost:${PORT}`);
->>>>>>> e8e43613ca780079425c65c97ff9cc44feef705a
 });
 

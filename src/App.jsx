@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { getFaculty, signup, login, createBooking, getStudentBookings, getAllBookings, updateBookingStatus } from './api'
-import { useState } from 'react'
 import './App.css'
 /*import BackendTest from './BackendTest';*/
 
