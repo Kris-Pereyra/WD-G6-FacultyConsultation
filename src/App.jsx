@@ -581,8 +581,6 @@ async function handleDecline(bookingId) {
     setActiveDashboardPage(page)
   }
 
-
- 
   /*LOGIN PAGE */
 
   if (currentPage === 'login') {
