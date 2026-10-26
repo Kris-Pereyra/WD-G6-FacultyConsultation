@@ -3634,7 +3634,7 @@ section.footer {
   }
 }
 
-/*LOGIN*/
+/*LOGIN PAGE*/
 
 .redesigned-login-page {
   --u0: clamp(
@@ -4019,7 +4019,7 @@ section.footer {
   line-height: calc(var(--u) * 10);
 }
 
-/*SIGN UP*/
+/*SIGN-UP PAGE*/
 
 .signup-page {
   --u0: clamp(
@@ -4316,6 +4316,8 @@ section.footer {
 .signup-alt button:hover {
   text-decoration: underline;
 }
+
+/* ---------- Login: small screens ---------- */
 
 @media (max-width: 900px) {
   .redesigned-login-page {
