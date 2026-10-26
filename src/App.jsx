@@ -2673,6 +2673,18 @@ function App() {
                           <BookIcon />
                           {booking.subject || "Consultation"}
                         </div>
+
+                        {isActive(booking) &&
+                          bookingStart(booking) > Date.now() && (
+                            <button
+                              type="button"
+                              className="bookings-find-button"
+                              onClick={() => handleCancelBooking(booking.id)}
+                            >
+                              Cancel Booking
+                            </button>
+                          )}
+
                         <div className="booking-details-row">
                           <span>
                             <CalendarIcon />
