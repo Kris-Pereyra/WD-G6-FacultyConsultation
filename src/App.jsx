@@ -734,14 +734,33 @@ function App() {
     window.scrollTo(0, 0);
   }
 
-  function openFacultyAvailability(faculty) {
+  async function openFacultyAvailability(faculty) {
     setBookingError("");
     setBookingNotice("");
-    setselectedfacultyForBooking(faculty);
-    const dates = getFacultyDates(faculty);
-    setSelectedBookingDate(dates[0]?.key || "");
-    setSelectedBookingTime("");
-    setBookingSubject("");
+
+    try {
+      const latestFaculty = await getFaculty();
+      setFacultyList(latestFaculty);
+
+      const updatedFaculty = latestFaculty.find(
+        (member) => String(member.id) === String(faculty.id),
+      );
+
+      if (!updatedFaculty) {
+        throw new Error("This faculty member is no longer available.");
+      }
+
+      const dates = getFacultyDates(updatedFaculty);
+
+      setSelectedBookingDate(dates[0]?.key || "");
+      setSelectedBookingTime("");
+      setBookingSubject("");
+      setselectedfacultyForBooking(updatedFaculty);
+    } catch (error) {
+      window.alert(
+        error.message || "Failed to load availability. Please try again.",
+      );
+    }
   }
 
   function closeFacultyAvailability() {
@@ -1541,6 +1560,19 @@ function App() {
           }
           allBookings={allBookings}
           loadAllBookings={loadAllBookings}
+          onAvailabilitySaved={(updatedFaculty) => {
+            setCurrentFaculty((current) =>
+              current ? { ...current, ...updatedFaculty } : current,
+            );
+
+            setFacultyList((current) =>
+              current.map((member) =>
+                String(member.id) === String(updatedFaculty.id)
+                  ? { ...member, ...updatedFaculty }
+                  : member,
+              ),
+            );
+          }}
           handleAccept={handleAccept}
           handleDecline={handleDecline}
           handleLogout={handleLogout}

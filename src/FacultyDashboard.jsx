@@ -75,6 +75,7 @@ export default function FacultyDashboard({
   faculty = null,
   allBookings = [],
   loadAllBookings,
+  onAvailabilitySaved,
   handleAccept,
   handleDecline,
   handleLogout,
@@ -670,6 +671,9 @@ export default function FacultyDashboard({
                                 )
                               : previous.filter((value) => value !== index),
                           );
+                          if (typeof onAvailabilitySaved === "function") {
+                            onAvailabilitySaved(result.faculty);
+                          }
                           setAvailabilityMessage("");
                           setAvailabilityError("");
                         }}
