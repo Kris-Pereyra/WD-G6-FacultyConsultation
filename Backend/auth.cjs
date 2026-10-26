@@ -37,11 +37,9 @@ function registerAuth(app, pool, secret) {
       req.user = user;
       next();
     } catch {
-      return res
-        .status(401)
-        .json({
-          message: "Your session is invalid or expired. Please log in again.",
-        });
+      return res.status(401).json({
+        message: "Your session is invalid or expired. Please log in again.",
+      });
     }
   }
   const requireRole = (role) => (req, res, next) =>
@@ -58,18 +56,14 @@ function registerAuth(app, pool, secret) {
     const email = normalizeEmail(body.email);
     const { fullName, studentId, phone, program, yearLevel, password } = body;
     if (body.role && body.role !== "student")
-      return res
-        .status(403)
-        .json({
-          message: "Faculty accounts must be registered by an administrator.",
-        });
+      return res.status(403).json({
+        message: "Faculty accounts must be registered by an administrator.",
+      });
     if (!STUDENT_EMAIL.test(email))
-      return res
-        .status(400)
-        .json({
-          message:
-            "Student registration requires name@student.edu.ph. Faculty accounts are created by an administrator.",
-        });
+      return res.status(400).json({
+        message:
+          "Student registration requires name@student.edu.ph. Faculty accounts are created by an administrator.",
+      });
     if (
       typeof fullName !== "string" ||
       fullName.trim().length < 2 ||
@@ -77,12 +71,10 @@ function registerAuth(app, pool, secret) {
       !studentId.trim() ||
       !validPassword(password)
     )
-      return res
-        .status(400)
-        .json({
-          message:
-            "Enter your name, student ID, and an 8+ character password with uppercase, lowercase and a number (maximum 72 UTF-8 bytes).",
-        });
+      return res.status(400).json({
+        message:
+          "Enter your name, student ID, and an 8+ character password with uppercase, lowercase and a number (maximum 72 UTF-8 bytes).",
+      });
     try {
       const exists = await pool.query(
         "SELECT id FROM students WHERE LOWER(email) = $1 OR student_id = $2",
@@ -107,18 +99,16 @@ function registerAuth(app, pool, secret) {
         ],
       );
       const student = result.rows[0];
-      res
-        .status(201)
-        .json({
-          message: "Account created successfully!",
+      res.status(201).json({
+        message: "Account created successfully!",
+        role: student.role,
+        token: sign({
+          id: Number(student.id),
+          email: student.email,
           role: student.role,
-          token: sign({
-            id: Number(student.id),
-            email: student.email,
-            role: student.role,
-          }),
-          student,
-        });
+        }),
+        student,
+      });
     } catch (error) {
       if (error.code === "23505")
         return res
@@ -158,10 +148,12 @@ function registerAuth(app, pool, secret) {
               [email],
             )
           : await pool.query(
-              SELECT a.id,a.faculty_id,a.email,a.password_hash,a.role,
-       f.name,f.department,f.room,
-       f.available_days,f.start_minutes,f.end_minutes
-            FROM faculty_accounts a JOIN faculty f ON f.id=a.faculty_id WHERE LOWER(a.email)=$1`,
+              `SELECT a.id,a.faculty_id,a.email,a.password_hash,a.role,
+                      f.name,f.department,f.room,
+                      f.available_days,f.start_minutes,f.end_minutes
+               FROM faculty_accounts a
+               JOIN faculty f ON f.id=a.faculty_id
+               WHERE LOWER(a.email)=$1`,
               [email],
             );
       const account = result.rows[0];
