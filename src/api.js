@@ -73,3 +73,21 @@ export async function getAllBookings() {
   if (!res.ok) throw new Error("Failed to fetch all bookings");
   return res.json();
 }
+
+export async function saveFacultyAvailability(data) {
+  const res = await fetch(`${API_URL}/faculty/availability`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to save availability.");
+  }
+
+  return result;
+}

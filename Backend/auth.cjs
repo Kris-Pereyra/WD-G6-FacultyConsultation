@@ -158,7 +158,9 @@ function registerAuth(app, pool, secret) {
               [email],
             )
           : await pool.query(
-              `SELECT a.id,a.faculty_id,a.email,a.password_hash,a.role,f.name,f.department,f.room
+              SELECT a.id,a.faculty_id,a.email,a.password_hash,a.role,
+       f.name,f.department,f.room,
+       f.available_days,f.start_minutes,f.end_minutes
             FROM faculty_accounts a JOIN faculty f ON f.id=a.faculty_id WHERE LOWER(a.email)=$1`,
               [email],
             );
@@ -176,6 +178,9 @@ function registerAuth(app, pool, secret) {
           email: account.email,
           department: account.department,
           room: account.room,
+          available_days: account.available_days,
+          start_minutes: account.start_minutes,
+          end_minutes: account.end_minutes,
         };
         return res.json({
           message: "Login successful!",

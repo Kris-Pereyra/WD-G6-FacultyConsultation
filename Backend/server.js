@@ -18,6 +18,7 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: Number(process.env.DB_PORT),
+  ssl: { rejectUnauthorized: false },
 });
 
 // Test connection
@@ -40,6 +41,62 @@ app.get("/api/faculty", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch faculty." });
   }
 });
+
+// Save the logged-in faculty member's consultation hours.
+app.put(
+  "/api/faculty/availability",
+  requireAuth,
+  requireRole("faculty"),
+  async (req, res) => {
+    const { available_days, start_minutes, end_minutes } = req.body || {};
+
+    if (
+      !Array.isArray(available_days) ||
+      available_days.length === 0 ||
+      !available_days.every(
+        (day) => Number.isInteger(day) && day >= 0 && day <= 6,
+      ) ||
+      !Number.isInteger(start_minutes) ||
+      !Number.isInteger(end_minutes) ||
+      start_minutes < 0 ||
+      end_minutes > 1440 ||
+      end_minutes - start_minutes < 30
+    ) {
+      return res.status(400).json({
+        message:
+          "Choose consultation days and hours covering at least 30 minutes.",
+      });
+    }
+
+    try {
+      const result = await pool.query(
+        `UPDATE faculty
+         SET available_days = $1, start_minutes = $2, end_minutes = $3
+         WHERE id = $4
+         RETURNING id, name, department, room,
+                   available_days, start_minutes, end_minutes`,
+        [
+          [...new Set(available_days)].sort((a, b) => a - b),
+          start_minutes,
+          end_minutes,
+          req.user.facultyId,
+        ],
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({ message: "Faculty record not found." });
+      }
+
+      res.json({
+        message: "Availability saved successfully.",
+        faculty: result.rows[0],
+      });
+    } catch (error) {
+      console.error("Availability save failed:", error.code || error.message);
+      res.status(500).json({ message: "Failed to save availability." });
+    }
+  },
+);
 
 // ====================== BOOKINGS ======================
 
@@ -123,12 +180,10 @@ app.patch(
         [status, req.params.id, req.user.facultyId, previous],
       );
       if (!result.rows.length)
-        return res
-          .status(404)
-          .json({
-            message:
-              "Booking not found, not assigned to you, or its status has changed.",
-          });
+        return res.status(404).json({
+          message:
+            "Booking not found, not assigned to you, or its status has changed.",
+        });
       res.json({ message: "Status updated!", booking: result.rows[0] });
     } catch (error) {
       console.error(error.code || error.message);
