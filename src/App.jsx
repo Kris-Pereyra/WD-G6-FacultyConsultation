@@ -10,6 +10,7 @@ import {
   getAllBookings,
   updateBookingStatus,
   clearAuthToken,
+  cancelBooking,
 } from "./api";
 import FacultyDashboard from "./FacultyDashboard";
 import "./App.css";
@@ -834,25 +835,32 @@ function App() {
     }
   }
 
-  function handleCancelBooking(id) {
+  async function handleCancelBooking(id) {
     const booking = bookings.find((item) => item.id === id);
-    if (!booking || !isActive(booking) || bookingStart(booking) <= Date.now())
+
+    if (!booking || !isActive(booking) || bookingStart(booking) <= Date.now()) {
       return;
+    }
+
     if (!window.confirm("Cancel this consultation request?")) return;
-    setBookings((current) =>
-      current.map((item) =>
-        item.id === id && isActive(item) && bookingStart(item) > Date.now()
-          ? {
-              ...item,
-              status: "Cancelled",
-              cancelledAt: new Date().toISOString(),
-            }
-          : item,
-      ),
-    );
-    setBookingNotice(
-      "Booking cancelled. You may request another available time.",
-    );
+
+    setBookingNotice("");
+
+    try {
+      const result = await cancelBooking(id);
+
+      setBookings((current) =>
+        current.map((item) =>
+          item.id === id ? { ...item, ...result.booking } : item,
+        ),
+      );
+
+      setBookingNotice(
+        "Booking cancelled. You may request another available time.",
+      );
+    } catch (error) {
+      setBookingNotice(error.message || "Failed to cancel booking.");
+    }
   }
 
   function handleLearnMore() {

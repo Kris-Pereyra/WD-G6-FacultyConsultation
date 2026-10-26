@@ -105,3 +105,18 @@ export async function getFacultyOccupiedSlots(facultyId) {
 
   return result;
 }
+
+export async function cancelBooking(bookingId) {
+  const res = await fetch(`${API_URL}/bookings/${bookingId}/cancel`, {
+    method: "PATCH",
+    headers: authHeaders(),
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to cancel booking.");
+  }
+
+  return result;
+}

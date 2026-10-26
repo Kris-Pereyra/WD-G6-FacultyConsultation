@@ -209,6 +209,56 @@ app.get(
   },
 );
 
+// Students can cancel their own upcoming active bookings.
+app.patch(
+  "/api/bookings/:id/cancel",
+  requireAuth,
+  requireRole("student"),
+  async (req, res) => {
+    const bookingId = Number(req.params.id);
+
+    if (!Number.isSafeInteger(bookingId) || bookingId < 1) {
+      return res.status(400).json({ message: "Invalid booking ID." });
+    }
+
+    try {
+      const result = await pool.query(
+        `UPDATE bookings
+         SET status = 'Cancelled'
+         WHERE id = $1
+           AND student_id = $2
+           AND status IN ('Pending', 'Confirmed')
+           AND (
+             (
+               date_key::date +
+               to_timestamp(
+                 split_part(time_slot, ' - ', 1),
+                 'HH12:MI AM'
+               )::time
+             ) AT TIME ZONE 'Asia/Manila'
+           ) > CURRENT_TIMESTAMP
+         RETURNING *`,
+        [bookingId, req.user.id],
+      );
+
+      if (!result.rows.length) {
+        return res.status(409).json({
+          message:
+            "This booking cannot be cancelled. It may have started, changed status, or belong to another account.",
+        });
+      }
+
+      res.json({
+        message: "Booking cancelled successfully.",
+        booking: result.rows[0],
+      });
+    } catch (error) {
+      console.error("Cancellation failed:", error.code || error.message);
+      res.status(500).json({ message: "Failed to cancel booking." });
+    }
+  },
+);
+
 // Faculty decisions are scoped to the authenticated faculty record.
 app.patch(
   "/api/bookings/:id/status",
