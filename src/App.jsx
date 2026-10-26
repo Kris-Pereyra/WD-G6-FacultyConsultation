@@ -425,7 +425,10 @@ function App() {
   const [loginError, setLoginError] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const emptySignup = {
-    fullName: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    suffix: "",
     studentId: "",
     email: "",
     phone: "",
@@ -439,6 +442,20 @@ function App() {
   const [signupErrors, setSignupErrors] = useState({});
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showSignupConfirm, setShowSignupConfirm] = useState(false);
+  const [legalDoc, setLegalDoc] = useState(null); // "terms" | "privacy" | null
+  useEffect(() => {
+    if (!legalDoc) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setLegalDoc(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [legalDoc]);
   const [profileData, setProfileData] = useState({
     fullName: "",
     studentId: "Student ID not set",
@@ -557,7 +574,22 @@ function App() {
     const email = f.email.trim().toLowerCase();
     const errors = {};
 
-    if (f.fullName.trim().length < 2) errors.fullName = "Enter your full name.";
+    const namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ .'-]*$/;
+    const firstName = f.firstName.trim();
+    const middleName = f.middleName.trim();
+    const lastName = f.lastName.trim();
+    const suffix = f.suffix.trim();
+
+    if (!firstName) errors.firstName = "Enter your first name.";
+    else if (!namePattern.test(firstName))
+      errors.firstName = "Use letters only for your first name.";
+    if (middleName && !namePattern.test(middleName))
+      errors.middleName = "Use letters only for your middle name.";
+    if (!lastName) errors.lastName = "Enter your last name.";
+    else if (!namePattern.test(lastName))
+      errors.lastName = "Use letters only for your last name.";
+    if (suffix && !/^[A-Za-z.]{1,6}$/.test(suffix))
+      errors.suffix = "Use a short suffix such as Jr., Sr. or III.";
     if (!f.studentId.trim()) errors.studentId = "Enter your student ID.";
     if (!/^[a-z0-9._%+-]+@student\.edu\.ph$/i.test(email)) {
       errors.email = "Use your student email, such as name@student.edu.ph.";
@@ -582,7 +614,14 @@ function App() {
 
     try {
       const result = await signup({
-        fullName: f.fullName.trim(),
+        // The backend still receives one fullName, built from the separate fields.
+        fullName: [firstName, middleName, lastName, suffix]
+          .filter(Boolean)
+          .join(" "),
+        firstName,
+        middleName,
+        lastName,
+        suffix,
         studentId: f.studentId.trim(),
         email,
         phone: f.phone.trim(),
@@ -935,14 +974,6 @@ function App() {
                 Log in to manage your consultations and connect with your
                 faculty.
               </p>
-              <button
-                onClick={() => {
-                  setIsFacultyView(true);
-                  loadAllBookings();
-                }}
-              >
-                Faculty Dashboard
-              </button>
             </div>
 
             <label className="login-form-label" htmlFor="login-email">
@@ -1152,7 +1183,9 @@ function App() {
           >
             <div className="signup-card-header">
               <h2>Create your student account</h2>
-              <p>Enter your details to get started. All fields are required.</p>
+              <p>
+                Enter your details to get started. Fields marked * are required.
+              </p>
             </div>
 
             <h3 className="signup-section">
@@ -1160,24 +1193,91 @@ function App() {
             </h3>
             <div className="signup-grid">
               <div className="signup-field">
-                <label className="signup-label" htmlFor="su-fullName">
-                  Full Name <span>*</span>
+                <label className="signup-label" htmlFor="su-firstName">
+                  First Name <span>*</span>
                 </label>
                 <div
-                  className={`signup-input${signupErrors.fullName ? " has-error" : ""}`}
+                  className={`signup-input${signupErrors.firstName ? " has-error" : ""}`}
                 >
                   <input
-                    id="su-fullName"
+                    id="su-firstName"
                     type="text"
-                    placeholder="Enter your full name"
-                    value={signupForm.fullName}
+                    autoComplete="given-name"
+                    placeholder="Enter your first name"
+                    value={signupForm.firstName}
                     onChange={(event) =>
-                      updateSignup("fullName", event.target.value)
+                      updateSignup("firstName", event.target.value)
                     }
                   />
                 </div>
-                {signupErrors.fullName && (
-                  <p className="signup-error">{signupErrors.fullName}</p>
+                {signupErrors.firstName && (
+                  <p className="signup-error">{signupErrors.firstName}</p>
+                )}
+              </div>
+              <div className="signup-field">
+                <label className="signup-label" htmlFor="su-middleName">
+                  Middle Name <em className="signup-optional">(optional)</em>
+                </label>
+                <div
+                  className={`signup-input${signupErrors.middleName ? " has-error" : ""}`}
+                >
+                  <input
+                    id="su-middleName"
+                    type="text"
+                    autoComplete="additional-name"
+                    placeholder="Enter your middle name"
+                    value={signupForm.middleName}
+                    onChange={(event) =>
+                      updateSignup("middleName", event.target.value)
+                    }
+                  />
+                </div>
+                {signupErrors.middleName && (
+                  <p className="signup-error">{signupErrors.middleName}</p>
+                )}
+              </div>
+              <div className="signup-field">
+                <label className="signup-label" htmlFor="su-lastName">
+                  Last Name <span>*</span>
+                </label>
+                <div
+                  className={`signup-input${signupErrors.lastName ? " has-error" : ""}`}
+                >
+                  <input
+                    id="su-lastName"
+                    type="text"
+                    autoComplete="family-name"
+                    placeholder="Enter your last name"
+                    value={signupForm.lastName}
+                    onChange={(event) =>
+                      updateSignup("lastName", event.target.value)
+                    }
+                  />
+                </div>
+                {signupErrors.lastName && (
+                  <p className="signup-error">{signupErrors.lastName}</p>
+                )}
+              </div>
+              <div className="signup-field">
+                <label className="signup-label" htmlFor="su-suffix">
+                  Suffix <em className="signup-optional">(optional)</em>
+                </label>
+                <div
+                  className={`signup-input${signupErrors.suffix ? " has-error" : ""}`}
+                >
+                  <input
+                    id="su-suffix"
+                    type="text"
+                    autoComplete="honorific-suffix"
+                    placeholder="e.g., Jr., Sr., III"
+                    value={signupForm.suffix}
+                    onChange={(event) =>
+                      updateSignup("suffix", event.target.value)
+                    }
+                  />
+                </div>
+                {signupErrors.suffix && (
+                  <p className="signup-error">{signupErrors.suffix}</p>
                 )}
               </div>
               <div className="signup-field">
@@ -1202,27 +1302,6 @@ function App() {
                 )}
               </div>
               <div className="signup-field">
-                <label className="signup-label" htmlFor="su-email">
-                  University Email <span>*</span>
-                </label>
-                <div
-                  className={`signup-input${signupErrors.email ? " has-error" : ""}`}
-                >
-                  <input
-                    id="su-email"
-                    type="email"
-                    placeholder="name@student.edu.ph"
-                    value={signupForm.email}
-                    onChange={(event) =>
-                      updateSignup("email", event.target.value)
-                    }
-                  />
-                </div>
-                {signupErrors.email && (
-                  <p className="signup-error">{signupErrors.email}</p>
-                )}
-              </div>
-              <div className="signup-field">
                 <label className="signup-label" htmlFor="su-phone">
                   Contact Number <span>*</span>
                 </label>
@@ -1241,6 +1320,27 @@ function App() {
                 </div>
                 {signupErrors.phone && (
                   <p className="signup-error">{signupErrors.phone}</p>
+                )}
+              </div>
+              <div className="signup-field wide">
+                <label className="signup-label" htmlFor="su-email">
+                  University Email <span>*</span>
+                </label>
+                <div
+                  className={`signup-input${signupErrors.email ? " has-error" : ""}`}
+                >
+                  <input
+                    id="su-email"
+                    type="email"
+                    placeholder="name@student.edu.ph"
+                    value={signupForm.email}
+                    onChange={(event) =>
+                      updateSignup("email", event.target.value)
+                    }
+                  />
+                </div>
+                {signupErrors.email && (
+                  <p className="signup-error">{signupErrors.email}</p>
                 )}
               </div>
             </div>
@@ -1415,21 +1515,21 @@ function App() {
                 />
                 <span>
                   I agree to the{" "}
-                  <a
+                  <button
                     className="signup-link"
-                    href="#terms"
-                    onClick={(event) => event.preventDefault()}
+                    type="button"
+                    onClick={() => setLegalDoc("terms")}
                   >
                     Terms of Service
-                  </a>{" "}
+                  </button>{" "}
                   and{" "}
-                  <a
+                  <button
                     className="signup-link"
-                    href="#privacy"
-                    onClick={(event) => event.preventDefault()}
+                    type="button"
+                    onClick={() => setLegalDoc("privacy")}
                   >
                     Privacy Policy
-                  </a>
+                  </button>
                   .
                 </span>
               </label>
@@ -1450,6 +1550,128 @@ function App() {
             </p>
           </form>
         </main>
+
+        {legalDoc &&
+          createPortal(
+            <div
+              className="legal-modal-backdrop"
+              role="presentation"
+              onClick={() => setLegalDoc(null)}
+            >
+              <div
+                className="legal-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="legal-modal-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <button
+                  className="legal-modal-close"
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => setLegalDoc(null)}
+                >
+                  ×
+                </button>
+                <h2 id="legal-modal-title">
+                  {legalDoc === "terms" ? "Terms of Service" : "Privacy Policy"}
+                </h2>
+                <p className="legal-modal-updated">
+                  Temporary text · Last updated: to be announced
+                </p>
+                <div className="legal-modal-body">
+                  {legalDoc === "terms" ? (
+                    <>
+                      <h3>1. Acceptance of Terms</h3>
+                      <p>
+                        By creating a
+                        ConsultTime account you agree to use the system only
+                        for scheduling and managing academic consultations with
+                        WMSU faculty.
+                      </p>
+                      <h3>2. Your Account</h3>
+                      <p>
+                        You are responsible
+                        for keeping your password secure and for the accuracy of
+                        the information you provide.
+                      </p>
+                      <h3>3. Booking Consultations</h3>
+                      <p>
+                        Booking requests are
+                        subject to faculty approval, and students are expected
+                        to cancel in advance if they can no longer attend.
+                      </p>
+                      <h3>4. Acceptable Use</h3>
+                      <p>
+                        Do not misuse the
+                        system, impersonate others, or attempt to access
+                        accounts that are not yours.
+                      </p>
+                      <h3>5. Changes</h3>
+                      <p>
+                        These terms may be
+                        updated, and the final version will replace this
+                        content.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h3>1. Information We Collect</h3>
+                      <p>
+                        ConsultTime collects
+                        your name, student ID, university email, contact number,
+                        program and year level to create your account.
+                      </p>
+                      <h3>2. How We Use Your Information</h3>
+                      <p>
+                        Your information is
+                        used to schedule consultations, notify you about booking
+                        updates and help faculty identify who they are meeting.
+                      </p>
+                      <h3>3. Sharing of Information</h3>
+                      <p>
+                        Your details are
+                        shared only with the faculty member you book and
+                        authorized university personnel.
+                      </p>
+                      <h3>4. Data Protection</h3>
+                      <p>
+                        Reasonable measures
+                        are taken to protect your data, and passwords are never
+                        stored in plain text.
+                      </p>
+                      <h3>5. Your Rights</h3>
+                      <p>
+                        You may request to
+                        view, correct or delete your information. The final
+                        policy will replace this content.
+                      </p>
+                    </>
+                  )}
+                </div>
+                <div className="legal-modal-actions">
+                  <button
+                    className="legal-modal-secondary"
+                    type="button"
+                    onClick={() => setLegalDoc(null)}
+                  >
+                    Close
+                  </button>
+                  <button
+                    className="legal-modal-primary"
+                    type="button"
+                    onClick={() => {
+                      updateSignup("agree", true);
+                      setLegalDoc(null);
+                    }}
+                  >
+                    I Agree
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )}
 
         <footer className="login-page-footer">
           <span>ConsultTime · Western Mindanao State University</span>
