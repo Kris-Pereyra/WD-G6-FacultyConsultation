@@ -179,15 +179,6 @@ function EyeOffIcon() {
   )
 }
 
-// Demo schedules only. Replace with facultyList-published availability from Express.
-/*const facultyList = [
-  { id: 'novie', name: 'Prof. Novie Jozane', department: 'Computer Science', subject: 'Programming and software development', room: 'facultyList Room 204', initials: 'NJ', style: 'avatar-one', days: [1,3], start: 14*60, end: 16*60 },
-  { id: 'kris', name: 'Prof. Kris', department: 'Information Technology', subject: 'Networking and information systems', room: 'facultyList Room 101', initials: 'KR', style: 'avatar-two', days: [2,4], start: 9*60, end: 11*60 },
-  { id: 'ian', name: 'Prof. Ian Lim', department: 'Mathematics', subject: 'Mathematics and statistics', room: 'facultyList Room 305', initials: 'IL', style: 'avatar-three', days: [1,5], start: 13*60, end: 15*60 },
-  { id: 'ellice', name: 'Prof. Ellice Vicente', department: 'Engineering', subject: 'Engineering fundamentals', room: 'Engineering Building 2B', initials: 'EV', style: 'avatar-four', days: [3,5], start: 10*60, end: 12*60 }
-]*/
-
-
 const BOOKING_STATUSES = ['Pending', 'Confirmed', 'Declined', 'Cancelled', 'Completed']
 const isActive = booking => ['Pending', 'Confirmed'].includes(booking.status)
 const formatMinutes = minutes => {
@@ -530,7 +521,7 @@ async function handleDecline(bookingId) {
     event.preventDefault()
     const subject = bookingSubject.trim()
     if (!selectedfacultyForBooking || !selectedBookingDate || !selectedBookingTime) {
-      setBookingError('Choose a facultyList member, date, and time.'); return
+      setBookingError('Choose a faculty member, date, and time.'); return
     }
     if (subject.length < 5 || subject.length > 300) {
       setBookingError('Enter a consultation topic between 5 and 300 characters.'); return
@@ -1048,7 +1039,7 @@ async function handleDecline(bookingId) {
                 handleDashboardNavigation('facultyList')
               }
             >
-              Find facultyList
+              Find Faculty
             </button>
 
 
@@ -1185,7 +1176,7 @@ async function handleDecline(bookingId) {
               <SearchIcon />
 
               <span>
-                Find facultyList
+                Find Faculty
               </span>
 
             </button>
@@ -1259,7 +1250,7 @@ async function handleDecline(bookingId) {
                     </h1>
 
                     <p className="welcome-description">
-                      Book a consultation with your facultyList members
+                      Book a consultation with your Faculty Members
                       <br />
                       and get the academic support you need.
                     </p>
@@ -1429,7 +1420,7 @@ async function handleDecline(bookingId) {
                 <div className="dashboard-lower">
 
 
-                  {/* FIND facultyList */}
+                  {/* Find Faculty */}
 
                   <div className="facultyList-section">
 
@@ -1726,7 +1717,7 @@ async function handleDecline(bookingId) {
                           <div>
 
                             <strong>
-                              Find facultyList
+                              Find Faculty
                             </strong>
 
                             <span>
@@ -1844,7 +1835,7 @@ async function handleDecline(bookingId) {
             )}
 
 
-            {/*FIND facultyList PAGE*/}
+            {/*Find Faculty PAGE*/}
 
             {activeDashboardPage === 'facultyList' && (
 
@@ -1853,9 +1844,9 @@ async function handleDecline(bookingId) {
                 <div className="facultyList-page-heading">
                   <div>
                     <p className="facultyList-eyebrow">CONSULTATION DIRECTORY</p>
-                    <h1>Find facultyList</h1>
+                    <h1>Find Faculty</h1>
                     <p className="facultyList-page-description">
-                      Browse facultyList members and find the right person to help with your academic concerns.
+                      Browse Faculty Members and find the right person to help with your academic concerns.
                     </p>
                   </div>
 
@@ -1870,18 +1861,16 @@ async function handleDecline(bookingId) {
                     <input
                       type="text"
                       value={facultySearch}
-                      onChange={(event) => setfacultySearch(event.target.value)}
-                      placeholder="Search by facultyList name, subject, or department..."
-                      aria-label="Search facultyList"
+                      onChange={(e) => setfacultySearch(e.target.value)}
+                      placeholder="Search by faculty name, subject, or department..."
                     />
                   </div>
 
                   <div className="facultyList-filter-field">
-                    <label htmlFor="facultyList-department">Department</label>
+                    <label>Department</label>
                     <select
-                      id="facultyList-department"
                       value={selectedDepartment}
-                      onChange={(event) => setSelectedDepartment(event.target.value)}
+                      onChange={(e) => setSelectedDepartment(e.target.value)}
                     >
                       <option>All Departments</option>
                       <option>Computer Science</option>
@@ -1891,13 +1880,7 @@ async function handleDecline(bookingId) {
                     </select>
                   </div>
 
-                  <button
-                    className="facultyList-search-submit"
-                    onClick={() => {
-                      const facultyList = document.getElementById('facultyList-results')
-                      if (facultyList) facultyList.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                    }}
-                  >
+                  <button className="facultyList-search-submit">
                     <SearchIcon />
                     Search
                   </button>
@@ -1905,8 +1888,8 @@ async function handleDecline(bookingId) {
 
                 <div className="facultyList-results-heading" id="facultyList-results">
                   <div>
-                    <h2>facultyList Members</h2>
-                    <p>Choose a facultyList member to view their consultation availability.</p>
+                    <h2>Faculty Members</h2>
+                    <p>Choose a faculty member to view their consultation availability.</p>
                   </div>
                   <span className="facultyList-result-count">
                     {facultyList.filter((facultyList) => {
@@ -1967,7 +1950,7 @@ async function handleDecline(bookingId) {
                 }).length === 0 && (
                   <div className="facultyList-empty-state">
                     <SearchIcon />
-                    <h3>No facultyList members found</h3>
+                    <h3>No Faculty Members found</h3>
                     <p>Try another name or choose a different department.</p>
                     <button onClick={() => { setfacultySearch(''); setSelectedDepartment('All Departments') }}>
                       Clear filters
@@ -2491,7 +2474,7 @@ async function handleDecline(bookingId) {
             ConsultTime provides a convenient way for students and facultyList
             to handle academic consultations in one place. Students can
             check facultyList schedules, select a suitable consultation time,
-            and book appointments, while facultyList members can organize their
+            and book appointments, while Faculty Members can organize their
             availability and keep track of upcoming consultations.
             By keeping schedules and bookings organized, the platform
             makes communication and appointment management smoother and
@@ -2561,7 +2544,7 @@ async function handleDecline(bookingId) {
             </h2>
 
             <p>
-              Browse available facultyList members
+              Browse available Faculty Members
               and their consultation schedules.
             </p>
 
@@ -2607,7 +2590,7 @@ async function handleDecline(bookingId) {
           <p>
             ConsultTime is a platform designed to streamline
             the process of scheduling academic consultations
-            between students and facultyList members.
+            between students and Faculty Members.
           </p>
 
         </div>
@@ -2646,7 +2629,7 @@ async function handleDecline(bookingId) {
           <div className="about-def">
             <p>
               Shows the available dates and times when
-              facultyList members can accommodate consultations.
+              Faculty Members can accommodate consultations.
             </p>
           </div>
 
