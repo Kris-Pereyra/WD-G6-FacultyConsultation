@@ -489,6 +489,54 @@ function App() {
   const [currentStudent, setCurrentStudent] = useState(null);
   const [token, setToken] = useState(null);
   useEffect(() => {
+    if (!token || currentPage !== "dashboard") return;
+    if (currentRole !== "student" && currentRole !== "faculty") return;
+    if (currentRole === "student" && !currentStudent?.id) return;
+
+    let stopped = false;
+    let loading = false;
+
+    async function refreshBookings() {
+      if (stopped || loading || document.hidden) return;
+
+      loading = true;
+
+      try {
+        const data =
+          currentRole === "faculty"
+            ? await getAllBookings()
+            : await getStudentBookings(currentStudent.id);
+
+        if (stopped) return;
+
+        if (currentRole === "faculty") {
+          setAllBookings(data);
+        } else {
+          setBookings(data);
+        }
+      } catch (error) {
+        if (!stopped) {
+          console.error("Booking refresh failed:", error.message);
+        }
+      } finally {
+        loading = false;
+      }
+    }
+
+    refreshBookings();
+
+    const timer = window.setInterval(refreshBookings, 10000);
+    window.addEventListener("focus", refreshBookings);
+    document.addEventListener("visibilitychange", refreshBookings);
+
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshBookings);
+      document.removeEventListener("visibilitychange", refreshBookings);
+    };
+  }, [token, currentPage, currentRole, currentStudent?.id]);
+  useEffect(() => {
     getFaculty()
       .then((data) => setFacultyList(data))
       .catch((err) => console.error("Failed to load faculty:", err));

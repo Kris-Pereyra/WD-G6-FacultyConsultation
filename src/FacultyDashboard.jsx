@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import weblogo from "./assets/weblogo.jpg";
 import wmsuLogo from "./assets/wmsuLogo.png";
 import facultyBanner from "./assets/faculty-banner.jpg";
@@ -90,6 +90,17 @@ export default function FacultyDashboard({
   const [notice, setNotice] = useState("");
   const [notifications, setNotifications] = useState(false);
   const [details, setDetails] = useState(null);
+  useEffect(() => {
+    setDetails((current) => {
+      if (!current) return current;
+
+      const updated = allBookings.find(
+        (booking) => String(booking.id) === String(current.id),
+      );
+
+      return updated ? { ...current, ...updated } : null;
+    });
+  }, [allBookings]);
   const toTimeInput = (minutes) =>
     Number.isInteger(minutes)
       ? `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(
