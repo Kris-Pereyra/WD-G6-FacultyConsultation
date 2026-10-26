@@ -3,7 +3,7 @@ import weblogo from "./assets/weblogo.jpg";
 import wmsuLogo from "./assets/wmsuLogo.png";
 import facultyBanner from "./assets/faculty-banner.jpg";
 import "./FacultyDashboard.css";
-import { saveFacultyAvailability } from "./api";
+import { saveFacultyAvailability, updateBookingStatus } from "./api";
 
 const NAV = [
   ["dashboard", "home", "Dashboard"],
@@ -183,6 +183,21 @@ export default function FacultyDashboard({
     setQuery("");
     setDetails(null);
   };
+
+  async function completeConsultation(id) {
+    const result = await updateBookingStatus(id, "Completed");
+
+    setDetails((current) =>
+      current && current.id === id
+        ? { ...current, ...result.booking }
+        : current,
+    );
+
+    if (typeof loadAllBookings === "function") {
+      await loadAllBookings();
+    }
+  }
+
   async function run(action, id) {
     if (busy || typeof action !== "function") return;
     setBusy(true);
@@ -498,7 +513,10 @@ export default function FacultyDashboard({
                           <small>{b.student_name || "Student"}</small>
                         </span>
                         <span className="fd-location">
-                          {b.location || "Location not set"}
+                          {b.location ||
+                            b.room ||
+                            faculty?.room ||
+                            "Location not set"}
                         </span>
                       </button>
                     ))}
@@ -762,7 +780,10 @@ export default function FacultyDashboard({
                   ["Subject", details.subject],
                   ["Date", formatDate(dateKey(details))],
                   ["Time", timeLabel(details)],
-                  ["Location", details.location],
+                  [
+                    "Location",
+                    details.location || details.room || faculty?.room,
+                  ],
                   ["Status", statusOf(details)],
                 ].map(([label, value]) => (
                   <div key={label}>
@@ -771,6 +792,17 @@ export default function FacultyDashboard({
                   </div>
                 ))}
               </dl>
+
+              {isStatus(details, "Confirmed") && (
+                <button
+                  type="button"
+                  className="fd-outline"
+                  disabled={busy}
+                  onClick={() => run(completeConsultation, details.id)}
+                >
+                  {busy ? "Saving..." : "Mark as Completed"}
+                </button>
+              )}
             </div>
           )}
           <p className="fd-footer">
