@@ -98,6 +98,43 @@ app.put(
   },
 );
 
+// Show occupied slots without exposing student details.
+app.get(
+  "/api/faculty/:facultyId/occupied-slots",
+  requireAuth,
+  requireRole("student"),
+  async (req, res) => {
+    const facultyId = Number(req.params.facultyId);
+
+    if (!Number.isSafeInteger(facultyId) || facultyId < 1) {
+      return res.status(400).json({ message: "Invalid faculty ID." });
+    }
+
+    try {
+      const result = await pool.query(
+        `SELECT
+           to_char(date_key::date, 'YYYY-MM-DD') AS date_key,
+           time_slot
+         FROM bookings
+         WHERE faculty_id = $1
+           AND status IN ('Pending', 'Confirmed')
+           AND date_key::date >=
+               (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Manila')::date
+         ORDER BY date_key, time_slot`,
+        [facultyId],
+      );
+
+      res.json(result.rows);
+    } catch (error) {
+      console.error(
+        "Occupied slots lookup failed:",
+        error.code || error.message,
+      );
+      res.status(500).json({ message: "Failed to load occupied slots." });
+    }
+  },
+);
+
 // ====================== BOOKINGS ======================
 
 // Create a booking
@@ -126,6 +163,16 @@ app.post(
         booking: result.rows[0],
       });
     } catch (error) {
+      if (
+        error.code === "23505" &&
+        error.constraint === "bookings_active_faculty_slot_unique"
+      ) {
+        return res.status(409).json({
+          message:
+            "This consultation slot is already reserved. Please choose another time.",
+        });
+      }
+
       console.error(error);
       res.status(500).json({ message: "Failed to create booking." });
     }

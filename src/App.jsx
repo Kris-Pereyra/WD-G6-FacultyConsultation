@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   getFaculty,
+  getFacultyOccupiedSlots,
   signup,
   login,
   createBooking,
@@ -260,10 +261,9 @@ function slotStart(dateKey, time) {
 }
 
 function bookingStart(booking) {
-  return slotStart(
-    booking.date_key || booking.dateKey,
-    booking.time_slot || booking.time,
-  );
+  const date = String(booking.date_key || booking.dateKey || "").slice(0, 10);
+
+  return slotStart(date, booking.time_slot || booking.time || "");
 }
 
 function getTimeSlots(facultyList, dateKey) {
@@ -381,6 +381,37 @@ function App() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [selectedfacultyForBooking, setselectedfacultyForBooking] =
     useState(null);
+  const [occupiedSlots, setOccupiedSlots] = useState([]);
+  const [occupiedSlotsLoading, setOccupiedSlotsLoading] = useState(true);
+  const [occupiedSlotsError, setOccupiedSlotsError] = useState("");
+
+  useEffect(() => {
+    if (!selectedfacultyForBooking) return;
+
+    let cancelled = false;
+    setOccupiedSlots([]);
+    setOccupiedSlotsLoading(true);
+    setOccupiedSlotsError("");
+
+    getFacultyOccupiedSlots(selectedfacultyForBooking.id)
+      .then((slots) => {
+        if (!cancelled) setOccupiedSlots(slots);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setOccupiedSlotsError(
+            error.message || "Failed to load occupied slots.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setOccupiedSlotsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedfacultyForBooking]);
   const availabilityRef = useRef(null);
   useEffect(() => {
     if (!selectedfacultyForBooking) return;
@@ -722,6 +753,32 @@ function App() {
   async function handleCreateBooking(event) {
     event.preventDefault();
     const subject = bookingSubject.trim();
+
+    if (occupiedSlotsLoading || occupiedSlotsError) {
+      setBookingError(
+        occupiedSlotsLoading
+          ? "Please wait while availability is checked."
+          : "Availability could not be checked. Close this window and try again.",
+      );
+      return;
+    }
+
+    const slotReserved = occupiedSlots.some(
+      (slot) =>
+        Math.abs(
+          slotStart(String(slot.date_key).slice(0, 10), slot.time_slot) -
+            slotStart(selectedBookingDate, selectedBookingTime),
+        ) <
+        30 * 60 * 1000,
+    );
+
+    if (slotReserved) {
+      setBookingError(
+        "This consultation slot is already reserved. Please choose another time.",
+      );
+      setSelectedBookingTime("");
+      return;
+    }
     if (
       !selectedfacultyForBooking ||
       !selectedBookingDate ||
@@ -2332,11 +2389,28 @@ function App() {
                                   selectedfacultyForBooking,
                                   selectedBookingDate,
                                 ).map((time) => {
-                                  const conflict = hasConflict(
-                                    bookings,
-                                    selectedBookingDate,
-                                    time,
-                                  );
+                                  const conflict =
+                                    occupiedSlotsLoading ||
+                                    Boolean(occupiedSlotsError) ||
+                                    hasConflict(
+                                      bookings,
+                                      selectedBookingDate,
+                                      time,
+                                    ) ||
+                                    occupiedSlots.some(
+                                      (slot) =>
+                                        Math.abs(
+                                          slotStart(
+                                            String(slot.date_key).slice(0, 10),
+                                            slot.time_slot,
+                                          ) -
+                                            slotStart(
+                                              selectedBookingDate,
+                                              time,
+                                            ),
+                                        ) <
+                                        30 * 60 * 1000,
+                                    );
                                   return (
                                     <button
                                       className={
@@ -2358,9 +2432,13 @@ function App() {
                                     >
                                       <strong>{time}</strong>
                                       <span>
-                                        {conflict
-                                          ? "Conflicts with your booking"
-                                          : "30 minutes"}
+                                        {occupiedSlotsLoading
+                                          ? "Checking availability..."
+                                          : occupiedSlotsError
+                                            ? "Availability check failed"
+                                            : conflict
+                                              ? "Unavailable"
+                                              : "30 minutes"}
                                       </span>
                                     </button>
                                   );

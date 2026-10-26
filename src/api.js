@@ -91,3 +91,17 @@ export async function saveFacultyAvailability(data) {
 
   return result;
 }
+
+export async function getFacultyOccupiedSlots(facultyId) {
+  const res = await fetch(`${API_URL}/faculty/${facultyId}/occupied-slots`, {
+    headers: authHeaders(),
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Failed to load occupied slots.");
+  }
+
+  return result;
+}
