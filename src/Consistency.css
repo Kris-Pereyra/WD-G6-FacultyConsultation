@@ -48,7 +48,7 @@ body:has(.consult-app) {
   font-family: inherit;
   letter-spacing: normal;
 }
-.consult-app .icon {
+.consult-app:not(.ct-home) .icon {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
@@ -91,14 +91,9 @@ body:has(.consult-app) {
 }
 /* Identical header footprint and three-column alignment on all pages. */
 .consult-app.ct-home {
-  max-width: none;
+  max-width: 1648px;
+  margin: 0 auto;
   padding: 16px 24px 0;
-}
-.consult-app.ct-home > main,
-.consult-app.ct-home > .ct-home-footer {
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
 }
 .consult-app.ct-home .ct-home-nav,
 .consult-app.redesigned-login-page > nav,
@@ -253,8 +248,7 @@ body:has(.consult-app) {
 }
 .consult-app .faculty-eyebrow,
 .consult-app .bookings-eyebrow,
-.consult-app .profile-eyebrow,
-.consult-app .ct-home-eyebrow {
+.consult-app .profile-eyebrow {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -266,8 +260,7 @@ body:has(.consult-app) {
 .consult-app .directory-faculty-card,
 .consult-app .booking-card,
 .consult-app .profile-overview-card,
-.consult-app .profile-details-card,
-.consult-app .ct-home-step {
+.consult-app .profile-details-card {
   padding: 24px;
   border: 1px solid var(--consult-border);
   border-radius: 16px;
@@ -276,8 +269,7 @@ body:has(.consult-app) {
 }
 .consult-app .faculty-grid,
 .consult-app .faculty-directory-grid,
-.consult-app .dashboard-lower,
-.consult-app .ct-home-step-grid {
+.consult-app .dashboard-lower {
   gap: 20px;
 }
 .consult-app .faculty-card {
@@ -299,9 +291,7 @@ body:has(.consult-app) {
 .consult-app .booking-summary-icon,
 .consult-app .profile-heading-icon,
 .consult-app .bookings-heading-icon,
-.consult-app .faculty-heading-icon,
-.consult-app .ct-home-tile-icon,
-.consult-app .ct-home-note-icon {
+.consult-app .faculty-heading-icon {
   background: var(--consult-soft);
   color: #8d171d;
   border-color: rgba(141, 23, 29, 0.1);
@@ -313,7 +303,6 @@ body:has(.consult-app) {
 .consult-app .profile-save-button,
 .consult-app .main-login-btn,
 .consult-app .signup-submit,
-.consult-app .ct-home-primary,
 .consult-app .faculty-workspace-accept {
   min-height: 44px;
   padding: 11px 20px;
@@ -331,7 +320,6 @@ body:has(.consult-app) {
 .consult-app .profile-discard-button,
 .consult-app .profile-back-button,
 .consult-app .profile-logout-button,
-.consult-app .ct-home-secondary,
 .consult-app .faculty-workspace-logout,
 .consult-app .faculty-workspace-decline {
   min-height: 44px;
@@ -345,8 +333,7 @@ body:has(.consult-app) {
   font-weight: 600;
   box-shadow: none;
 }
-.consult-app .availability-btn:hover,
-.consult-app .ct-home-secondary:hover {
+.consult-app .availability-btn:hover {
   background: #f4e8dd;
   color: #8d171d;
   transform: none;
@@ -407,192 +394,7 @@ body:has(.consult-app) {
   padding: 6px 10px;
   border-radius: 20px;
 }
-/* Landing sections use the dashboard's type, controls, card spacing and gradients. */
-.consult-app.ct-home .ct-home-hero {
-  padding: 56px 24px;
-  gap: 56px;
-}
-.consult-app .ct-home-hero-copy h1 {
-  font-size: 40px;
-  line-height: 1.15;
-  letter-spacing: -1px;
-  color: #651b1e;
-  margin-top: 20px;
-}
-.consult-app .ct-home-hero-copy h1 em {
-  color: #8d171d;
-}
-.consult-app .ct-home-hero-copy > p {
-  font-size: 14px;
-  line-height: 1.7;
-  color: #817173;
-  margin-top: 20px;
-  max-width: 460px;
-}
-.consult-app .ct-home-hero-actions {
-  margin-top: 24px;
-  gap: 12px;
-}
-.consult-app .ct-home-hero-note strong,
-.consult-app .ct-home-hero-note div > span {
-  font-size: 12px;
-  line-height: 1.6;
-}
-.consult-app .ct-home-section-intro h2,
-.consult-app .ct-home-about-copy h2,
-.consult-app .ct-home-cta h2 {
-  font-size: 28px;
-  line-height: 1.25;
-  letter-spacing: -0.5px;
-  color: #651b1e;
-}
-.consult-app .ct-home-section-intro p,
-.consult-app .ct-home-about-copy > p,
-.consult-app .ct-home-cta p,
-.consult-app .ct-home-step p,
-.consult-app .ct-home-feature p {
-  font-size: 14px;
-  line-height: 1.7;
-  color: #817173;
-}
-.consult-app .ct-home-step h3,
-.consult-app .ct-home-feature h3 {
-  font-size: 16px;
-  line-height: 1.4;
-  color: #651b1e;
-}
-.consult-app .ct-home-step-top > span:last-child {
-  color: #cfa99e;
-  font-size: 28px;
-}
-.consult-app .ct-home-benefit-strip {
-  margin: 0 24px;
-  padding: 24px 0;
-  border-color: var(--consult-border);
-}
-.consult-app .ct-home-benefit-strip > span {
-  font-size: 14px;
-  color: #6b4b4d;
-  border-color: var(--consult-border);
-}
-.consult-app.ct-home .ct-home-how {
-  padding: 48px 24px;
-}
-.consult-app.ct-home .ct-home-about {
-  padding: 32px;
-  border: 1px solid var(--consult-border);
-  border-radius: 20px;
-  background: linear-gradient(135deg, #f7e9e0 0%, #faf6ee 55%, #f6e7de 100%);
-}
-.consult-app .ct-home-feature {
-  padding: 20px;
-  background: #fffdf9;
-  border: 1px solid var(--consult-border);
-  border-radius: 14px;
-}
-.consult-app .ct-home-text-link {
-  font-size: 14px;
-  color: #8d171d;
-}
-.consult-app.ct-home .ct-home-cta {
-  padding: 48px 24px;
-}
-.consult-app .ct-home-footer {
-  padding: 24px;
-  border-color: var(--consult-border);
-}
-.consult-app .ct-home-footer-brand {
-  font-size: 20px;
-  color: #8d171d !important;
-}
-.consult-app .ct-home-footer-brand span,
-.consult-app .ct-home-footer p,
-.consult-app .ct-home-footer > a:last-child {
-  font-size: 12px;
-  line-height: 1.6;
-  color: #817173;
-}
-.consult-app .ct-home-preview {
-  background: #fffdf9;
-  border-color: var(--consult-border);
-  border-radius: 20px;
-  box-shadow: 0 12px 34px rgba(100, 50, 20, 0.08);
-}
-.consult-app .ct-home-preview-content,
-.consult-app .ct-home-preview-top {
-  padding: 20px;
-}
-.consult-app .ct-home-preview-content h2 {
-  font-size: 22px;
-  color: #651b1e;
-}
-.consult-app .ct-home-preview-content > p,
-.consult-app .ct-home-preview-session > p,
-.consult-app .ct-home-preview-detail,
-.consult-app .ct-home-preview-bottom {
-  font-size: 12px;
-  line-height: 1.6;
-  color: #817173;
-}
-.consult-app .ct-home-preview-top > span:first-child,
-.consult-app .ct-home-preview-session h3 {
-  font-size: 16px;
-  color: #651b1e;
-}
-.consult-app .ct-home-preview-kicker,
-.consult-app .ct-home-preview-label {
-  font-size: 10px;
-  color: #9d2028;
-}
-.consult-app .ct-home-preview-status {
-  font-size: 11px;
-  line-height: 1.4;
-  color: #98610f;
-  background: #fff0d6;
-}
-.consult-app .ct-home-preview-week > div {
-  background: #fffdf9;
-  border-color: var(--consult-border);
-  color: #817173;
-}
-.consult-app .ct-home-preview-week > div.is-highlighted {
-  background: var(--consult-primary);
-  border-color: #9d2028;
-  color: #fff;
-}
-.consult-app .ct-home-preview-week span {
-  font-size: 10px;
-}
-.consult-app .ct-home-preview-week strong {
-  font-size: 24px;
-}
-.consult-app .ct-home-preview-session {
-  padding: 20px;
-  border: 1px solid var(--consult-border);
-  border-radius: 14px;
-}
-.consult-app .ct-home-session-icon,
-.consult-app .ct-home-mini-mark,
-.consult-app .ct-home-floating > span {
-  background: var(--consult-soft);
-  color: #8d171d;
-}
-.consult-app .ct-home-preview-detail .icon {
-  width: 16px;
-  height: 16px;
-}
-.consult-app .ct-home-floating {
-  padding: 14px 16px;
-  border: 1px solid var(--consult-border);
-  border-radius: 14px;
-  background: #fffdf9;
-}
-.consult-app .ct-home-floating strong,
-.consult-app .ct-home-floating p,
-.consult-app .ct-home-visual-caption {
-  font-size: 12px;
-  line-height: 1.5;
-}
+/* Landing page: only the nav (brand, links, Log In) is styled here. Everything else is in the landing CSS file. */
 /* Auth pages no longer scale font sizes with viewport height. */
 .consult-app.redesigned-login-page {
   --u0: 1px;
@@ -613,6 +415,12 @@ body:has(.consult-app) {
   width: 100%;
   margin: 40px auto 32px;
   flex: 1 0 auto;
+}
+.consult-app:not(.signup-page) .redesigned-login-layout {
+  align-items: center;
+}
+.consult-app:not(.signup-page) .redesigned-login-card {
+  justify-self: center;
 }
 .consult-app .signup-layout {
   max-width: 1180px;
@@ -829,9 +637,36 @@ body:has(.consult-app) {
   font-size: 12px;
   line-height: 1.5;
 }
+.consult-app .redesigned-login-card .forgot-password {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  margin: 0;
+  padding: 4px 2px;
+  border: 0;
+  background: transparent;
+  color: #8d171d;
+  font-family: inherit;
+  font-weight: 700;
+  text-align: right;
+  cursor: pointer;
+}
+.consult-app .redesigned-login-card .forgot-password:hover {
+  color: #651b1e;
+  background: transparent;
+  text-decoration: underline;
+}
+.consult-app .redesigned-login-card .remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 .consult-app .redesigned-login-card .remember input {
   width: 16px;
   height: 16px;
+  margin: 0;
+  vertical-align: middle;
   accent-color: #8d171d;
 }
 .consult-app .redesigned-main-login-btn,
@@ -840,21 +675,58 @@ body:has(.consult-app) {
   height: auto;
   margin-top: 20px;
 }
+.consult-app .redesigned-main-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: center;
+}
 .consult-app .redesigned-register-text,
 .consult-app .redesigned-register-text button,
 .consult-app .signup-alt,
-.consult-app .signup-alt button {
+.consult-app .signup-alt button,
+.consult-app .signup-terms .signup-link {
   font-size: 12px;
   line-height: 1.6;
 }
 .consult-app .redesigned-register-text {
   display: flex;
+  align-items: center;
   justify-content: center;
   gap: 6px;
   flex-wrap: wrap;
   margin-top: 24px;
   padding-top: 18px;
   border-top: 1px solid var(--consult-border);
+}
+.consult-app .redesigned-register-text button,
+.consult-app .signup-alt button,
+.consult-app .signup-terms .signup-link {
+  display: inline;
+  min-height: 0;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: #8d171d;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+  text-align: center;
+  cursor: pointer;
+}
+.consult-app .redesigned-register-text button:hover,
+.consult-app .signup-alt button:hover,
+.consult-app .signup-terms .signup-link:hover {
+  color: #651b1e;
+  background: transparent;
+  text-decoration: underline;
+}
+.consult-app .signup-terms .signup-link {
+  text-align: left;
 }
 .consult-app .signup-section {
   font-size: 16px;
@@ -1048,14 +920,6 @@ body:has(.consult-app) {
     padding: 10px;
     font-size: 13px;
   }
-  .consult-app.ct-home .ct-home-hero {
-    gap: 32px;
-    padding-left: 0;
-    padding-right: 0;
-  }
-  .consult-app .ct-home-hero-copy h1 {
-    font-size: 36px;
-  }
 }
 @media (max-width: 900px) {
   .consult-app.ct-home .ct-home-nav,
@@ -1086,9 +950,6 @@ body:has(.consult-app) {
   .consult-app.signup-page .login-benefit-list {
     grid-template-columns: 1fr;
     gap: 16px;
-  }
-  .consult-app .ct-home-hero-copy h1 {
-    font-size: 36px;
   }
 }
 @media (max-width: 640px) {
@@ -1146,97 +1007,8 @@ body:has(.consult-app) {
   .consult-app .directory-faculty-card,
   .consult-app .booking-card,
   .consult-app .profile-overview-card,
-  .consult-app .profile-details-card,
-  .consult-app .ct-home-step {
+  .consult-app .profile-details-card {
     padding: 16px;
-  }
-  .consult-app.ct-home .ct-home-hero {
-    grid-template-columns: minmax(0, 1fr);
-    padding: 32px 4px;
-    gap: 32px;
-  }
-  .consult-app .ct-home-hero-copy h1 {
-    font-size: 32px;
-    letter-spacing: -0.6px;
-  }
-  .consult-app .ct-home-hero-copy > p {
-    font-size: 14px;
-  }
-  .consult-app .ct-home-hero-actions {
-    align-items: stretch;
-  }
-  .consult-app .ct-home-hero-actions > button {
-    flex: 1 1 100%;
-  }
-  .consult-app .ct-home-visual {
-    padding-left: 4px;
-    padding-right: 4px;
-    max-width: 440px;
-  }
-  .consult-app .ct-home-floating {
-    left: 0;
-    bottom: 45px;
-  }
-  .consult-app .ct-home-floating strong,
-  .consult-app .ct-home-floating p {
-    font-size: 11px;
-  }
-  .consult-app .ct-home-visual-caption {
-    font-size: 11px;
-  }
-  .consult-app .ct-home-preview-content,
-  .consult-app .ct-home-preview-top {
-    padding: 16px;
-  }
-  .consult-app .ct-home-preview-week {
-    gap: 6px;
-  }
-  .consult-app .ct-home-preview-week span {
-    font-size: 9px;
-  }
-  .consult-app .ct-home-preview-content h2 {
-    font-size: 20px;
-  }
-  .consult-app .ct-home-preview-top > span:first-child {
-    font-size: 14px;
-  }
-  .consult-app .ct-home-preview-label {
-    font-size: 8px;
-    letter-spacing: 0.6px;
-  }
-  .consult-app .ct-home-preview-kicker {
-    font-size: 9px;
-    letter-spacing: 0.8px;
-  }
-  .consult-app .ct-home-preview-session {
-    padding: 16px;
-  }
-  .consult-app .ct-home-preview-status {
-    font-size: 10px;
-  }
-  .consult-app .ct-home-benefit-strip {
-    margin: 0 4px;
-  }
-  .consult-app.ct-home .ct-home-how {
-    padding: 32px 4px;
-  }
-  .consult-app .ct-home-section-intro h2,
-  .consult-app .ct-home-about-copy h2,
-  .consult-app .ct-home-cta h2 {
-    font-size: 24px;
-  }
-  .consult-app.ct-home .ct-home-about {
-    padding: 20px;
-    gap: 24px;
-  }
-  .consult-app .ct-home-feature {
-    padding: 16px;
-  }
-  .consult-app.ct-home .ct-home-cta {
-    padding: 32px 4px;
-  }
-  .consult-app .ct-home-footer {
-    padding: 24px 4px;
   }
   .consult-app .redesigned-login-layout,
   .consult-app .signup-layout {
@@ -1311,9 +1083,6 @@ body:has(.consult-app) {
     padding-left: 10px;
     padding-right: 10px;
   }
-  .consult-app .ct-home-benefit-strip > span {
-    font-size: 13px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .consult-app * {
@@ -1324,7 +1093,6 @@ body:has(.consult-app) {
     transform: none;
   }
 }
-
 /* Keep the restored faculty component aligned with the shared student design. */
 .faculty-page-scope .fd-shell {
   background: var(--consult-bg);
