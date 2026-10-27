@@ -1,0 +1,146 @@
+/* Expand the consultation in place; retain the dashboard's red-and-cream styling. */
+.consult-app .ct-hover-card.consultation-card {
+  display: block;
+  padding: 0;
+  min-width: 0;
+  min-height: 125px;
+  overflow: hidden;
+  transform: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.consult-app .ct-hover-card.consultation-card:hover {
+  transform: none;
+}
+.consult-app .ct-hover-card.is-expanded {
+  border-color: #d7aaa2;
+  box-shadow: 0 8px 24px #641e2012;
+}
+.consult-app .ct-hover-card .ct-hover-summary {
+  display: grid;
+  grid-template-columns: 45px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 123px;
+  margin: 0;
+  padding: 16px;
+  border: 0;
+  border-radius: 12px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+}
+.consult-app .ct-hover-summary:focus-visible {
+  outline: 2px solid #9d2028;
+  outline-offset: -3px;
+}
+.consult-app .ct-hover-summary .consultation-info { min-width: 0; }
+.consult-app .ct-hover-summary .ct-consultation-name {
+  display: block;
+  color: #651b1e;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.consult-app .ct-hover-summary .ct-consultation-department {
+  display: block;
+  margin-top: 3px;
+  color: #817173;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.consult-app .ct-hover-summary .ct-consultation-date {
+  display: block;
+  margin-top: 9px;
+  color: #65565a;
+  font-size: 11px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.consult-app .ct-hover-summary .confirmed { white-space: nowrap; justify-self: end; }
+.consult-app .ct-hover-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  color: #9d2028;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.consult-app .ct-hover-hint .chevron-icon {
+  position: static;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  transform: rotate(90deg);
+  transition: transform 220ms ease;
+}
+.consult-app .is-expanded .ct-hover-hint .chevron-icon { transform: rotate(-90deg); }
+.consult-app .ct-hover-touch-hint { display: none; }
+.consult-app .ct-hover-details {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 220ms ease, opacity 180ms ease;
+}
+.consult-app .ct-hover-card.is-expanded .ct-hover-details { grid-template-rows: 1fr; opacity: 1; }
+.consult-app .ct-hover-clip { min-height: 0; overflow: hidden; }
+.consult-app .ct-hover-content { padding: 0 16px 16px; }
+.consult-app .ct-consultation-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding-top: 18px;
+  border-top: 1px solid #eadfd3;
+}
+.consult-app .ct-consultation-details > div { min-width: 0; }
+.consult-app .ct-consultation-details .ct-consultation-purpose { grid-column: 1 / -1; }
+.consult-app .ct-consultation-details dt { margin: 0 0 5px; color: #817173; font-size: 11px; }
+.consult-app .ct-consultation-details dd {
+  margin: 0;
+  color: #493b3b;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.consult-app .ct-hover-content .ct-hover-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  margin: 18px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #e1c5bb;
+  border-radius: 10px;
+  background: #fcf2eb;
+  color: #8d171d;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.consult-app .ct-hover-action .chevron-icon { width: 15px; height: 15px; flex-shrink: 0; }
+@media (hover: none) {
+  .consult-app .ct-hover-desktop-hint { display: none; }
+  .consult-app .ct-hover-touch-hint { display: inline; }
+}
+@media (max-width: 400px) {
+  .consult-app .ct-hover-card .ct-hover-summary { grid-template-columns: 38px minmax(0, 1fr); gap: 10px; }
+  .consult-app .ct-hover-summary .consultation-icon { width: 38px; height: 38px; }
+  .consult-app .ct-hover-summary .confirmed { grid-column: 2; justify-self: start; }
+  .consult-app .ct-consultation-details { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .consult-app .ct-hover-card, .consult-app .ct-hover-details, .consult-app .ct-hover-hint .chevron-icon { transition: none; }
+}

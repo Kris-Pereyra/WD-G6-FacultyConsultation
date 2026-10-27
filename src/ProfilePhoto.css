@@ -1,0 +1,213 @@
+/* Shared account avatars: a photo or initials is always visible. */
+.consult-app .ct-profile-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #f0ddd4;
+  color: #8d171d;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  text-align: center;
+}
+.consult-app .ct-profile-avatar > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.consult-app .ct-profile-avatar > span {
+  color: inherit;
+  font: inherit;
+}
+.consult-app .ct-photo-panel {
+  margin: 20px 0;
+  padding: 24px;
+  background: #fffdf9;
+  border: 1px solid #eadfd3;
+  border-radius: 16px;
+}
+.consult-app .ct-photo-editor {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  min-width: 0;
+}
+.consult-app .ct-photo-preview {
+  width: 88px;
+  height: 88px;
+  flex: 0 0 88px;
+  font-size: 27px;
+  border: 4px solid #fffdf9;
+  box-shadow: 0 0 0 1px #e6d5c9;
+}
+.consult-app .ct-photo-editor-content {
+  min-width: 0;
+  flex: 1;
+}
+.consult-app .ct-photo-editor h3 {
+  margin: 0 0 7px;
+  color: #651b1e;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.consult-app .ct-photo-editor p {
+  margin: 0;
+  font-size: 12px;
+  color: #817173;
+  line-height: 1.7;
+}
+.consult-app .ct-photo-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.consult-app .ct-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 13px 0;
+}
+.consult-app .ct-photo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-height: 40px;
+  margin: 0;
+  padding: 9px 12px;
+  border: 1px solid #dcbdb6;
+  border-radius: 10px;
+  background: #fffaf5;
+  color: #8d171d;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.consult-app .ct-photo-button.is-primary {
+  color: white;
+  border-color: #8d171d;
+  background: linear-gradient(110deg, #a1212d, #681a1d);
+}
+.consult-app .ct-photo-button.is-remove {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+}
+.consult-app .ct-photo-button:hover:not(:disabled) {
+  box-shadow: 0 0 0 2px #8d171d15;
+}
+.consult-app .ct-photo-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.consult-app .ct-photo-button:focus-visible {
+  outline: 2px solid #a53443;
+  outline-offset: 3px;
+}
+.consult-app .ct-photo-editor p.ct-photo-error {
+  margin-top: 8px;
+  color: #a1212d;
+}
+.consult-app .ct-photo-editor p.ct-photo-success {
+  margin-top: 8px;
+  color: #2f6d44;
+}
+.consult-app .ct-photo-editor p.ct-photo-hint {
+  margin-top: 8px;
+}
+.faculty-page-scope .fd-shell .ct-photo-preview {
+  width: 88px;
+  height: 88px;
+  flex-basis: 88px;
+}
+.faculty-page-scope .fd-shell .ct-photo-button {
+  border: 1px solid #dcbdb6;
+  font-size: 12px;
+  padding: 9px 12px;
+}
+.faculty-page-scope .fd-shell .ct-photo-button.is-remove {
+  border-color: transparent;
+}
+.faculty-page-scope .fd-shell .fd-avatar.ct-profile-avatar {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+  font-size: 12px;
+}
+.faculty-page-scope .fd-shell .fd-user-avatar.ct-profile-avatar {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+  font-size: 14px;
+}
+.faculty-page-scope .fd-shell .fd-person-avatar.ct-profile-avatar {
+  font-size: 15px;
+}
+@media (max-width: 600px) {
+  .consult-app .ct-photo-panel {
+    padding: 20px 16px;
+  }
+  .consult-app .ct-photo-editor {
+    flex-direction: column;
+  }
+  .consult-app .ct-photo-actions {
+    gap: 8px;
+  }
+}
+
+/* Upload controls live inside Edit Profile, alongside the editable fields. */
+.consult-app .ct-photo-panel.is-inline {
+  margin: 0 0 24px;
+  padding: 18px;
+  border: 1px solid #ebdbcf;
+  border-radius: 12px;
+  background: #fffaf5;
+}
+.consult-app .ct-photo-editor p.ct-photo-save-note {
+  margin-top: 5px;
+  color: #8a6b68;
+  font-size: 11px;
+}
+.faculty-page-scope .fd-shell .ct-photo-panel.is-inline .ct-photo-editor {
+  flex-direction: row;
+  align-items: flex-start;
+}
+.faculty-page-scope .fd-shell .ct-photo-panel.is-inline .ct-photo-preview {
+  width: 76px;
+  height: 76px;
+  flex-basis: 76px;
+  font-size: 23px;
+}
+@media (max-width: 600px) {
+  .consult-app .ct-photo-panel.is-inline {
+    padding: 16px;
+  }
+  .faculty-page-scope .fd-shell .ct-photo-panel.is-inline .ct-photo-editor {
+    flex-direction: column;
+  }
+}
+
+.consult-app .profile-edit-error {
+  margin: 16px 0;
+  padding: 12px 14px;
+  border: 1px solid #edc4c0;
+  border-radius: 10px;
+  color: #94202a;
+  background: #fff0ed;
+  font-size: 13px;
+  line-height: 1.7;
+}

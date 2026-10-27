@@ -1,4 +1,5 @@
 const API_URL = "https://wd-g6-facultyconsultation.onrender.com/api";
+/*const API_URL = "http://localhost:5000/api";*/
 // Tab-scoped storage survives refresh; the backend validates every token.
 const SESSION_KEY = "consulttime.auth.v1";
 function readStoredToken() {
@@ -180,5 +181,26 @@ export async function saveProfile(data) {
   const result = await res.json();
   if (!res.ok)
     throw new Error(result.message || "Unable to save your profile.");
+  return result;
+}
+
+export async function uploadProfilePhoto(photo) {
+  const res = await apiFetch(`${API_URL}/me/photo`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ photo }),
+  });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.message || "Unable to save your photo.");
+  return result;
+}
+export async function removeProfilePhoto() {
+  const res = await apiFetch(`${API_URL}/me/photo`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  const result = await res.json();
+  if (!res.ok)
+    throw new Error(result.message || "Unable to remove your photo.");
   return result;
 }

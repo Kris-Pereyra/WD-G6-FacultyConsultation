@@ -1,0 +1,359 @@
+/* Click-to-expand booking cards; cancellation stays out of the summary's click area. */
+.consult-app .ct-booking-card.booking-card {
+  display: block;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  transform: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.consult-app .ct-booking-card.booking-card:hover {
+  transform: none;
+}
+.consult-app .ct-booking-card.is-expanded {
+  border-color: #d7aaa2;
+  box-shadow: 0 8px 22px #641e2010;
+}
+.consult-app .ct-booking-card .ct-booking-summary {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+  padding: 20px 24px;
+  margin: 0;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transform: none;
+  box-shadow: none;
+}
+.consult-app .ct-booking-summary:focus-visible {
+  outline: 2px solid #9d2028;
+  outline-offset: -4px;
+}
+.consult-app .ct-booking-summary:disabled {
+  cursor: wait;
+}
+.consult-app .ct-booking-icon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.consult-app .ct-booking-summary .booking-date-block {
+  width: 108px;
+  min-width: 0;
+  min-height: 136px;
+  margin: 0;
+  padding: 16px 10px;
+  justify-content: center;
+  gap: 5px;
+  box-sizing: border-box;
+}
+.consult-app .ct-booking-summary .booking-date-block .ct-booking-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  margin-bottom: 3px;
+}
+.consult-app .ct-booking-summary .booking-date-block > span {
+  display: block;
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.3px;
+}
+.consult-app .ct-booking-summary .booking-date-block > strong {
+  font-size: 30px;
+  line-height: 1.15;
+}
+.consult-app .ct-booking-summary .booking-date-block > small {
+  margin-top: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.consult-app .ct-booking-summary .booking-card-main {
+  display: block;
+  min-width: 0;
+}
+.consult-app .ct-booking-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.consult-app .ct-booking-faculty {
+  display: block;
+  min-width: 0;
+}
+.consult-app .ct-booking-faculty > strong {
+  display: block;
+  color: #651b1e;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.consult-app .ct-booking-faculty > span {
+  display: block;
+  margin-top: 3px;
+  color: #817173;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.consult-app .ct-booking-title-row .booking-status {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.consult-app .ct-booking-topic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: #68474b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.consult-app .ct-booking-topic .ct-booking-icon {
+  color: #a05e62;
+}
+.consult-app .ct-booking-topic > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.consult-app .ct-booking-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin-top: 12px;
+  color: #817173;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.consult-app .ct-booking-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.consult-app .ct-booking-meta .ct-booking-icon {
+  color: #a05e62;
+}
+.consult-app .ct-booking-disclosure {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: #8d171d;
+  font-size: 11px;
+  font-weight: 600;
+}
+.consult-app .ct-booking-disclosure .ct-booking-icon {
+  width: 13px;
+  height: 13px;
+  flex-basis: 13px;
+  transform: rotate(90deg);
+  transition: transform 200ms ease;
+}
+.consult-app
+  .ct-booking-card.is-expanded
+  .ct-booking-disclosure
+  .ct-booking-icon {
+  transform: rotate(-90deg);
+}
+.consult-app .ct-booking-expansion {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 220ms ease,
+    opacity 180ms ease;
+}
+.consult-app .ct-booking-card.is-expanded .ct-booking-expansion {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.consult-app .ct-booking-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+.consult-app .ct-booking-expanded-content {
+  margin: 0 24px 0 154px;
+  padding: 18px 0 16px;
+  border-top: 1px solid #eadfd3;
+}
+.consult-app .ct-booking-expanded-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+.consult-app .ct-booking-expanded-grid > div {
+  min-width: 0;
+}
+.consult-app .ct-booking-expanded-grid dt {
+  margin: 0 0 6px;
+  color: #817173;
+  font-size: 11px;
+}
+.consult-app .ct-booking-expanded-grid dd {
+  margin: 0;
+  color: #493b3b;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.consult-app .ct-booking-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+.consult-app .ct-booking-actions > p {
+  margin: 0;
+  color: #998183;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.consult-app .ct-booking-actions .ct-booking-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 34px;
+  padding: 7px 12px;
+  margin: 0 0 0 auto;
+  border: 1px solid #d7aaa2;
+  border-radius: 9px;
+  background: #fffaf7;
+  color: #9a2730;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+}
+.consult-app .ct-booking-cancel:hover:not(:disabled) {
+  background: #fae9e5;
+  border-color: #a94d56;
+}
+.consult-app .ct-booking-cancel:focus-visible {
+  outline: 2px solid #a53443;
+  outline-offset: 3px;
+}
+.consult-app .ct-booking-cancel:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.consult-app .ct-booking-action-error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #edc4c0;
+  border-radius: 9px;
+  color: #94202a;
+  background: #fff0ed;
+  font-size: 12px;
+}
+
+/* Both student dashboard and directory use the same primary gradient. */
+.consult-app.student-dashboard-shell .availability-btn,
+.consult-app.student-dashboard-shell .directory-availability-btn {
+  background: var(--consult-primary, linear-gradient(100deg, #e00008, #681a1d));
+  color: #fff;
+  border-color: transparent;
+  border-radius: 12px;
+}
+.consult-app.student-dashboard-shell .availability-btn:hover,
+.consult-app.student-dashboard-shell .directory-availability-btn:hover {
+  background: var(--consult-primary, linear-gradient(100deg, #e00008, #681a1d));
+  color: #fff;
+  border-color: transparent;
+  filter: brightness(0.94);
+  transform: none;
+}
+.consult-app.student-dashboard-shell .availability-btn .icon,
+.consult-app.student-dashboard-shell .directory-availability-btn .chevron-icon {
+  color: inherit;
+  stroke: currentColor;
+}
+@media (max-width: 600px) {
+  .consult-app .ct-booking-card .ct-booking-summary {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 14px;
+    padding: 18px 16px;
+  }
+  .consult-app .ct-booking-summary .booking-date-block {
+    width: 88px;
+    min-height: 124px;
+    padding: 14px 6px;
+  }
+  .consult-app .ct-booking-summary .booking-date-block > span {
+    font-size: 9px;
+    letter-spacing: 0;
+  }
+  .consult-app .ct-booking-summary .booking-date-block > strong {
+    font-size: 28px;
+  }
+  .consult-app .ct-booking-title-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .consult-app .ct-booking-title-row .booking-status {
+    padding: 5px 9px;
+  }
+  .consult-app .ct-booking-faculty {
+    flex-basis: 100%;
+  }
+  .consult-app .ct-booking-faculty > strong {
+    font-size: 14px;
+  }
+  .consult-app .ct-booking-meta {
+    gap: 8px;
+    font-size: 11px;
+  }
+  .consult-app .ct-booking-expanded-content {
+    margin: 0 16px;
+    padding-top: 16px;
+  }
+  .consult-app .ct-booking-expanded-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .consult-app .ct-booking-purpose {
+    grid-column: 1 / -1;
+  }
+  .consult-app .ct-booking-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .consult-app .ct-booking-actions .ct-booking-cancel {
+    min-height: 44px;
+    margin-left: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .consult-app .ct-booking-card,
+  .consult-app .ct-booking-expansion,
+  .consult-app .ct-booking-disclosure .ct-booking-icon {
+    transition: none;
+  }
+}

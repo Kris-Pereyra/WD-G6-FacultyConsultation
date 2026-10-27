@@ -880,3 +880,748 @@ body:has(.fd-shell) {
     transition: none !important;
   }
 }
+
+/* Faculty request dialog and account editors. Scoped to the faculty dashboard. */
+.faculty-page-scope .fd-shell .fd-section-eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: #8d171d;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+}
+.faculty-page-scope .fd-shell .fd-workspace {
+  width: 100%;
+  min-width: 0;
+}
+.faculty-page-scope .fd-shell .fd-workspace-heading {
+  margin-bottom: 26px;
+}
+.faculty-page-scope .fd-shell .fd-workspace-heading h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+.faculty-page-scope .fd-shell .fd-workspace-heading p,
+.faculty-page-scope .fd-shell .fd-card-heading p,
+.faculty-page-scope .fd-shell .fd-field-help {
+  color: #817173;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.faculty-page-scope .fd-shell .fd-availability-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(260px, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.faculty-page-scope .fd-shell .fd-editor-card {
+  min-width: 0;
+  padding: 28px;
+}
+.faculty-page-scope .fd-shell .fd-editor-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.faculty-page-scope .fd-shell .fd-editor-fieldset legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 0;
+  color: #651b1e;
+  font-size: 17px;
+  font-weight: 700;
+}
+.faculty-page-scope .fd-shell .fd-step {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f6e7df;
+  color: #8d171d;
+  font-size: 13px;
+}
+.faculty-page-scope .fd-shell .fd-day-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+.faculty-page-scope .fd-shell .fd-day-choice {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+  min-height: 54px;
+  padding: 12px 10px;
+  border: 1px solid #e5d7cd;
+  border-radius: 12px;
+  background: #fffdfa;
+  color: #746267;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.faculty-page-scope .fd-shell .fd-day-choice input {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  margin: 0;
+  accent-color: #8d171d;
+  cursor: pointer;
+}
+.faculty-page-scope .fd-shell .fd-day-choice.is-selected {
+  color: #8d171d;
+  font-weight: 700;
+  border-color: #a74d54;
+  background: #fbede7;
+}
+.faculty-page-scope .fd-shell .fd-day-choice:hover {
+  border-color: #a74d54;
+}
+.faculty-page-scope .fd-shell .fd-day-choice:focus-within {
+  outline: 2px solid #a53443;
+  outline-offset: 3px;
+}
+.faculty-page-scope .fd-shell .fd-editor-fieldset:disabled .fd-day-choice {
+  opacity: 0.65;
+  cursor: wait;
+}
+.faculty-page-scope .fd-shell .fd-hours-fieldset {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #eadfd3;
+}
+.faculty-page-scope .fd-shell .fd-time-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+.faculty-page-scope .fd-shell .fd-editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.faculty-page-scope .fd-shell .fd-editor-field > span {
+  color: #624446;
+  font-size: 13px;
+  font-weight: 600;
+}
+.faculty-page-scope .fd-shell .fd-editor-field input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #dfcfc3;
+  border-radius: 12px;
+  background: #fffdf9;
+  color: #493333;
+  font: inherit;
+  font-size: 14px;
+  box-sizing: border-box;
+  color-scheme: light;
+}
+.faculty-page-scope .fd-shell .fd-editor-field input:focus {
+  border-color: #a74d54;
+  outline: 2px solid #a74d5426;
+  outline-offset: 1px;
+}
+.faculty-page-scope .fd-shell .fd-editor-field input:read-only {
+  background: #f5f1eb;
+  color: #817173;
+}
+.faculty-page-scope .fd-shell .fd-editor-field small {
+  color: #817173;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.faculty-page-scope .fd-shell .fd-timezone-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  color: #817173;
+  font-size: 12px;
+}
+.faculty-page-scope .fd-shell .fd-timezone-note .fd-icon {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+}
+.faculty-page-scope .fd-shell .fd-form-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid #eadfd3;
+}
+.faculty-page-scope .fd-shell .fd-form-footer > p {
+  flex: 1 1 160px;
+  color: #817173;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.faculty-page-scope .fd-shell .fd-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.faculty-page-scope .fd-shell .fd-availability-aside {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.faculty-page-scope .fd-shell .fd-preview-heading {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.faculty-page-scope .fd-shell .fd-preview-heading h2,
+.faculty-page-scope .fd-shell .fd-pause-card h2,
+.faculty-page-scope .fd-shell .fd-card-heading h2 {
+  font-size: 19px;
+}
+.faculty-page-scope .fd-shell .fd-preview-hours {
+  margin: 20px 0 16px;
+  padding: 18px;
+  border: 1px solid #ecd9cd;
+  border-radius: 12px;
+  background: #faf0e8;
+}
+.faculty-page-scope .fd-shell .fd-preview-hours small {
+  display: block;
+  color: #8b7074;
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+.faculty-page-scope .fd-shell .fd-preview-hours strong {
+  display: block;
+  margin: 8px 0;
+  color: #651b1e;
+  font-size: 17px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.faculty-page-scope .fd-shell .fd-preview-hours > span {
+  color: #817173;
+  font-size: 12px;
+}
+.faculty-page-scope .fd-shell .fd-preview-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.faculty-page-scope .fd-shell .fd-preview-days > span {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #f5e6dd;
+  color: #8d171d;
+  font-size: 12px;
+}
+.faculty-page-scope .fd-shell .fd-preview-days p {
+  color: #817173;
+  font-size: 13px;
+}
+.faculty-page-scope .fd-shell .fd-schedule-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #eadfd3;
+  font-size: 12px;
+  color: #2c754c;
+}
+.faculty-page-scope .fd-shell .fd-schedule-state > span {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.faculty-page-scope .fd-shell .fd-schedule-state.is-paused {
+  color: #956510;
+}
+.faculty-page-scope .fd-shell .fd-pause-card p {
+  color: #817173;
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 12px 0 18px;
+}
+.faculty-page-scope .fd-shell .fd-pause-card button {
+  width: 100%;
+}
+.faculty-page-scope .fd-shell .fd-pause-card small {
+  display: block;
+  margin-top: 12px;
+  color: #817173;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.faculty-page-scope .fd-shell .fd-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 13px 15px;
+  border: 1px solid;
+  border-radius: 11px;
+  margin: 20px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.faculty-page-scope .fd-shell .fd-feedback.is-success {
+  background: #edf7ef;
+  border-color: #c7e4cd;
+  color: #2f6d44;
+}
+.faculty-page-scope .fd-shell .fd-feedback.is-error {
+  background: #fff0ed;
+  border-color: #edc4c0;
+  color: #94202a;
+}
+.faculty-page-scope .fd-shell .fd-feedback .fd-icon {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+  margin-top: 2px;
+}
+.faculty-page-scope .fd-shell .fd-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.8fr) minmax(0, 1.7fr);
+  gap: 22px;
+  align-items: start;
+}
+.faculty-page-scope .fd-shell .fd-profile-summary {
+  text-align: center;
+  padding: 30px 24px;
+  min-width: 0;
+}
+.faculty-page-scope .fd-shell .fd-profile-initials {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 86px;
+  border: 6px solid #fffdf9;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  box-shadow: 0 0 0 1px #ead7cb;
+  background: #f1ddd3;
+  color: #8d171d;
+  font-size: 29px;
+  font-weight: 700;
+}
+.faculty-page-scope .fd-shell .fd-role-label {
+  display: inline-flex;
+  padding: 5px 12px;
+  margin-bottom: 14px;
+  border-radius: 20px;
+  background: #f6e7df;
+  color: #8d171d;
+  font-size: 11px;
+  font-weight: 700;
+}
+.faculty-page-scope .fd-shell .fd-profile-summary h2 {
+  font-size: 22px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.faculty-page-scope .fd-shell .fd-profile-summary > p {
+  font-size: 13px;
+  color: #817173;
+  margin: 8px 0 24px;
+}
+.faculty-page-scope .fd-shell .fd-profile-contact {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid #eadfd3;
+  text-align: left;
+  color: #745d60;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.faculty-page-scope .fd-shell .fd-profile-contact .fd-icon {
+  color: #8d171d;
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+  margin-top: 2px;
+}
+.faculty-page-scope .fd-shell .fd-profile-contact > span {
+  min-width: 0;
+}
+.faculty-page-scope .fd-shell .fd-profile-reminder {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 15px;
+  margin-top: 18px;
+  border-radius: 12px;
+  background: #f8eee6;
+  text-align: left;
+  color: #8a6b68;
+}
+.faculty-page-scope .fd-shell .fd-profile-reminder p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.faculty-page-scope .fd-shell .fd-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.faculty-page-scope .fd-shell .fd-card-heading p {
+  font-size: 13px;
+  margin-top: 7px;
+}
+.faculty-page-scope .fd-shell .fd-card-heading button {
+  flex-shrink: 0;
+  gap: 8px;
+}
+.faculty-page-scope .fd-shell .fd-card-heading button .fd-icon {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+}
+.faculty-page-scope .fd-shell .fd-profile-values,
+.faculty-page-scope .fd-shell .fd-profile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 20px;
+  margin: 0;
+}
+.faculty-page-scope .fd-shell .fd-profile-values > div {
+  min-width: 0;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee2d8;
+}
+.faculty-page-scope .fd-shell .fd-profile-values dt {
+  margin: 0 0 8px;
+  color: #817173;
+  font-size: 12px;
+}
+.faculty-page-scope .fd-shell .fd-profile-values dd {
+  margin: 0;
+  color: #493333;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.faculty-page-scope .fd-shell .fd-field-wide {
+  grid-column: 1 / -1;
+}
+.faculty-page-scope .fd-shell .fd-account-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 15px;
+  border-radius: 11px;
+  background: #faf3ec;
+  color: #8a6b68;
+  margin-top: 26px;
+}
+.faculty-page-scope .fd-shell .fd-account-note p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.faculty-page-scope .fd-shell .fd-account-note .fd-icon {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+  margin-top: 2px;
+}
+.faculty-page-scope .fd-shell .fd-student-trigger {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+  border-radius: 8px;
+}
+.faculty-page-scope .fd-shell .fd-student-trigger:hover strong {
+  color: #8d171d;
+  text-decoration: underline;
+}
+.faculty-page-scope .fd-shell .fd-student-copy {
+  min-width: 0;
+}
+.faculty-page-scope .fd-shell .fd-request-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  padding: 0;
+  width: min(700px, calc(100vw - 40px));
+  max-width: none;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  overflow: hidden;
+  border: 1px solid #e6d5c9;
+  border-radius: 22px;
+  background: #fffdf9;
+  color: #493333;
+  box-shadow: 0 28px 90px #28101640;
+  font: inherit;
+}
+.faculty-page-scope .fd-shell .fd-request-dialog:not([open]) {
+  display: none;
+}
+.faculty-page-scope .fd-shell .fd-request-dialog::backdrop {
+  background: #24131499;
+  backdrop-filter: blur(4px);
+}
+.faculty-page-scope .fd-shell .fd-dialog-card {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 42px);
+  max-height: calc(100dvh - 42px);
+  min-height: 0;
+}
+.faculty-page-scope .fd-shell .fd-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 28px;
+  border-bottom: 1px solid #eadfd3;
+  flex: 0 0 auto;
+}
+.faculty-page-scope .fd-shell .fd-dialog-header h2 {
+  font-size: 25px;
+  line-height: 1.3;
+}
+.faculty-page-scope .fd-shell .fd-dialog-header p {
+  margin-top: 7px;
+  color: #817173;
+  font-size: 13px;
+}
+.faculty-page-scope .fd-shell .fd-dialog-close {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 1px solid #e5d2c8;
+  border-radius: 50%;
+  color: #8d171d;
+  background: #faf0e8;
+  padding: 8px;
+}
+.faculty-page-scope .fd-shell .fd-dialog-close:hover {
+  background: #f1ddd3;
+}
+.faculty-page-scope .fd-shell .fd-dialog-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px 28px;
+}
+.faculty-page-scope .fd-shell .fd-request-person {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #ecdcd0;
+  border-radius: 14px;
+  background: #fbf2eb;
+}
+.faculty-page-scope .fd-shell .fd-request-person > div {
+  min-width: 0;
+  flex: 1;
+}
+.faculty-page-scope .fd-shell .fd-request-person h3 {
+  margin: 0;
+  color: #651b1e;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.faculty-page-scope .fd-shell .fd-request-person p {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #817173;
+  overflow-wrap: anywhere;
+}
+.faculty-page-scope .fd-shell .fd-person-avatar {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 50%;
+  background: #eedbd1;
+  color: #8d171d;
+}
+.faculty-page-scope .fd-shell .fd-dialog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
+  margin: 24px 0 0;
+}
+.faculty-page-scope .fd-shell .fd-dialog-grid > div {
+  min-width: 0;
+}
+.faculty-page-scope .fd-shell .fd-dialog-grid dt {
+  margin: 0 0 6px;
+  color: #817173;
+  font-size: 12px;
+}
+.faculty-page-scope .fd-shell .fd-dialog-grid dd {
+  margin: 0;
+  color: #493333;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.faculty-page-scope .fd-shell .fd-detail-topic {
+  grid-column: 1 / -1;
+  padding: 18px;
+  border: 1px solid #eee2d8;
+  border-radius: 12px;
+  background: #fffcf7;
+}
+.faculty-page-scope .fd-shell .fd-dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 28px;
+  border-top: 1px solid #eadfd3;
+  background: #fffaf5;
+  flex: 0 0 auto;
+}
+.faculty-page-scope .fd-shell .fd-dialog-timezone {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #817173;
+  font-size: 12px;
+}
+.faculty-page-scope .fd-shell .fd-dialog-timezone .fd-icon {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+}
+@media (max-width: 1200px) {
+  .faculty-page-scope .fd-shell .fd-availability-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .faculty-page-scope .fd-shell .fd-availability-aside {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .faculty-page-scope .fd-shell .fd-profile-layout {
+    grid-template-columns: minmax(210px, 0.8fr) minmax(0, 1.4fr);
+  }
+  .faculty-page-scope .fd-shell .fd-day-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 950px) {
+  .faculty-page-scope .fd-shell .fd-profile-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .faculty-page-scope .fd-shell .fd-profile-summary {
+    text-align: left;
+  }
+  .faculty-page-scope .fd-shell .fd-profile-initials {
+    margin-left: 0;
+  }
+}
+@media (max-width: 640px) {
+  .faculty-page-scope .fd-shell .fd-workspace-heading h1 {
+    font-size: 28px;
+  }
+  .faculty-page-scope .fd-shell .fd-workspace-heading p {
+    font-size: 13px;
+  }
+  .faculty-page-scope .fd-shell .fd-editor-card,
+  .faculty-page-scope .fd-shell .fd-profile-summary {
+    padding: 20px 16px;
+  }
+  .faculty-page-scope .fd-shell .fd-availability-aside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .faculty-page-scope .fd-shell .fd-day-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .faculty-page-scope .fd-shell .fd-time-grid,
+  .faculty-page-scope .fd-shell .fd-profile-fields,
+  .faculty-page-scope .fd-shell .fd-profile-values {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .faculty-page-scope .fd-shell .fd-card-heading {
+    flex-wrap: wrap;
+  }
+  .faculty-page-scope .fd-shell .fd-card-heading > div {
+    flex-basis: 100%;
+  }
+  .faculty-page-scope .fd-shell .fd-form-footer {
+    align-items: stretch;
+  }
+  .faculty-page-scope .fd-shell .fd-form-footer > p {
+    flex-basis: 100%;
+  }
+  .faculty-page-scope .fd-shell .fd-form-footer > button,
+  .faculty-page-scope .fd-shell .fd-form-footer .fd-editor-actions {
+    width: 100%;
+  }
+  .faculty-page-scope .fd-shell .fd-form-footer .fd-editor-actions button {
+    flex: 1;
+  }
+  .faculty-page-scope .fd-shell .fd-request-dialog {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    border-radius: 18px;
+  }
+  .faculty-page-scope .fd-shell .fd-dialog-card {
+    max-height: calc(100dvh - 26px);
+  }
+  .faculty-page-scope .fd-shell .fd-dialog-header {
+    padding: 20px 16px;
+    gap: 10px;
+  }
+  .faculty-page-scope .fd-shell .fd-dialog-header h2 {
+    font-size: 22px;
+  }
+  .faculty-page-scope .fd-shell .fd-dialog-body {
+    padding: 20px 16px;
+  }
+  .faculty-page-scope .fd-shell .fd-dialog-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .faculty-page-scope .fd-shell .fd-request-person {
+    flex-wrap: wrap;
+  }
+  .faculty-page-scope .fd-shell .fd-request-person > .fd-badge {
+    margin-left: 54px;
+  }
+  .faculty-page-scope .fd-shell .fd-dialog-footer {
+    padding: 16px;
+  }
+  .faculty-page-scope .fd-shell .fd-dialog-footer .fd-editor-actions {
+    width: 100%;
+  }
+  .faculty-page-scope .fd-shell .fd-dialog-footer .fd-editor-actions button {
+    flex: 1;
+  }
+}
