@@ -3,7 +3,7 @@ import weblogo from "./assets/weblogo.jpg";
 import wmsuLogo from "./assets/wmsuLogo.png";
 import facultyBanner from "./assets/faculty-banner.jpg";
 import "./FacultyDashboard.css";
-import { saveFacultyAvailability, updateBookingStatus } from "./api";
+import { saveFacultyAvailability, updateBookingStatus, saveProfile } from "./api";
 
 const NAV = [
   ["dashboard", "home", "Dashboard"],
@@ -76,6 +76,7 @@ export default function FacultyDashboard({
   allBookings = [],
   loadAllBookings,
   onAvailabilitySaved,
+  onProfileSaved,
   handleAccept,
   handleDecline,
   handleLogout,
@@ -152,11 +153,52 @@ export default function FacultyDashboard({
         start_minutes: toMinutes(availabilityStart),
         end_minutes: toMinutes(availabilityEnd),
       });
+      if (typeof onAvailabilitySaved === "function") onAvailabilitySaved(result.faculty);
       setAvailabilityMessage(result.message);
     } catch (error) {
       setAvailabilityError(error.message || "Failed to save availability.");
     } finally {
       setSavingAvailability(false);
+    }
+  }
+  async function handleRemoveAvailability() {
+    if (savingAvailability) return;
+    if (!window.confirm("Remove all consultation availability? Existing bookings will remain unchanged.")) return;
+    setSavingAvailability(true);
+    setAvailabilityMessage("");
+    setAvailabilityError("");
+    try {
+      const result = await saveFacultyAvailability({ available_days: [] });
+      setAvailabilityDays([]);
+      if (typeof onAvailabilitySaved === "function") onAvailabilitySaved(result.faculty);
+      setAvailabilityMessage(result.message);
+    } catch (error) {
+      setAvailabilityError(error.message || "Failed to remove availability.");
+    } finally {
+      setSavingAvailability(false);
+    }
+  }
+
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileDraft, setProfileDraft] = useState({});
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
+  const [profileError, setProfileError] = useState("");
+  async function handleSaveProfile(event) {
+    event.preventDefault();
+    if (savingProfile) return;
+    setSavingProfile(true);
+    setProfileMessage("");
+    setProfileError("");
+    try {
+      const result = await saveProfile(profileDraft);
+      if (typeof onProfileSaved === "function") onProfileSaved(result.faculty);
+      setEditingProfile(false);
+      setProfileMessage(result.message);
+    } catch (error) {
+      setProfileError(error.message || "Unable to save your profile.");
+    } finally {
+      setSavingProfile(false);
     }
   }
   const profile = profileData || {};
@@ -653,6 +695,7 @@ export default function FacultyDashboard({
                 Philippine time.
               </p>
 
+              <p>Removing availability stops new bookings. Existing bookings remain unchanged.</p>
               <form onSubmit={handleSaveAvailability}>
                 <fieldset disabled={savingAvailability}>
                   <legend>Consultation days</legend>
@@ -682,9 +725,6 @@ export default function FacultyDashboard({
                                 )
                               : previous.filter((value) => value !== index),
                           );
-                          if (typeof onAvailabilitySaved === "function") {
-                            onAvailabilitySaved(result.faculty);
-                          }
                           setAvailabilityMessage("");
                           setAvailabilityError("");
                         }}
@@ -743,6 +783,11 @@ export default function FacultyDashboard({
                   style={{ marginTop: "16px" }}
                 >
                   {savingAvailability ? "Saving..." : "Save Availability"}
+                </button>{" "}
+                <button type="button" className="fd-outline"
+                  disabled={savingAvailability || !faculty?.available_days?.length}
+                  onClick={handleRemoveAvailability}>
+                  Remove availability
                 </button>
               </form>
             </div>
@@ -762,12 +807,39 @@ export default function FacultyDashboard({
                 <dd>
                   {profile.department || faculty?.department || "Not provided"}
                 </dd>
+                <dt>Consultation room</dt>
+                <dd>{faculty?.room || "Not provided"}</dd>
                 <dt>Role</dt>
                 <dd>Faculty</dd>
               </dl>
-              <div className="fd-note">
-                Profile editing is not connected to a save endpoint yet.
-              </div>
+              {profileMessage && <p role="status">{profileMessage}</p>}
+              {profileError && <p role="alert">{profileError}</p>}
+              {editingProfile ? (
+                <form onSubmit={handleSaveProfile}>
+                  <fieldset disabled={savingProfile}>
+                    <legend>Edit profile</legend>
+                    {[["fullName", "Full name", 150], ["department", "Department", 150], ["room", "Consultation room", 150]].map(([key, label, max]) => (
+                      <label key={key} style={{ display: "block", marginBottom: 12 }}>
+                        {label}
+                        <input type="text" value={profileDraft[key] || ""} maxLength={max}
+                          required={key !== "room"} minLength={key === "fullName" ? 2 : undefined}
+                          onChange={(event) => setProfileDraft((draft) => ({ ...draft, [key]: event.target.value }))} />
+                      </label>
+                    ))}
+                    <button type="submit">{savingProfile ? "Saving..." : "Save Changes"}</button>{" "}
+                    <button type="button" className="fd-outline" onClick={() => {
+                      setEditingProfile(false);
+                      setProfileError("");
+                    }}>Cancel</button>
+                  </fieldset>
+                </form>
+              ) : <button type="button" className="fd-outline" onClick={() => {
+                setProfileDraft({ fullName: name, department: faculty?.department || "", room: faculty?.room || "" });
+                setProfileMessage("");
+                setProfileError("");
+                setEditingProfile(true);
+              }}>Edit Profile</button>}
+              <p className="fd-note">Your login email is managed by your administrator.</p>
             </div>
           )}
           {details && (
