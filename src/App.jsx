@@ -16,9 +16,15 @@ import {
   saveProfile,
 } from "./api";
 import FacultyDashboard from "./FacultyDashboard";
+import ProfileAvatar from "./ProfileAvatar";
+import ProfilePhotoEditor from "./ProfilePhotoEditor";
+import HoverInfoCard from "./HoverInfoCard";
+import BookingDetailsCard from "./BookingDetailsCard";
+import { DashboardHeader, DashboardSidebar } from "./DashboardShell";
 import "./App.css";
 import "./LandingPage.css";
 import "./Consistency.css";
+import "./DashboardShell.css";
 /*import BackendTest from './BackendTest';*/
 
 import weblogo from "./assets/weblogo.jpg";
@@ -369,14 +375,14 @@ function formatBookingDate(value) {
 function accountProfile(result) {
   if (result.role === "faculty") {
     const f = result.faculty;
-    return { fullName: f.name || "", email: f.email || "", department: f.department || "", room: f.room || "" };
+    return { fullName: f.name || "", email: f.email || "", department: f.department || "", room: f.room || "", photo: f.profile_photo || null };
   }
   const student = result.student;
   return {
     fullName: student.full_name || "", studentId: student.student_id || "",
     email: student.email || "", phone: student.phone || "", course: student.program || "",
     yearLevel: student.year_level || "", section: student.section || "",
-    department: "College of Computing Studies",
+    department: "College of Computing Studies", photo: student.profile_photo || null,
   };
 }
 /* APP*/
@@ -397,8 +403,9 @@ function App() {
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileDraft, setProfileDraft] = useState({});
   const [profileSaving, setProfileSaving] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoPending, setPhotoPending] = useState(false);
   const [profileError, setProfileError] = useState("");
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [selectedfacultyForBooking, setselectedfacultyForBooking] =
     useState(null);
   const [occupiedSlots, setOccupiedSlots] = useState([]);
@@ -576,7 +583,11 @@ function App() {
   }, [restoreAttempt]);
 
   async function handleSaveStudentProfile() {
-    if (profileSaving) return;
+    if (profileSaving || photoBusy) return;
+    if (photoPending) {
+      setProfileError("Save Photo or cancel its preview before saving your personal details.");
+      return;
+    }
     setProfileSaving(true);
     setProfileSaved(false);
     setProfileError("");
@@ -838,7 +849,6 @@ function App() {
       setToken(result.token);
       setCurrentRole(result.role);
       setLoginError("");
-      setIsUserMenuOpen(false);
       applyAccount(result);
       setIsProfileEditing(false);
       setProfileSaved(false);
@@ -866,6 +876,7 @@ function App() {
     setRestoreError("");
     setProfileError("");
     setProfileDraft({});
+    setPhotoPending(false);
     setProfileData({});
     setselectedfacultyForBooking(null);
     setCurrentFaculty(null);
@@ -1045,6 +1056,10 @@ function App() {
   /*DASHBOARD NAVIGATION */
 
   function handleDashboardNavigation(page) {
+    if (page !== "profile") {
+      setIsProfileEditing(false);
+      setPhotoPending(false);
+    }
     if (currentRole === "faculty") {
       setIsFacultyView(true);
       return;
@@ -1896,7 +1911,7 @@ function App() {
       (member) => String(member.id) === String(currentFaculty?.id),
     );
     return (
-      <div className="consult-app faculty-page-scope">
+      <div className="consult-app faculty-page-scope ct-dashboard-shell">
         <FacultyDashboard
           profileData={profileData}
           faculty={
@@ -1919,6 +1934,13 @@ function App() {
               ),
             );
           }}
+          onPhotoSaved={(photo) => {
+            setCurrentFaculty((current) => current ? { ...current, profile_photo: photo } : current);
+            setProfileData((current) => ({ ...current, photo }));
+            setFacultyList((current) => current.map((member) =>
+              String(member.id) === String(currentFaculty?.id) ? { ...member, profile_photo: photo } : member,
+            ));
+          }}
           onProfileSaved={(updatedFaculty) => {
             setCurrentFaculty(updatedFaculty);
             setProfileData(accountProfile({ role: "faculty", faculty: updatedFaculty }));
@@ -1936,192 +1958,25 @@ function App() {
 
   if (currentPage === "dashboard") {
     return (
-      <div className="dashboard-page student-dashboard-shell consult-app">
+      <div className="dashboard-page student-dashboard-shell consult-app ct-dashboard-shell">
         {/*TOP HEADER */}
 
-        <header className="dashboard-header">
-          {/* LOGO */}
-
-          <div className="dashboard-logo" onClick={handleHome}>
-            <ConsultBrand />
-          </div>
-
-          {/* TOP NAVIGATION */}
-
-          <div className="dashboard-top-nav">
-            {currentRole === "faculty" ? (
-              <button
-                className="top-nav-btn active"
-                onClick={() => {
-                  setIsFacultyView(true);
-                  loadAllBookings();
-                }}
-              >
-                Faculty Dashboard
-              </button>
-            ) : (
-              <>
-                <button
-                  className={
-                    activeDashboardPage === "dashboard"
-                      ? "top-nav-btn active"
-                      : "top-nav-btn"
-                  }
-                  onClick={() => handleDashboardNavigation("dashboard")}
-                >
-                  Home
-                </button>
-
-                <button
-                  className={
-                    activeDashboardPage === "facultyList"
-                      ? "top-nav-btn active"
-                      : "top-nav-btn"
-                  }
-                  onClick={() => handleDashboardNavigation("facultyList")}
-                >
-                  Find Faculty
-                </button>
-
-                <button
-                  className={
-                    activeDashboardPage === "bookings"
-                      ? "top-nav-btn active"
-                      : "top-nav-btn"
-                  }
-                  onClick={() => handleDashboardNavigation("bookings")}
-                >
-                  My Bookings
-                </button>
-
-                <button
-                  className={
-                    activeDashboardPage === "profile"
-                      ? "top-nav-btn active"
-                      : "top-nav-btn"
-                  }
-                  onClick={() => handleDashboardNavigation("profile")}
-                >
-                  Profile
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* USER */}
-
-          <div className="dashboard-user">
-            <div className="user-avatar">
-              <UserIcon />
-            </div>
-
-            <div className="user-information">
-              <strong>{profileData.fullName}</strong>
-
-              <span>{currentRole === "faculty" ? "Faculty" : "Student"}</span>
-            </div>
-
-            <button
-              className="user-arrow"
-              type="button"
-              aria-label="Open account menu"
-              aria-expanded={isUserMenuOpen}
-              onClick={() => setIsUserMenuOpen((open) => !open)}
-            >
-              ▼
-            </button>
-          </div>
-
-          {isUserMenuOpen && (
-            <div className="dashboard-account-menu" role="menu">
-              <button
-                className="dashboard-logout-button"
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setIsUserMenuOpen(false);
-                  handleLogout();
-                }}
-              >
-                Log Out
-              </button>
-            </div>
-          )}
-        </header>
+        <DashboardHeader name={profileData.fullName} role="Student" photo={profileData.photo}
+          onDashboard={() => handleDashboardNavigation("dashboard")}
+          onProfile={() => handleDashboardNavigation("profile")} onLogout={handleLogout} />
 
         {/* DASHBOARD BODY */}
 
-        <div className="dashboard-body">
+        <div className="dashboard-body ct-dashboard-layout">
           {/*SIDEBAR*/}
 
-          <aside className="dashboard-sidebar">
-            {currentRole === "faculty" ? (
-              <button
-                className="sidebar-btn active"
-                onClick={() => {
-                  setIsFacultyView(true);
-                  loadAllBookings();
-                }}
-              >
-                <CalendarIcon />
-                <span>Faculty Dashboard</span>
-              </button>
-            ) : (
-              <>
-                <button
-                  className={
-                    activeDashboardPage === "dashboard"
-                      ? "sidebar-btn active"
-                      : "sidebar-btn"
-                  }
-                  onClick={() => handleDashboardNavigation("dashboard")}
-                >
-                  <HomeIcon />
-
-                  <span>Dashboard</span>
-                </button>
-
-                <button
-                  className={
-                    activeDashboardPage === "facultyList"
-                      ? "sidebar-btn active"
-                      : "sidebar-btn"
-                  }
-                  onClick={() => handleDashboardNavigation("facultyList")}
-                >
-                  <SearchIcon />
-
-                  <span>Find Faculty</span>
-                </button>
-
-                <button
-                  className={
-                    activeDashboardPage === "bookings"
-                      ? "sidebar-btn active"
-                      : "sidebar-btn"
-                  }
-                  onClick={() => handleDashboardNavigation("bookings")}
-                >
-                  <CalendarIcon />
-
-                  <span>My Bookings</span>
-                </button>
-
-                <button
-                  className={
-                    activeDashboardPage === "profile"
-                      ? "sidebar-btn active"
-                      : "sidebar-btn"
-                  }
-                  onClick={() => handleDashboardNavigation("profile")}
-                >
-                  <UserIcon />
-
-                  <span>Profile</span>
-                </button>
-              </>
-            )}
-          </aside>
+          <DashboardSidebar label="Student navigation" activePage={activeDashboardPage}
+            onNavigate={handleDashboardNavigation} items={[
+              ["dashboard", "home", "Dashboard"],
+              ["facultyList", "search", "Find Faculty"],
+              ["bookings", "calendar", "My Bookings"],
+              ["profile", "user", "Profile"],
+            ]} />
 
           {/*MAIN DASHBOARD CONTENT*/}
 
@@ -2282,25 +2137,8 @@ function App() {
                           className="faculty-card"
                           key={faculty.id || faculty.name}
                         >
-                          <div
-                            className={
-                              "faculty-avatar " +
-                              (faculty.style ||
-                                [
-                                  "avatar-one",
-                                  "avatar-two",
-                                  "avatar-three",
-                                  "avatar-four",
-                                ][index % 4])
-                            }
-                          >
-                            {faculty.initials ||
-                              (faculty.name || "Faculty")
-                                .split(" ")
-                                .slice(-2)
-                                .map((part) => part[0])
-                                .join("")}
-                          </div>
+                          <ProfileAvatar name={faculty.name} photo={faculty.profile_photo}
+                            className={"faculty-avatar " + (faculty.style || ["avatar-one", "avatar-two", "avatar-three", "avatar-four"][index % 4])} />
                           <h3>{faculty.name}</h3>
                           <p className="faculty-department">
                             {faculty.department}
@@ -2352,29 +2190,27 @@ function App() {
                       </div>
 
                       {nextBooking ? (
-                        <div className="consultation-card">
-                          <div className="consultation-icon">
-                            <CalendarIcon />
-                          </div>
-                          <div className="consultation-info">
-                            <h3>
-                              {nextBooking.faculty_name ||
-                                nextBooking.faculty ||
-                                "Faculty Member"}
-                            </h3>
-                            <p>{nextBooking.department}</p>
-                            <div>
-                              {formatBookingDate(
-                                nextBooking.date_key ||
-                                  nextBooking.dateKey ||
-                                  nextBooking.date,
-                              )}{" "}
-                              · {nextBooking.time_slot || nextBooking.time}
-                            </div>
-                            <div>{nextBooking.location}</div>
-                          </div>
-                          <span className="confirmed">Confirmed</span>
-                        </div>
+                        <HoverInfoCard key={nextBooking.id || "upcoming"} className="consultation-card"
+                          label={`Consultation details with ${nextBooking.faculty_name || nextBooking.faculty || "faculty"}`}
+                          summary={<>
+                            <span className="consultation-icon"><CalendarIcon /></span>
+                            <span className="consultation-info">
+                              <strong className="ct-consultation-name">{nextBooking.faculty_name || nextBooking.faculty || "Faculty Member"}</strong>
+                              <span className="ct-consultation-department">{nextBooking.department || "Department not provided"}</span>
+                              <span className="ct-consultation-date">{formatBookingDate(nextBooking.date_key || nextBooking.dateKey || nextBooking.date)} · {nextBooking.time_slot || nextBooking.time}</span>
+                              <span className="ct-hover-hint" aria-hidden="true"><span className="ct-hover-desktop-hint">Hover for details</span><span className="ct-hover-touch-hint">Tap for details</span><ChevronIcon /></span>
+                            </span>
+                            <span className="confirmed">Confirmed</span>
+                          </>}>
+                          <dl className="ct-consultation-details">
+                            <div className="ct-consultation-purpose"><dt>Consultation purpose</dt><dd>{nextBooking.subject || "Purpose not provided"}</dd></div>
+                            <div><dt>Date</dt><dd>{formatBookingDate(nextBooking.date_key || nextBooking.dateKey || nextBooking.date)}</dd></div>
+                            <div><dt>Time · Manila</dt><dd>{nextBooking.time_slot || nextBooking.time || "Time to be confirmed"}</dd></div>
+                            <div><dt>Location</dt><dd>{nextBooking.location || nextBooking.room || "Location to be confirmed"}</dd></div>
+                            <div><dt>Status</dt><dd>{nextBooking.status || "Confirmed"}</dd></div>
+                          </dl>
+                          <button type="button" className="ct-hover-action" onClick={() => handleDashboardNavigation("bookings")}>Open My Bookings<ChevronIcon /></button>
+                        </HoverInfoCard>
                       ) : (
                         <p className="availability-demo-note">
                           No upcoming confirmed consultations. Pending requests
@@ -2599,11 +2435,8 @@ function App() {
                         key={facultyList.name}
                       >
                         <div className="directory-card-top">
-                          <div
-                            className={`faculty-avatar ${facultyList.style}`}
-                          >
-                            {facultyList.initials}
-                          </div>
+                          <ProfileAvatar name={facultyList.name} photo={facultyList.profile_photo}
+                            className={`faculty-avatar ${facultyList.style || "avatar-one"}`} />
                           <span className="faculty-status">
                             <span></span> Consultation hours
                           </span>
@@ -3022,76 +2855,10 @@ function App() {
                 </div>
                 <div className="booking-cards-list">
                   {visibleBookings.map((booking) => (
-                    <article className="booking-card" key={booking.id}>
-                      <div className="booking-date-block">
-                        <CalendarIcon />
-                        <span>Consultation</span>
-                        <strong>
-                          {String(
-                            booking.date_key || booking.dateKey || "",
-                          ).slice(8, 10) || "—"}
-                        </strong>
-                        <small>Manila time</small>
-                      </div>
-                      <div className="booking-card-main">
-                        <div className="booking-card-title-row">
-                          <div>
-                            <h3>
-                              {booking.faculty_name ||
-                                booking.faculty ||
-                                "Faculty Member"}
-                            </h3>
-                            <p>
-                              {booking.department || "Faculty consultation"}
-                            </p>
-                          </div>
-                          <span
-                            className={
-                              "booking-status status-" +
-                              String(booking.status || "Pending").toLowerCase()
-                            }
-                          >
-                            {booking.status || "Pending"}
-                          </span>
-                        </div>
-                        <div className="booking-subject">
-                          <BookIcon />
-                          {booking.subject || "Consultation"}
-                        </div>
-
-                        {isActive(booking) &&
-                          bookingStart(booking) > Date.now() && (
-                            <button
-                              type="button"
-                              className="bookings-find-button"
-                              onClick={() => handleCancelBooking(booking.id)}
-                            >
-                              Cancel Booking
-                            </button>
-                          )}
-
-                        <div className="booking-details-row">
-                          <span>
-                            <CalendarIcon />
-                            {formatBookingDate(
-                              booking.date_key ||
-                                booking.dateKey ||
-                                booking.date,
-                            )}
-                          </span>
-                          <span>
-                            <ClockIcon />
-                            {booking.time_slot || booking.time}
-                          </span>
-                          {(booking.location || booking.room) && (
-                            <span>
-                              <UserIcon />
-                              {booking.location || booking.room}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </article>
+                    <BookingDetailsCard key={booking.id} booking={booking}
+                      dateLabel={formatBookingDate(booking.date_key || booking.dateKey || booking.date)}
+                      canCancel={isActive(booking) && bookingStart(booking) > Date.now()}
+                      onCancel={handleCancelBooking} />
                   ))}
                   {!visibleBookings.length && (
                     <div className="bookings-empty-state">
@@ -3139,15 +2906,7 @@ function App() {
                 </div>
 
                 <section className="profile-overview-card">
-                  <div className="profile-avatar">
-                    {profileData.fullName
-                      .split(" ")
-                      .filter(Boolean)
-                      .slice(0, 2)
-                      .map((part) => part[0])
-                      .join("")
-                      .toUpperCase()}
-                  </div>
+                  <ProfileAvatar className="profile-avatar" name={profileData.fullName} photo={profileData.photo} />
                   <div className="profile-overview-info">
                     <h2>{profileData.fullName || "Student Name"}</h2>
                     <p>
@@ -3160,9 +2919,10 @@ function App() {
                   </div>
                   <button
                     className="profile-edit-button"
-                    disabled={profileSaving}
+                    disabled={profileSaving || photoBusy}
                     onClick={() => {
                       setProfileDraft({ ...profileData });
+                      setPhotoPending(false);
                       setIsProfileEditing((current) => !current);
                       setProfileSaved(false);
                       setProfileError("");
@@ -3179,7 +2939,6 @@ function App() {
                   </div>
                 )}
 
-                {profileError && <p role="alert">{profileError}</p>}
                 <div className="profile-content-grid">
                   <section className="profile-details-card">
                     <div className="profile-section-heading">
@@ -3188,6 +2947,16 @@ function App() {
                         <p>Keep your contact information up to date.</p>
                       </div>
                     </div>
+                    {isProfileEditing && (
+                      <div className="ct-photo-panel is-inline" aria-label="Edit profile photo">
+                        <ProfilePhotoEditor name={profileData.fullName} photo={profileData.photo}
+                          disabled={profileSaving} onBusyChange={setPhotoBusy} onDraftChange={(pending) => { setPhotoPending(pending); setProfileError(""); }}
+                          onSaved={(photo) => {
+                            setProfileData((current) => ({ ...current, photo }));
+                            setCurrentStudent((current) => current ? { ...current, profile_photo: photo } : current);
+                          }} />
+                      </div>
+                    )}
                     <div className="profile-fields-grid">
                       <label className="profile-field">
                         <span>Full Name</span>
@@ -3195,7 +2964,7 @@ function App() {
                           type="text"
                           autoComplete="name"
                           value={(isProfileEditing ? profileDraft.fullName : profileData.fullName) || ""}
-                          readOnly={!isProfileEditing || profileSaving}
+                          readOnly={!isProfileEditing || profileSaving || photoBusy}
                           onChange={(event) =>
                             setProfileDraft((current) => ({
                               ...current,
@@ -3209,7 +2978,7 @@ function App() {
                         <input
                           type="text"
                           value={(isProfileEditing ? profileDraft.studentId : profileData.studentId) || ""}
-                          readOnly={!isProfileEditing || profileSaving}
+                          readOnly={!isProfileEditing || profileSaving || photoBusy}
                           onChange={(event) =>
                             setProfileDraft((current) => ({
                               ...current,
@@ -3224,7 +2993,7 @@ function App() {
                           type="email"
                           autoComplete="email"
                           value={(isProfileEditing ? profileDraft.email : profileData.email) || ""}
-                          readOnly={!isProfileEditing || profileSaving}
+                          readOnly={!isProfileEditing || profileSaving || photoBusy}
                           onChange={(event) =>
                             setProfileDraft((current) => ({
                               ...current,
@@ -3239,7 +3008,7 @@ function App() {
                           type="tel"
                           autoComplete="tel"
                           value={(isProfileEditing ? profileDraft.phone : profileData.phone) || ""}
-                          readOnly={!isProfileEditing || profileSaving}
+                          readOnly={!isProfileEditing || profileSaving || photoBusy}
                           onChange={(event) =>
                             setProfileDraft((current) => ({
                               ...current,
@@ -3253,7 +3022,7 @@ function App() {
                         <input
                           type="text"
                           value={(isProfileEditing ? profileDraft.yearLevel : profileData.yearLevel) || ""}
-                          readOnly={!isProfileEditing || profileSaving}
+                          readOnly={!isProfileEditing || profileSaving || photoBusy}
                           onChange={(event) =>
                             setProfileDraft((current) => ({
                               ...current,
@@ -3267,7 +3036,7 @@ function App() {
                         <input
                           type="text"
                           value={(isProfileEditing ? profileDraft.section : profileData.section) || ""}
-                          readOnly={!isProfileEditing || profileSaving}
+                          readOnly={!isProfileEditing || profileSaving || photoBusy}
                           onChange={(event) =>
                             setProfileDraft((current) => ({
                               ...current,
@@ -3277,13 +3046,15 @@ function App() {
                         />
                       </label>
                     </div>
+                    {profileError && <p className="profile-edit-error" role="alert">{profileError}</p>}
                     {isProfileEditing && (
                       <div className="profile-form-actions">
                         <button
                           className="profile-discard-button"
-                          disabled={profileSaving}
+                          disabled={profileSaving || photoBusy}
                           onClick={() => {
                             setIsProfileEditing(false);
+                            setPhotoPending(false);
                             setProfileDraft({ ...profileData });
                             setProfileSaved(false);
                             setProfileError("");
@@ -3293,7 +3064,7 @@ function App() {
                         </button>
                         <button
                           className="profile-save-button"
-                          disabled={profileSaving}
+                          disabled={profileSaving || photoBusy}
                           onClick={handleSaveStudentProfile}
                         >
                           {profileSaving ? "Saving..." : "Save Changes"}

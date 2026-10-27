@@ -3,13 +3,14 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const { registerAuth } = require("./auth.cjs");
+const { registerPhotoRoutes } = require("./profile-photo.cjs");
 
 const app = express();
 const PORT = 5000;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "256kb" }));
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -28,6 +29,7 @@ pool
   .catch((err) => console.error("❌ Database connection failed:", err.message));
 
 const { requireAuth, requireRole } = registerAuth(app, pool, JWT_SECRET);
+registerPhotoRoutes(app, pool, requireAuth);
 
 // ====================== FACULTY ======================
 
@@ -396,11 +398,12 @@ app.get(
     try {
       const result = await pool.query(
         `
-      SELECT b.*, 
-             s.full_name AS student_name, 
-             s.student_id, 
-             s.email AS student_email,
-             f.name AS faculty_name
+      SELECT b.*,
+       s.full_name AS student_name,
+       s.student_id,
+       s.profile_photo AS student_photo,
+       s.email AS student_email,
+       f.name AS faculty_name
       FROM bookings b
       JOIN students s ON b.student_id = s.id
       JOIN faculty f ON b.faculty_id = f.id
@@ -416,6 +419,17 @@ app.get(
     }
   },
 );
+
+// Keep upload parser errors readable by the frontend.
+app.use((error, req, res, next) => {
+  if (error.type === "entity.too.large")
+    return res
+      .status(413)
+      .json({ message: "That upload is too large. Choose a smaller photo." });
+  if (error instanceof SyntaxError && error.status === 400)
+    return res.status(400).json({ message: "Invalid request data." });
+  next(error);
+});
 
 // ====================== START SERVER ======================
 
