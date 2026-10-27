@@ -144,19 +144,113 @@ app.post(
   requireRole("student"),
   async (req, res) => {
     try {
-      const { facultyId, dateKey, timeSlot, subject } = req.body;
+      const { facultyId, dateKey, timeSlot, subject } = req.body || {};
       const studentId = req.user.id;
 
-      if (!studentId || !facultyId || !dateKey || !timeSlot || !subject) {
-        return res.status(400).json({ message: "Missing required fields." });
+      if (!Number.isSafeInteger(facultyId) || facultyId < 1) {
+        return res.status(400).json({ message: "Invalid faculty ID." });
+      }
+
+      const date =
+        typeof dateKey === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateKey)
+          ? new Date(`${dateKey}T00:00:00Z`)
+          : null;
+
+      if (
+        !date ||
+        !Number.isFinite(date.getTime()) ||
+        date.toISOString().slice(0, 10) !== dateKey
+      ) {
+        return res.status(400).json({ message: "Choose a valid date." });
+      }
+
+      if (
+        typeof subject !== "string" ||
+        subject.trim().length < 5 ||
+        subject.trim().length > 300
+      ) {
+        return res.status(400).json({
+          message: "Enter a consultation topic between 5 and 300 characters.",
+        });
+      }
+
+      const timeMatch =
+        typeof timeSlot === "string"
+          ? timeSlot.match(
+              /^([1-9]|1[0-2]):([0-5]\d) (AM|PM) - ([1-9]|1[0-2]):([0-5]\d) (AM|PM)$/,
+            )
+          : null;
+
+      if (!timeMatch) {
+        return res.status(400).json({ message: "Choose a valid time slot." });
+      }
+
+      const startMinute =
+        ((Number(timeMatch[1]) % 12) + (timeMatch[3] === "PM" ? 12 : 0)) * 60 +
+        Number(timeMatch[2]);
+
+      const endMinute = startMinute + 30;
+
+      const formatTime = (minutes) => {
+        const hour = Math.floor(minutes / 60) % 24;
+        return (
+          (hour % 12 || 12) +
+          ":" +
+          String(minutes % 60).padStart(2, "0") +
+          (hour < 12 ? " AM" : " PM")
+        );
+      };
+
+      if (
+        endMinute > 1440 ||
+        timeSlot !== `${formatTime(startMinute)} - ${formatTime(endMinute)}`
+      ) {
+        return res.status(400).json({
+          message: "Choose a valid 30-minute consultation slot.",
+        });
+      }
+
+      const startsAt = Date.parse(
+        `${dateKey}T${String(Math.floor(startMinute / 60)).padStart(2, "0")}:${String(
+          startMinute % 60,
+        ).padStart(2, "0")}:00+08:00`,
+      );
+
+      if (!Number.isFinite(startsAt) || startsAt <= Date.now()) {
+        return res.status(400).json({
+          message: "This consultation time has already passed.",
+        });
       }
 
       const result = await pool.query(
-        `INSERT INTO bookings (student_id, faculty_id, date_key, time_slot, subject, status)
-       VALUES ($1, $2, $3, $4, $5, 'Pending')
-       RETURNING *`,
-        [studentId, facultyId, dateKey, timeSlot, subject],
+        `INSERT INTO bookings
+           (student_id, faculty_id, date_key, time_slot, subject, status)
+         SELECT $1, f.id, $3, $4, $5, 'Pending'
+         FROM faculty f
+         WHERE f.id = $2
+           AND $8::integer = ANY(f.available_days)
+           AND $6::integer >= f.start_minutes
+           AND $7::integer <= f.end_minutes
+           AND MOD($6::integer - f.start_minutes, 30) = 0
+         RETURNING *`,
+        [
+          studentId,
+          facultyId,
+          dateKey,
+          timeSlot,
+          subject.trim(),
+          startMinute,
+          endMinute,
+          date.getUTCDay(),
+        ],
       );
+
+      if (!result.rows.length) {
+        return res.status(409).json({
+          message:
+            "This time is outside the faculty's current consultation schedule. Reopen availability and choose another slot.",
+        });
+      }
 
       res.status(201).json({
         message: "Booking created successfully!",
