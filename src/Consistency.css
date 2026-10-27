@@ -80,16 +80,18 @@ body:has(.consult-app) {
 }
 .consult-app .consult-brand .consult-brand-name {
   display: inline;
-  color: #8c1016;
+  color: transparent;
+  background-image: linear-gradient(135deg, #df0109, #6d191c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-size: 25px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: normal;
   white-space: nowrap;
-  background: none;
-  -webkit-text-fill-color: currentColor;
 }
-/* Identical header footprint and three-column alignment on all pages. */
+
 .consult-app.ct-home {
   max-width: 1648px;
   margin: 0 auto;
@@ -394,8 +396,7 @@ body:has(.consult-app) {
   padding: 6px 10px;
   border-radius: 20px;
 }
-/* Landing page: only the nav (brand, links, Log In) is styled here. Everything else is in the landing CSS file. */
-/* Auth pages no longer scale font sizes with viewport height. */
+
 .consult-app.redesigned-login-page {
   --u0: 1px;
   --u: 1px;
