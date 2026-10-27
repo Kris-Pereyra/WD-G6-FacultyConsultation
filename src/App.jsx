@@ -11,6 +11,9 @@ import {
   updateBookingStatus,
   clearAuthToken,
   cancelBooking,
+  getAuthToken,
+  getCurrentUser,
+  saveProfile,
 } from "./api";
 import FacultyDashboard from "./FacultyDashboard";
 import "./App.css";
@@ -363,6 +366,19 @@ function formatBookingDate(value) {
         year: "numeric",
       });
 }
+function accountProfile(result) {
+  if (result.role === "faculty") {
+    const f = result.faculty;
+    return { fullName: f.name || "", email: f.email || "", department: f.department || "", room: f.room || "" };
+  }
+  const student = result.student;
+  return {
+    fullName: student.full_name || "", studentId: student.student_id || "",
+    email: student.email || "", phone: student.phone || "", course: student.program || "",
+    yearLevel: student.year_level || "", section: student.section || "",
+    department: "College of Computing Studies",
+  };
+}
 /* APP*/
 
 function App() {
@@ -379,6 +395,9 @@ function App() {
   const [bookingSearch, setBookingSearch] = useState("");
   const [isProfileEditing, setIsProfileEditing] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
+  const [profileDraft, setProfileDraft] = useState({});
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [selectedfacultyForBooking, setselectedfacultyForBooking] =
     useState(null);
@@ -489,22 +508,90 @@ function App() {
     };
   }, [legalDoc]);
   const [profileData, setProfileData] = useState({
-    fullName: "",
-    studentId: "Student ID not set",
-    email: "",
-    phone: "Not provided",
-    course: "BS Computer Science",
-    yearLevel: "2nd Year",
-    section: "Not set",
-    department: "College of Computing Studies",
+    fullName: "", studentId: "", email: "", phone: "", course: "",
+    yearLevel: "", section: "", department: "",
   });
-  // In-memory demo data is cleared on logout/reload; never treat this as a database.
+  // Bookings are loaded from the API after authentication.
   const [bookings, setBookings] = useState([]);
   const [bookingError, setBookingError] = useState("");
   const [bookingNotice, setBookingNotice] = useState("");
   const [facultyList, setFacultyList] = useState([]);
   const [currentStudent, setCurrentStudent] = useState(null);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(getAuthToken);
+  const [restoringSession, setRestoringSession] = useState(() => Boolean(getAuthToken()));
+  const [restoreError, setRestoreError] = useState("");
+  const [restoreAttempt, setRestoreAttempt] = useState(0);
+
+  function applyAccount(result) {
+    setCurrentRole(result.role);
+    setCurrentFaculty(result.role === "faculty" ? result.faculty : null);
+    setCurrentStudent(result.role === "student" ? result.student : null);
+    setIsFacultyView(result.role === "faculty");
+    setProfileData(accountProfile(result));
+  }
+
+  useEffect(() => {
+    function expireSession() {
+      setToken(null);
+      setCurrentRole(null);
+      setCurrentStudent(null);
+      setCurrentFaculty(null);
+      setBookings([]);
+      setAllBookings([]);
+      setProfileData({});
+      setIsProfileEditing(false);
+      setselectedfacultyForBooking(null);
+      setIsFacultyView(false);
+      setRestoringSession(false);
+      setCurrentPage("login");
+      setLoginError("Your session has expired. Please log in again.");
+    }
+    window.addEventListener("consulttime:session-expired", expireSession);
+    return () => window.removeEventListener("consulttime:session-expired", expireSession);
+  }, []);
+
+  useEffect(() => {
+    if (!getAuthToken()) return;
+    let cancelled = false;
+    getCurrentUser().then((result) => {
+      if (cancelled) return;
+      applyAccount(result);
+      setToken(getAuthToken());
+      setCurrentPage("dashboard");
+      setRestoringSession(false);
+    }).catch((error) => {
+      if (cancelled) return;
+      if (error.status === 401) {
+        clearAuthToken();
+        setToken(null);
+        setCurrentPage("login");
+        setLoginError("Your session has expired. Please log in again.");
+        setRestoringSession(false);
+      } else {
+        // A temporary outage must not discard a valid stored session.
+        setRestoreError(error.message || "Unable to reconnect. Please try again.");
+      }
+    });
+    return () => { cancelled = true; };
+  }, [restoreAttempt]);
+
+  async function handleSaveStudentProfile() {
+    if (profileSaving) return;
+    setProfileSaving(true);
+    setProfileSaved(false);
+    setProfileError("");
+    try {
+      const result = await saveProfile(profileDraft);
+      applyAccount(result);
+      setIsProfileEditing(false);
+      setProfileSaved(true);
+    } catch (error) {
+      setProfileError(error.message || "Unable to save your profile.");
+    } finally {
+      setProfileSaving(false);
+    }
+  }
+
   useEffect(() => {
     if (!token || currentPage !== "dashboard") return;
     if (currentRole !== "student" && currentRole !== "faculty") return;
@@ -714,16 +801,7 @@ function App() {
       setIsFacultyView(false);
       setToken(result.token);
       setCurrentStudent(result.student);
-      setProfileData({
-        fullName: result.student.full_name,
-        studentId: result.student.student_id,
-        email: result.student.email,
-        phone: result.student.phone || "Not provided",
-        course: result.student.program,
-        yearLevel: result.student.year_level,
-        section: "Not set",
-        department: "College of Computing Studies",
-      });
+      setProfileData(accountProfile(result));
 
       setSignupForm(emptySignup);
       handleDashboard();
@@ -761,36 +839,15 @@ function App() {
       setCurrentRole(result.role);
       setLoginError("");
       setIsUserMenuOpen(false);
-      if (result.role === "faculty") {
-        setCurrentFaculty(result.faculty);
-        setCurrentStudent(null);
-        setProfileData((current) => ({
-          ...current,
-          fullName: result.faculty.name,
-          email: result.faculty.email,
-          department: result.faculty.department,
-        }));
-        setBookings([]);
-        setIsFacultyView(true);
-        setCurrentPage("dashboard");
-        await loadAllBookings();
-      } else {
-        setCurrentFaculty(null);
-        setCurrentStudent(result.student);
-        setIsFacultyView(false);
-        setProfileData({
-          fullName: result.student.full_name,
-          studentId: result.student.student_id,
-          email: result.student.email,
-          phone: result.student.phone || "Not provided",
-          course: result.student.program,
-          yearLevel: result.student.year_level,
-          section: "Not set",
-          department: "College of Computing Studies",
-        });
-        setBookings(await getStudentBookings(result.student.id));
-        handleDashboard();
-      }
+      applyAccount(result);
+      setIsProfileEditing(false);
+      setProfileSaved(false);
+      setProfileError("");
+      setActiveDashboardPage("dashboard");
+      setCurrentPage("dashboard");
+      setBookings([]);
+      setAllBookings([]);
+      setLoginPassword("");
       window.scrollTo(0, 0);
     } catch (err) {
       clearAuthToken();
@@ -805,6 +862,12 @@ function App() {
 
   function handleLogout() {
     clearAuthToken();
+    setRestoringSession(false);
+    setRestoreError("");
+    setProfileError("");
+    setProfileDraft({});
+    setProfileData({});
+    setselectedfacultyForBooking(null);
     setCurrentFaculty(null);
     setCurrentRole(null);
     setAllBookings([]);
@@ -988,6 +1051,19 @@ function App() {
     }
     setIsFacultyView(false);
     setActiveDashboardPage(page);
+  }
+
+  if (restoringSession) {
+    return (
+      <main className="consult-app" style={{ minHeight: "100vh", display: "grid", placeContent: "center", padding: 24, textAlign: "center" }}>
+        <h1>ConsultTime</h1>
+        {restoreError ? <>
+          <p role="alert">{restoreError}</p>
+          <button type="button" onClick={() => { setRestoreError(""); setRestoreAttempt((attempt) => attempt + 1); }}>Retry connection</button>
+          <button type="button" onClick={handleLogout}>Sign out</button>
+        </> : <p role="status">Restoring your session…</p>}
+      </main>
+    );
   }
 
   /*LOGIN PAGE */
@@ -1842,6 +1918,13 @@ function App() {
                   : member,
               ),
             );
+          }}
+          onProfileSaved={(updatedFaculty) => {
+            setCurrentFaculty(updatedFaculty);
+            setProfileData(accountProfile({ role: "faculty", faculty: updatedFaculty }));
+            setFacultyList((current) => current.map((member) =>
+              String(member.id) === String(updatedFaculty.id) ? { ...member, ...updatedFaculty } : member,
+            ));
           }}
           handleAccept={handleAccept}
           handleDecline={handleDecline}
@@ -3077,9 +3160,12 @@ function App() {
                   </div>
                   <button
                     className="profile-edit-button"
+                    disabled={profileSaving}
                     onClick={() => {
+                      setProfileDraft({ ...profileData });
                       setIsProfileEditing((current) => !current);
                       setProfileSaved(false);
+                      setProfileError("");
                     }}
                   >
                     <UserIcon />{" "}
@@ -3089,10 +3175,11 @@ function App() {
 
                 {profileSaved && (
                   <div className="profile-success-message">
-                    Your profile changes have been saved for this session.
+                    Your profile changes have been saved.
                   </div>
                 )}
 
+                {profileError && <p role="alert">{profileError}</p>}
                 <div className="profile-content-grid">
                   <section className="profile-details-card">
                     <div className="profile-section-heading">
@@ -3107,10 +3194,10 @@ function App() {
                         <input
                           type="text"
                           autoComplete="name"
-                          value={profileData.fullName}
-                          readOnly={!isProfileEditing}
+                          value={(isProfileEditing ? profileDraft.fullName : profileData.fullName) || ""}
+                          readOnly={!isProfileEditing || profileSaving}
                           onChange={(event) =>
-                            setProfileData((current) => ({
+                            setProfileDraft((current) => ({
                               ...current,
                               fullName: event.target.value,
                             }))
@@ -3121,10 +3208,10 @@ function App() {
                         <span>Student ID</span>
                         <input
                           type="text"
-                          value={profileData.studentId}
-                          readOnly={!isProfileEditing}
+                          value={(isProfileEditing ? profileDraft.studentId : profileData.studentId) || ""}
+                          readOnly={!isProfileEditing || profileSaving}
                           onChange={(event) =>
-                            setProfileData((current) => ({
+                            setProfileDraft((current) => ({
                               ...current,
                               studentId: event.target.value,
                             }))
@@ -3136,10 +3223,10 @@ function App() {
                         <input
                           type="email"
                           autoComplete="email"
-                          value={profileData.email}
-                          readOnly={!isProfileEditing}
+                          value={(isProfileEditing ? profileDraft.email : profileData.email) || ""}
+                          readOnly={!isProfileEditing || profileSaving}
                           onChange={(event) =>
-                            setProfileData((current) => ({
+                            setProfileDraft((current) => ({
                               ...current,
                               email: event.target.value,
                             }))
@@ -3151,10 +3238,10 @@ function App() {
                         <input
                           type="tel"
                           autoComplete="tel"
-                          value={profileData.phone}
-                          readOnly={!isProfileEditing}
+                          value={(isProfileEditing ? profileDraft.phone : profileData.phone) || ""}
+                          readOnly={!isProfileEditing || profileSaving}
                           onChange={(event) =>
-                            setProfileData((current) => ({
+                            setProfileDraft((current) => ({
                               ...current,
                               phone: event.target.value,
                             }))
@@ -3165,10 +3252,10 @@ function App() {
                         <span>Year Level</span>
                         <input
                           type="text"
-                          value={profileData.yearLevel}
-                          readOnly={!isProfileEditing}
+                          value={(isProfileEditing ? profileDraft.yearLevel : profileData.yearLevel) || ""}
+                          readOnly={!isProfileEditing || profileSaving}
                           onChange={(event) =>
-                            setProfileData((current) => ({
+                            setProfileDraft((current) => ({
                               ...current,
                               yearLevel: event.target.value,
                             }))
@@ -3179,10 +3266,10 @@ function App() {
                         <span>Section</span>
                         <input
                           type="text"
-                          value={profileData.section}
-                          readOnly={!isProfileEditing}
+                          value={(isProfileEditing ? profileDraft.section : profileData.section) || ""}
+                          readOnly={!isProfileEditing || profileSaving}
                           onChange={(event) =>
-                            setProfileData((current) => ({
+                            setProfileDraft((current) => ({
                               ...current,
                               section: event.target.value,
                             }))
@@ -3194,21 +3281,22 @@ function App() {
                       <div className="profile-form-actions">
                         <button
                           className="profile-discard-button"
+                          disabled={profileSaving}
                           onClick={() => {
                             setIsProfileEditing(false);
+                            setProfileDraft({ ...profileData });
                             setProfileSaved(false);
+                            setProfileError("");
                           }}
                         >
                           Cancel
                         </button>
                         <button
                           className="profile-save-button"
-                          onClick={() => {
-                            setIsProfileEditing(false);
-                            setProfileSaved(true);
-                          }}
+                          disabled={profileSaving}
+                          onClick={handleSaveStudentProfile}
                         >
-                          Save Changes
+                          {profileSaving ? "Saving..." : "Save Changes"}
                         </button>
                       </div>
                     )}

@@ -3533,7 +3533,7 @@ input {
 .signup-label {
   display: block;
   margin: 0 0 calc(var(--u) * 5.5);
-
+}
 .signup-field.wide {
   grid-column: 1 / -1;
 }
@@ -3567,7 +3567,6 @@ button.signup-link:focus-visible {
   outline-offset: 2px;
   border-radius: 2px;
 }
-
 
 .legal-modal-backdrop {
   position: fixed;
@@ -5391,5 +5390,4 @@ body:has(.student-dashboard-shell) {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-}
 }

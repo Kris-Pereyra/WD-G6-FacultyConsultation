@@ -52,15 +52,15 @@ app.put(
 
     if (
       !Array.isArray(available_days) ||
-      available_days.length === 0 ||
       !available_days.every(
         (day) => Number.isInteger(day) && day >= 0 && day <= 6,
       ) ||
-      !Number.isInteger(start_minutes) ||
-      !Number.isInteger(end_minutes) ||
-      start_minutes < 0 ||
-      end_minutes > 1440 ||
-      end_minutes - start_minutes < 30
+      (available_days.length > 0 &&
+        (!Number.isInteger(start_minutes) ||
+          !Number.isInteger(end_minutes) ||
+          start_minutes < 0 ||
+          end_minutes > 1440 ||
+          end_minutes - start_minutes < 30))
     ) {
       return res.status(400).json({
         message:
@@ -71,14 +71,16 @@ app.put(
     try {
       const result = await pool.query(
         `UPDATE faculty
-         SET available_days = $1, start_minutes = $2, end_minutes = $3
+         SET available_days = $1,
+             start_minutes = COALESCE($2, start_minutes),
+             end_minutes = COALESCE($3, end_minutes)
          WHERE id = $4
          RETURNING id, name, department, room,
                    available_days, start_minutes, end_minutes`,
         [
           [...new Set(available_days)].sort((a, b) => a - b),
-          start_minutes,
-          end_minutes,
+          available_days.length ? start_minutes : null,
+          available_days.length ? end_minutes : null,
           req.user.facultyId,
         ],
       );
@@ -88,7 +90,9 @@ app.put(
       }
 
       res.json({
-        message: "Availability saved successfully.",
+        message: available_days.length
+          ? "Availability saved successfully."
+          : "Availability removed. Existing bookings are unchanged.",
         faculty: result.rows[0],
       });
     } catch (error) {
