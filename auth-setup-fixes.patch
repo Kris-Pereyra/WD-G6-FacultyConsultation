@@ -1,0 +1,736 @@
+diff --git a/.env.example b/.env.example
+new file mode 100644
+--- /dev/null
++++ b/.env.example
+@@ -0,0 +1 @@
++VITE_API_URL=http://localhost:5000/api
+diff --git a/Backend/.env.example b/Backend/.env.example
+new file mode 100644
+--- /dev/null
++++ b/Backend/.env.example
+@@ -0,0 +1,8 @@
++DB_HOST=localhost
++DB_PORT=5432
++DB_NAME=faculty_consultation
++DB_USER=postgres
++DB_PASSWORD=
++JWT_SECRET=
++PORT=5000
++FRONTEND_ORIGIN=http://localhost:5173
+diff --git a/Backend/base-schema.sql b/Backend/base-schema.sql
+new file mode 100644
+--- /dev/null
++++ b/Backend/base-schema.sql
+@@ -0,0 +1,33 @@
++-- Fresh-database baseline inferred from the current API and UI.
++-- Existing tables are retained; incompatible existing schemas require manual review.
++CREATE TABLE IF NOT EXISTS students (
++  id SERIAL PRIMARY KEY,
++  full_name TEXT NOT NULL,
++  student_id TEXT NOT NULL UNIQUE,
++  email TEXT NOT NULL,
++  phone TEXT,
++  program TEXT,
++  year_level TEXT,
++  password_hash TEXT NOT NULL,
++  role TEXT NOT NULL DEFAULT 'student' CHECK (role = 'student')
++);
++CREATE TABLE IF NOT EXISTS faculty (
++  id SERIAL PRIMARY KEY,
++  name TEXT NOT NULL,
++  department TEXT,
++  room TEXT,
++  available_days INTEGER[] NOT NULL DEFAULT '{}',
++  start_minutes INTEGER,
++  end_minutes INTEGER,
++  consultation_status TEXT
++);
++CREATE TABLE IF NOT EXISTS bookings (
++  id SERIAL PRIMARY KEY,
++  student_id INTEGER NOT NULL REFERENCES students(id),
++  faculty_id INTEGER NOT NULL REFERENCES faculty(id),
++  date_key DATE NOT NULL,
++  time_slot TEXT NOT NULL,
++  subject TEXT NOT NULL,
++  status TEXT NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending','Confirmed','Declined','Completed','Cancelled'))
++);
++CREATE UNIQUE INDEX IF NOT EXISTS students_student_id_unique ON students(student_id);
+diff --git a/Backend/faculty-auth.sql b/Backend/faculty-auth.sql
+--- a/Backend/faculty-auth.sql
++++ b/Backend/faculty-auth.sql
+@@ -1,4 +1,4 @@
+-BEGIN;
++
+ -- Existing students remain students. No faculty or student records are deleted.
+ ALTER TABLE students ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'student';
+ UPDATE students SET role='student' WHERE role IS NULL;
+@@ -20,4 +20,4 @@
+   CONSTRAINT faculty_account_email_domain CHECK (email ~ '^[a-z0-9._%+-]+@faculty\.edu\.ph$')
+ );
+ CREATE UNIQUE INDEX IF NOT EXISTS faculty_accounts_login_email_unique ON faculty_accounts (LOWER(email));
+-COMMIT;
++
+diff --git a/Backend/package.json b/Backend/package.json
+--- a/Backend/package.json
++++ b/Backend/package.json
+@@ -1,4 +1,3 @@
+-
+ {
+   "name": "faculty-consultation-backend",
+   "version": "1.0.0",
+@@ -6,7 +5,9 @@
+   "main": "server.js",
+   "scripts": {
+     "start": "node server.js",
+-    "dev": "node --watch server.js"
++    "dev": "node --watch server.js",
++    "setup": "node setup-auth.cjs",
++    "create-faculty": "node create-faculty.cjs"
+   },
+   "dependencies": {
+     "bcryptjs": "^2.4.3",
+diff --git a/Backend/server.js b/Backend/server.js
+--- a/Backend/server.js
++++ b/Backend/server.js
+@@ -5,10 +5,10 @@
+ const { registerAuth } = require('./auth.cjs');
+ 
+ const app = express();
+-const PORT = 5000;
++const PORT = Number(process.env.PORT) || 5000;
+ const JWT_SECRET = process.env.JWT_SECRET;
+ 
+-app.use(cors());
++app.use(cors({ origin: process.env.FRONTEND_ORIGIN || 'http://localhost:5173' }));
+ app.use(express.json());
+ 
+ // PostgreSQL connection
+diff --git a/Backend/setup-auth.cjs b/Backend/setup-auth.cjs
+--- a/Backend/setup-auth.cjs
++++ b/Backend/setup-auth.cjs
+@@ -1,11 +1,27 @@
+ 'use strict';
+-const fs=require('fs'),path=require('path');
+-async function main(){
+- require('dotenv').config({path:path.join(__dirname,'.env')});
+- const {Pool}=require('pg');
+- const pool=new Pool({user:process.env.DB_USER,host:process.env.DB_HOST,database:process.env.DB_NAME,password:process.env.DB_PASSWORD,port:Number(process.env.DB_PORT)||5432});
+- try{await pool.query(fs.readFileSync(path.join(__dirname,'faculty-auth.sql'),'utf8'));console.log('Faculty login tables and student roles are ready. Existing records were retained.');}
+- catch(error){console.error('Setup failed:',error.message);process.exitCode=1;}
+- finally{await pool.end()}
++const fs = require('fs'), path = require('path');
++async function main() {
++  require('dotenv').config({ path: path.join(__dirname, '.env') });
++  const { Pool } = require('pg');
++  const pool = new Pool({ user: process.env.DB_USER, host: process.env.DB_HOST,
++    database: process.env.DB_NAME, password: process.env.DB_PASSWORD, port: Number(process.env.DB_PORT) || 5432 });
++  let client;
++  try {
++    client = await pool.connect();
++    await client.query('BEGIN');
++    for (const file of ['base-schema.sql', 'faculty-auth.sql']) {
++      await client.query(fs.readFileSync(path.join(__dirname, file), 'utf8'));
++    }
++    // Check all columns used by the API before committing changes.
++    await client.query('SELECT id,full_name,student_id,email,phone,program,year_level,password_hash,role FROM students LIMIT 0');
++    await client.query('SELECT id,name,department,room,available_days,start_minutes,end_minutes FROM faculty LIMIT 0');
++    await client.query('SELECT id,student_id,faculty_id,date_key,time_slot,subject,status FROM bookings LIMIT 0');
++    await client.query('COMMIT');
++    console.log('Database setup complete. Existing records were retained.');
++  } catch (error) {
++    if (client) await client.query('ROLLBACK');
++    console.error('Setup failed; changes rolled back. Review existing schema/duplicates. Code:', error.code || 'unknown');
++    process.exitCode = 1;
++  } finally { if (client) client.release(); await pool.end(); }
+ }
+-main().catch(error=>{console.error(error.message);process.exitCode=1});
++main().catch(() => { console.error('Database setup could not connect. Check Backend/.env and PostgreSQL.'); process.exitCode = 1; });
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -1,19 +1,45 @@
+-# React + Vite
++# ConsultTime — faculty consultation
+ 
+-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
++## Local setup
++Requires Node.js compatible with the locked Vite version, npm, and PostgreSQL.
++1. In the project root, run npm ci.
++2. In Backend, run npm ci.
++3. Create an empty PostgreSQL database (for example faculty_consultation).
++4. Copy Backend/.env.example to Backend/.env and fill in database credentials.
++   Generate a random JWT secret with: node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
++   Put it in JWT_SECRET; never commit the populated .env file.
++5. Back up an existing database first. In Backend, run npm run setup.
++   This runs base-schema.sql and faculty-auth.sql in one transaction. Existing
++   tables/records are retained. Duplicate emails/IDs, incompatible columns, or
++   nonstudent roles cause setup to stop and roll back; review them manually.
++   The baseline is inferred from this project's code, not an export of your database.
++6. Add real faculty directory records to the faculty table using your database tool.
++   No sample accounts or passwords are seeded. Run npm run create-faculty in Backend
++   to provision a login for an existing faculty ID.
++7. Run npm start in Backend. In another terminal, run npm run dev in the project root.
++8. Open the URL Vite prints. Use student registration or the provisioned faculty login.
+ 
+-Currently, two official plugins are available:
++The backend entry is Backend/server.js on port 5000 by default. Root server.js
++forwards to it. src/BackendTest.jsx is an unused legacy test for a nonexistent endpoint.
+ 
+-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
++## Configuration
++The frontend defaults to http://localhost:5000/api. Copy root .env.example to .env
++and set VITE_API_URL when needed; restart Vite after changing it. Configure
++FRONTEND_ORIGIN in Backend/.env to the frontend origin (default http://localhost:5173).
++Use HTTPS for deployment. Tokens stay in memory; reload and logout end the browser
++session. A protected request returning 401 clears identity and returns to login.
++Logout clears the browser token; an already copied token remains valid until expiry.
+ 
+-## React Compiler
++## Scope and remaining work
++Student and faculty API permissions remain enforced by the backend. This update
++adds setup, explicit dashboard guards, shared session state, expired-session handling,
++and faculty loading errors. Student registration still needs identity/email verification
++and rate limiting. Server-side booking schedule/conflict validation remains pending.
++Cancellation and profile edits are still local previews; password recovery is unfinished.
++No live database was included, so existing schema compatibility must be checked locally.
+ 
+-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+-
+-Note: This will impact Vite dev & build performances.
+-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
+-
+-## Expanding the ESLint configuration
+-
+-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
++## Verification
++Run npm test in the project root. The included 12 tests exercise the API client
++and setup transaction control using mocked HTTP/database responses. They do not
++replace a real PostgreSQL migration, browser smoke test, or a full production build.
++Run npm run build after installing dependencies.
+diff --git a/package.json b/package.json
+--- a/package.json
++++ b/package.json
+@@ -7,7 +7,8 @@
+     "dev": "vite",
+     "build": "vite build",
+     "lint": "eslint .",
+-    "preview": "vite preview"
++    "preview": "vite preview",
++    "test": "node --test tests/*.test.mjs"
+   },
+   "dependencies": {
+     "react": "^19.2.8",
+diff --git a/server.js b/server.js
+--- a/server.js
++++ b/server.js
+@@ -1,16 +1,5 @@
+-const express = require("express");
+-const app = express();
+-const cors = require("cors");
+-const corsOptions = {
+-    origin: "https://localhost:5173",
+-}
+-
+-app.use(cors(corsOptions));
+-
+-app.get("/Api/names",(req,res)=>{
+-    res.json({name: ["SAMMY", "BAKILI", "IAN"]});
+-});
+-
+-app.listen(3000, ()=>{
+-    console.log("Server is running on port 3000");
+-});
++// Compatibility entry: the backend has its own CommonJS package and dependencies.
++import './Backend/server.js';
++import backend from './Backend/server.js';
++const port = Number(process.env.PORT) || 5000;
++backend.app.listen(port, () => console.log('Backend listening on port ' + port));
+diff --git a/src/App.jsx b/src/App.jsx
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -1,6 +1,6 @@
+-import { useState, useEffect, useRef } from 'react'
++import { useState, useEffect, useRef, useSyncExternalStore } from 'react'
+ import { createPortal } from 'react-dom'
+-import { getFaculty, signup, login, createBooking, getStudentBookings, getAllBookings, updateBookingStatus, clearAuthToken } from './api'
++import { getFaculty, signup, login, createBooking, getStudentBookings, getAllBookings, updateBookingStatus, clearAuthToken, subscribeAuth, getAuthToken } from './api'
+ import FacultyDashboard from './FacultyDashboard'
+ import './App.css'
+ import './LandingPage.css'
+@@ -288,6 +288,11 @@
+ return Number.isNaN(date.getTime())?String(value):date.toLocaleDateString('en-US',{timeZone:'Asia/Manila',month:'long',day:'numeric',year:'numeric'})
+ }
+ /* APP*/
++
++const emptySignup = {
++    fullName: '', studentId: '', email: '', phone: '',
++    program: '', yearLevel: '', password: '', confirmPassword: '', agree: false
++  }
+ 
+ function App() {
+ 
+@@ -336,10 +341,6 @@
+   const [loginPassword, setLoginPassword] = useState('')
+   const [loginError, setLoginError] = useState('')
+   const [showLoginPassword, setShowLoginPassword] = useState(false)
+-  const emptySignup = {
+-    fullName: '', studentId: '', email: '', phone: '',
+-    program: '', yearLevel: '', password: '', confirmPassword: '', agree: false
+-  }
+   const [signupForm, setSignupForm] = useState(emptySignup)
+   const [signupErrors, setSignupErrors] = useState({})
+   const [showSignupPassword, setShowSignupPassword] = useState(false)
+@@ -360,7 +361,18 @@
+   const [bookingNotice, setBookingNotice] = useState('')
+   const [facultyList, setFacultyList] = useState([])
+   const [currentStudent, setCurrentStudent] = useState(null)
+-  const [token, setToken] = useState(null)
++  const token = useSyncExternalStore(subscribeAuth, getAuthToken, () => null)
++  const [facultyLoading, setFacultyLoading] = useState(false)
++  const [facultyError, setFacultyError] = useState('')
++  const [authBusy, setAuthBusy] = useState(false)
++  useEffect(() => subscribeAuth(() => {
++    if (getAuthToken()) return
++    setCurrentRole(null); setCurrentFaculty(null); setCurrentStudent(null)
++    setAllBookings([]); setBookings([]); setIsFacultyView(false)
++    setProfileData({}); setselectedfacultyForBooking(null); setIsUserMenuOpen(false)
++    setSignupForm(emptySignup); setLoginPassword(''); setFacultyError('')
++    setCurrentPage('login'); setLoginError('Your session ended. Please log in again.')
++  }), [])
+   useEffect(() => {
+   getFaculty()
+     .then(data => setFacultyList(data))
+@@ -368,12 +380,15 @@
+ }, [])
+ 
+ async function loadAllBookings() {
++  setFacultyLoading(true)
++  setFacultyError('')
+   try {
+     const data = await getAllBookings()
+     setAllBookings(data)
+   } catch (err) {
+-    console.error(err)
+-  }
++    setFacultyError(err.message || 'Unable to load bookings.')
++    throw err
++  } finally { setFacultyLoading(false) }
+ }
+ 
+ async function handleAccept(bookingId) {
+@@ -396,7 +411,7 @@
+   }
+   }
+ 
+-  console.log('App is running, currentPage =', currentPage)
++
+ 
+ 
+   const availableBookingDates = getFacultyDates(selectedfacultyForBooking)
+@@ -435,6 +450,7 @@
+ 
+   async function handleSignupSubmit(event) {
+   event.preventDefault()
++  if (authBusy) return
+ 
+   const f = signupForm
+   const email = f.email.trim().toLowerCase()
+@@ -461,6 +477,7 @@
+   setSignupErrors(errors)
+   if (Object.keys(errors).length > 0) return
+ 
++  setAuthBusy(true)
+   try {
+     const result = await signup({
+       fullName: f.fullName.trim(),
+@@ -474,7 +491,6 @@
+ 
+     setCurrentRole('student')
+     setIsFacultyView(false)
+-    setToken(result.token)
+     setCurrentStudent(result.student)
+     setProfileData({
+       fullName: result.student.full_name,
+@@ -491,7 +507,7 @@
+     handleDashboard()
+   } catch (err) {
+     setSignupErrors({ email: err.message || 'Signup failed.' })
+-  }
++  } finally { setAuthBusy(false) }
+   }
+ 
+   function handleHome() {
+@@ -507,13 +523,14 @@
+ 
+   async function handleLoginSubmit(event) {
+     event.preventDefault()
++    if (authBusy) return
+     const email=loginEmail.trim().toLowerCase()
+     if(!/^[a-z0-9._%+-]+@(student|faculty)\.edu\.ph$/i.test(email) || !loginPassword) {
+       setLoginError('Use name@student.edu.ph or name@faculty.edu.ph and enter your password.'); return
+     }
++    setAuthBusy(true)
+     try {
+       const result=await login(email,loginPassword)
+-      setToken(result.token)
+       setCurrentRole(result.role)
+       setLoginError('')
+       setIsUserMenuOpen(false)
+@@ -524,17 +541,18 @@
+         setBookings([])
+         setIsFacultyView(true)
+         setCurrentPage('dashboard')
+-        await loadAllBookings()
++        await loadAllBookings().catch(() => {})
+       } else {
+         setCurrentFaculty(null)
+         setCurrentStudent(result.student)
+         setIsFacultyView(false)
+         setProfileData({fullName:result.student.full_name,studentId:result.student.student_id,email:result.student.email,phone:result.student.phone||'Not provided',course:result.student.program,yearLevel:result.student.year_level,section:'Not set',department:'College of Computing Studies'})
+-        setBookings(await getStudentBookings(result.student.id))
+         handleDashboard()
++        try { setBookings(await getStudentBookings(result.student.id)) }
++        catch (err) { setBookingNotice(err.message || 'Unable to load bookings.') }
+       }
+       window.scrollTo(0,0)
+-    } catch(err) { clearAuthToken();setToken(null);setCurrentRole(null);setCurrentStudent(null);setIsFacultyView(false);setCurrentPage('login');setLoginError(err.message||'Login failed.') }
++    } catch(err) { clearAuthToken();setCurrentRole(null);setCurrentStudent(null);setIsFacultyView(false);setCurrentPage('login');setLoginError(err.message||'Login failed.') } finally { setAuthBusy(false); setLoginPassword('') }
+   }
+ 
+   function handleLogout() {
+@@ -546,12 +564,13 @@
+     setProfileSaved(false)
+     setActiveDashboardPage('dashboard')
+     setCurrentPage('home')
++    setLoginError('')
++    setProfileData({})
+     setIsFacultyView(false)
+     setBookings([])
+     setBookingNotice('')
+     setLoginPassword('')
+     setCurrentStudent(null)
+-    setToken(null)
+     window.scrollTo(0, 0)
+   }
+ 
+@@ -642,7 +661,7 @@
+  
+   /*LOGIN PAGE */
+ 
+-  if (currentPage === 'login') {
++  if (currentPage === 'login' || (currentPage === 'dashboard' && (!token || !['student', 'faculty'].includes(currentRole)))) {
+     return (
+       <div className="login-page redesigned-login-page consult-app">
+         {/* LOGIN NAVIGATION */}
+@@ -711,12 +730,6 @@
+             <div className="login-card-header">
+               <h2>Welcome back!</h2>
+               <p>Log in to manage your consultations and connect with your faculty.</p>
+-              <button onClick={() => {
+-                setIsFacultyView(true)
+-                loadAllBookings()
+-              }}>
+-                Faculty Dashboard
+-              </button>
+             </div>
+ 
+             <label className="login-form-label" htmlFor="login-email">
+@@ -770,10 +783,7 @@
+             </div>
+ 
+             <div className="login-options redesigned-login-options">
+-              <label className="remember">
+-                <input type="checkbox" />
+-                <span>Remember me</span>
+-              </label>
++<span>Sessions end when you reload or log out.</span>
+ 
+               <button
+                 className="forgot-password"
+@@ -790,6 +800,7 @@
+ 
+             <button
+               className="main-login-btn redesigned-main-login-btn"
++              disabled={authBusy}
+               type="submit"
+             >
+               Log In
+@@ -996,7 +1007,7 @@
+               {signupErrors.agree && <p className="signup-error">{signupErrors.agree}</p>}
+             </div>
+ 
+-            <button className="signup-submit" type="submit">Create Account</button>
++            <button className="signup-submit" type="submit" disabled={authBusy}>{authBusy ? 'Creating account…' : 'Create Account'}</button>
+ 
+             <p className="signup-alt">
+               Already have an account? <button type="button" onClick={handleLogin}>Sign In</button>
+@@ -1016,11 +1027,13 @@
+ 
+   /* STUDENT DASHBOARD */
+ 
+-  if (currentPage === 'dashboard' && currentRole === 'faculty') {
++  if (currentPage === 'dashboard' && token && currentRole === 'faculty') {
+     const facultyRecord = facultyList.find(member => String(member.id) === String(currentFaculty?.id))
+     return <div className="consult-app faculty-page-scope"><FacultyDashboard
+       profileData={profileData}
+       faculty={facultyRecord ? {...facultyRecord, ...currentFaculty} : currentFaculty}
++      loading={facultyLoading}
++      error={facultyError}
+       allBookings={allBookings}
+       loadAllBookings={loadAllBookings}
+       handleAccept={handleAccept}
+@@ -1029,7 +1042,7 @@
+     /></div>
+   }
+ 
+-  if (currentPage === 'dashboard') {
++  if (currentPage === 'dashboard' && token && currentRole === 'student') {
+ 
+     return (
+       <div className="dashboard-page student-dashboard-shell consult-app">
+@@ -1263,6 +1276,7 @@
+           {/*MAIN DASHBOARD CONTENT*/}
+ 
+           <main className="dashboard-main">
++            {bookingNotice && activeDashboardPage !== 'bookings' && <p className="booking-notice" role="status">{bookingNotice}</p>}
+             {/*DASHBOARD HOME */}
+ 
+             {!isFacultyView && activeDashboardPage === 'dashboard' && (
+diff --git a/src/api.js b/src/api.js
+--- a/src/api.js
++++ b/src/api.js
+@@ -1,69 +1,46 @@
+-const API_URL = 'http://localhost:5000/api';
+-// Session-only token; logout/reload clears it.
++const API_URL = (import.meta.env?.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+ let authToken = null;
+-export function clearAuthToken() { authToken = null; }
+-function authHeaders() { return authToken ? { Authorization: 'Bearer ' + authToken } : {}; }
++let revision = 0;
++const listeners = new Set();
++export const getAuthToken = () => authToken;
++export function subscribeAuth(listener) { listeners.add(listener); return () => listeners.delete(listener); }
++function setAuthToken(value) { authToken = value; revision++; for (const listener of listeners) listener(); }
++export function clearAuthToken() { setAuthToken(null); }
+ 
+-export async function getFaculty() {
+-  const res = await fetch(`${API_URL}/faculty`);
+-  if (!res.ok) throw new Error('Failed to fetch faculty');
+-  return res.json();
+-}
+-
+-export async function signup(data) {
+-  const res = await fetch(`${API_URL}/signup`, {
+-    method: 'POST',
+-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+-    body: JSON.stringify(data)
++async function request(endpoint, { method = 'GET', body, protectedRequest = false } = {}) {
++  const started = revision;
++  const res = await fetch(API_URL + endpoint, {
++    method,
++    headers: { ...(body ? { 'Content-Type': 'application/json' } : {}),
++      ...(protectedRequest && authToken ? { Authorization: 'Bearer ' + authToken } : {}) },
++    ...(body ? { body: JSON.stringify(body) } : {})
+   });
+-  const result = await res.json();
+-  if (!res.ok) throw new Error(result.message || 'Signup failed');
+-  authToken = result.token;
++  // Ignore responses belonging to an account that has since logged out or changed.
++  if (protectedRequest && started !== revision) throw new Error('Session changed. Please try again.');
++  const result = await res.json().catch(() => ({}));
++  if (protectedRequest && started !== revision) throw new Error('Session changed. Please try again.');
++  if (res.status === 401 && protectedRequest) {
++    clearAuthToken();
++    throw new Error('Your session expired. Please log in again.');
++  }
++  if (!res.ok) throw new Error(result.message || 'Request failed. Please try again.');
+   return result;
+ }
+-
+-export async function login(email, password) {
+-  const res = await fetch(`${API_URL}/login`, {
+-    method: 'POST',
+-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+-    body: JSON.stringify({ email, password })
+-  });
+-  const result = await res.json();
+-  if (!res.ok) throw new Error(result.message || 'Login failed');
+-  authToken = result.token;
++async function authenticate(endpoint, body) {
++  const started = revision;
++  const result = await request(endpoint, { method: 'POST', body });
++  if (started !== revision) throw new Error('Session changed. Please try again.');
++  if (typeof result.token !== 'string' || !['student', 'faculty'].includes(result.role) ||
++      !(result.role === 'student' ? result.student?.id : result.faculty?.id)) {
++    throw new Error('Invalid login response. Please contact support.');
++  }
++  setAuthToken(result.token);
+   return result;
+ }
+-
+-export async function createBooking(data) {
+-  const res = await fetch(`${API_URL}/bookings`, {
+-    method: 'POST',
+-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+-    body: JSON.stringify(data)
+-  });
+-  const result = await res.json();
+-  if (!res.ok) throw new Error(result.message || 'Booking failed');
+-  return result;
+-}
+-
+-export async function getStudentBookings(studentId) {
+-  const res = await fetch(`${API_URL}/bookings/student/${studentId}`, { headers: authHeaders() });
+-  if (!res.ok) throw new Error('Failed to fetch bookings');
+-  return res.json();
+-}
+-
+-export async function updateBookingStatus(bookingId, status) {
+-  const res = await fetch(`${API_URL}/bookings/${bookingId}/status`, {
+-    method: 'PATCH',
+-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+-    body: JSON.stringify({ status })
+-  });
+-  const result = await res.json();
+-  if (!res.ok) throw new Error(result.message || 'Failed to update status');
+-  return result;
+-}
+-
+-export async function getAllBookings() {
+-  const res = await fetch(`${API_URL}/bookings`, { headers: authHeaders() });
+-  if (!res.ok) throw new Error('Failed to fetch all bookings');
+-  return res.json();
+-}
++export const getFaculty = () => request('/faculty');
++export const signup = data => authenticate('/signup', data);
++export const login = (email, password) => authenticate('/login', { email, password });
++export const createBooking = data => request('/bookings', { method: 'POST', body: data, protectedRequest: true });
++export const getStudentBookings = id => request('/bookings/student/' + encodeURIComponent(id), { protectedRequest: true });
++export const updateBookingStatus = (id, status) => request('/bookings/' + encodeURIComponent(id) + '/status', { method: 'PATCH', body: { status }, protectedRequest: true });
++export const getAllBookings = () => request('/bookings', { protectedRequest: true });
+diff --git a/tests/api.test.mjs b/tests/api.test.mjs
+new file mode 100644
+--- /dev/null
++++ b/tests/api.test.mjs
+@@ -0,0 +1,74 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import vm from 'node:vm';
++
++function apiHarness() {
++  const pending = [];
++  const context = vm.createContext({ Set, Error, encodeURIComponent, fetch: (url, options) =>
++    new Promise(resolve => pending.push({ url, options, resolve })) });
++  let source = fs.readFileSync(new URL('../src/api.js', import.meta.url), 'utf8')
++    .replace('import.meta.env?.VITE_API_URL', 'undefined').replaceAll('export ', '');
++  source += '\nglobalThis.api = { login, signup, clearAuthToken, getAuthToken, subscribeAuth, getAllBookings, getStudentBookings };';
++  vm.runInContext(source, context);
++  const reply = (status, value) => pending.shift().resolve({ status, ok: status < 400, json: async () => value });
++  const signIn = async () => {
++    const result = context.api.login('a@student.edu.ph', 'TestOnly123');
++    reply(200, { token: 'test-token', role: 'student', student: { id: 1 } });
++    await result;
++  };
++  return { api: context.api, pending, reply, signIn };
++}
++
++test('login publishes token; protected API sends it; logout clears it', async () => {
++  const h = apiHarness(); let changes = 0;
++  const unsubscribe = h.api.subscribeAuth(() => changes++);
++  await h.signIn();
++  const result = h.api.getAllBookings();
++  assert.equal(h.pending[0].options.headers.Authorization, 'Bearer test-token');
++  h.reply(200, []); await result;
++  h.api.clearAuthToken(); assert.equal(h.api.getAuthToken(), null);
++  assert.equal(changes, 2); unsubscribe();
++});
++test('protected 401 clears session and explains reauthentication', async () => {
++  const h = apiHarness(); await h.signIn();
++  const result = h.api.getAllBookings(); h.reply(401, {});
++  await assert.rejects(result, /session expired/i); assert.equal(h.api.getAuthToken(), null);
++});
++test('403 keeps the authenticated session and backend message', async () => {
++  const h = apiHarness(); await h.signIn();
++  const result = h.api.getAllBookings(); h.reply(403, { message: 'Faculty only' });
++  await assert.rejects(result, /Faculty only/); assert.equal(h.api.getAuthToken(), 'test-token');
++});
++test('invalid credentials do not create a session', async () => {
++  const h = apiHarness(); const result = h.api.login('x', 'wrong'); h.reply(401, { message: 'Invalid credentials' });
++  await assert.rejects(result, /Invalid credentials/); assert.equal(h.api.getAuthToken(), null);
++});
++test('malformed successful auth response cannot establish a session', async () => {
++  const h = apiHarness(); const result = h.api.login('x', 'wrong');
++  h.reply(200, { role: 'faculty', faculty: { id: 1 } });
++  await assert.rejects(result, /Invalid login response/); assert.equal(h.api.getAuthToken(), null);
++});
++test('late login response cannot restore a logged-out session', async () => {
++  const h = apiHarness(); const result = h.api.login('x', 'password');
++  h.api.clearAuthToken(); h.reply(200, { token: 'late', role: 'student', student: { id: 1 } });
++  await assert.rejects(result, /Session changed/); assert.equal(h.api.getAuthToken(), null);
++});
++test('late protected response cannot populate a logged-out dashboard', async () => {
++  const h = apiHarness(); await h.signIn(); const result = h.api.getAllBookings();
++  h.api.clearAuthToken(); h.reply(200, [{ id: 1 }]);
++  await assert.rejects(result, /Session changed/);
++});
++test('logout during JSON parsing also discards protected response', async () => {
++  const h = apiHarness(); await h.signIn(); const result = h.api.getAllBookings();
++  let finish;
++  h.pending.shift().resolve({ status: 200, ok: true, json: () => new Promise(resolve => { finish = resolve; }) });
++  await new Promise(resolve => setImmediate(resolve));
++  h.api.clearAuthToken(); finish([{ id: 1 }]);
++  await assert.rejects(result, /Session changed/);
++});
++test('server outage preserves session for retry', async () => {
++  const h = apiHarness(); await h.signIn(); const result = h.api.getAllBookings();
++  h.reply(503, { message: 'Try later' }); await assert.rejects(result, /Try later/);
++  assert.equal(h.api.getAuthToken(), 'test-token');
++});
+diff --git a/tests/setup.test.mjs b/tests/setup.test.mjs
+new file mode 100644
+--- /dev/null
++++ b/tests/setup.test.mjs
+@@ -0,0 +1,41 @@
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import path from 'node:path';
++import vm from 'node:vm';
++
++async function runSetup(failAt) {
++  const queries=[]; let released=false; let ended=false;
++  const client={
++    query: async sql => { queries.push(sql); if (failAt && sql.includes(failAt)) throw Object.assign(new Error('test failure'),{code:'TEST'}); },
++    release:()=>{released=true;}
++  };
++  class Pool { async connect(){return client;} async end(){ended=true;} }
++  const fakeProcess={exitCode:0};
++  const context=vm.createContext({
++    __dirname:'/backend', console:{log(){},error(){}}, process:{...fakeProcess,env:{}},
++    require:name=> name==='fs'?{readFileSync:file=>file.endsWith('base-schema.sql')?'BASE MIGRATION':'AUTH MIGRATION'}:
++      name==='path'?path:name==='dotenv'?{config(){}}:name==='pg'?{Pool}:null
++  });
++  const source=fs.readFileSync(new URL('../Backend/setup-auth.cjs',import.meta.url),'utf8');
++  await vm.runInContext(source,context);
++  return {queries,released,ended,exitCode:context.process.exitCode};
++}
++test('setup commits both migrations after schema checks and releases connection',async()=>{
++  const r=await runSetup();
++  assert.equal(r.queries[0],'BEGIN');
++  assert.deepEqual(r.queries.slice(1,3),['BASE MIGRATION','AUTH MIGRATION']);
++  assert.equal(r.queries.at(-1),'COMMIT');
++  assert.ok(r.queries.some(q=>q.includes('FROM bookings LIMIT 0')));
++  assert.ok(r.released && r.ended);assert.equal(r.exitCode,0);
++});
++test('migration failure rolls back without committing',async()=>{
++  const r=await runSetup('AUTH MIGRATION');
++  assert.equal(r.queries.at(-1),'ROLLBACK');assert.ok(!r.queries.includes('COMMIT'));
++  assert.ok(r.released && r.ended);assert.equal(r.exitCode,1);
++});
++test('incompatible existing schema rolls back before commit',async()=>{
++  const r=await runSetup('FROM faculty LIMIT 0');
++  assert.equal(r.queries.at(-1),'ROLLBACK');assert.ok(!r.queries.includes('COMMIT'));
++  assert.ok(r.released && r.ended);assert.equal(r.exitCode,1);
++});

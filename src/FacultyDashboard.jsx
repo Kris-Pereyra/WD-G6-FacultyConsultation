@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import weblogo from "./assets/weblogo.jpg";
 import wmsuLogo from "./assets/wmsuLogo.png";
 import facultyBanner from "./assets/faculty-banner.jpg";
 import "./FacultyDashboard.css";
+import { saveFacultyAvailability, updateBookingStatus } from "./api";
 
 const NAV = [
   ["dashboard", "home", "Dashboard"],
@@ -74,6 +75,7 @@ export default function FacultyDashboard({
   faculty = null,
   allBookings = [],
   loadAllBookings,
+  onAvailabilitySaved,
   handleAccept,
   handleDecline,
   handleLogout,
@@ -88,6 +90,75 @@ export default function FacultyDashboard({
   const [notice, setNotice] = useState("");
   const [notifications, setNotifications] = useState(false);
   const [details, setDetails] = useState(null);
+  useEffect(() => {
+    setDetails((current) => {
+      if (!current) return current;
+
+      const updated = allBookings.find(
+        (booking) => String(booking.id) === String(current.id),
+      );
+
+      return updated ? { ...current, ...updated } : null;
+    });
+  }, [allBookings]);
+  const toTimeInput = (minutes) =>
+    Number.isInteger(minutes)
+      ? `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(
+          minutes % 60,
+        ).padStart(2, "0")}`
+      : "";
+
+  const [availabilityDays, setAvailabilityDays] = useState(
+    () => faculty?.available_days || [],
+  );
+  const [availabilityStart, setAvailabilityStart] = useState(() =>
+    toTimeInput(faculty?.start_minutes),
+  );
+  const [availabilityEnd, setAvailabilityEnd] = useState(() =>
+    toTimeInput(faculty?.end_minutes),
+  );
+  const [savingAvailability, setSavingAvailability] = useState(false);
+  const [availabilityMessage, setAvailabilityMessage] = useState("");
+  const [availabilityError, setAvailabilityError] = useState("");
+
+  async function handleSaveAvailability(event) {
+    event.preventDefault();
+    if (savingAvailability) return;
+
+    setAvailabilityMessage("");
+    setAvailabilityError("");
+
+    const toMinutes = (time) => {
+      const [hours, minutes] = time.split(":").map(Number);
+      return hours * 60 + minutes;
+    };
+
+    if (
+      availabilityDays.length === 0 ||
+      !availabilityStart ||
+      !availabilityEnd ||
+      toMinutes(availabilityEnd) - toMinutes(availabilityStart) < 30
+    ) {
+      setAvailabilityError(
+        "Choose at least one day and hours covering at least 30 minutes.",
+      );
+      return;
+    }
+
+    setSavingAvailability(true);
+    try {
+      const result = await saveFacultyAvailability({
+        available_days: availabilityDays,
+        start_minutes: toMinutes(availabilityStart),
+        end_minutes: toMinutes(availabilityEnd),
+      });
+      setAvailabilityMessage(result.message);
+    } catch (error) {
+      setAvailabilityError(error.message || "Failed to save availability.");
+    } finally {
+      setSavingAvailability(false);
+    }
+  }
   const profile = profileData || {};
   const name = profile.fullName || faculty?.name || "Professor";
   const rows = Array.isArray(allBookings)
@@ -124,6 +195,21 @@ export default function FacultyDashboard({
     setQuery("");
     setDetails(null);
   };
+
+  async function completeConsultation(id) {
+    const result = await updateBookingStatus(id, "Completed");
+
+    setDetails((current) =>
+      current && current.id === id
+        ? { ...current, ...result.booking }
+        : current,
+    );
+
+    if (typeof loadAllBookings === "function") {
+      await loadAllBookings();
+    }
+  }
+
   async function run(action, id) {
     if (busy || typeof action !== "function") return;
     setBusy(true);
@@ -439,7 +525,10 @@ export default function FacultyDashboard({
                           <small>{b.student_name || "Student"}</small>
                         </span>
                         <span className="fd-location">
-                          {b.location || "Location not set"}
+                          {b.location ||
+                            b.room ||
+                            faculty?.room ||
+                            "Location not set"}
                         </span>
                       </button>
                     ))}
@@ -558,31 +647,104 @@ export default function FacultyDashboard({
           )}
           {page === "availability" && (
             <div className="fd-panel fd-info">
-              <span className="fd-stat-icon">
-                <Icon name="clock" />
-              </span>
               <h1>Manage Availability</h1>
-              <p>Your published consultation hours</p>
-              {faculty && Array.isArray(faculty.available_days) ? (
-                <p>
-                  {faculty.available_days
-                    .map(
-                      (d) =>
-                        ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d],
-                    )
-                    .join(", ") || "No days published"}{" "}
-                  ·{" "}
-                  {faculty.start_minutes != null && faculty.end_minutes != null
-                    ? `${Math.floor(faculty.start_minutes / 60)}:${String(faculty.start_minutes % 60).padStart(2, "0")} – ${Math.floor(faculty.end_minutes / 60)}:${String(faculty.end_minutes % 60).padStart(2, "0")} (Manila, 24-hour time)`
-                    : "Hours not provided"}
-                </p>
-              ) : (
-                <p>No availability information was supplied.</p>
-              )}
-              <div className="fd-note">
-                Availability editing needs a backend save endpoint. This screen
-                is read-only until it is connected.
-              </div>
+              <p>
+                Choose your weekly consultation days and hours. All times are in
+                Philippine time.
+              </p>
+
+              <form onSubmit={handleSaveAvailability}>
+                <fieldset disabled={savingAvailability}>
+                  <legend>Consultation days</legend>
+
+                  {[
+                    "Sunday",
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                  ].map((day, index) => (
+                    <label
+                      key={day}
+                      style={{ display: "block", marginBottom: "8px" }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={availabilityDays.includes(index)}
+                        onChange={(event) => {
+                          const checked = event.target.checked;
+                          setAvailabilityDays((previous) =>
+                            checked
+                              ? [...new Set([...previous, index])].sort(
+                                  (a, b) => a - b,
+                                )
+                              : previous.filter((value) => value !== index),
+                          );
+                          if (typeof onAvailabilitySaved === "function") {
+                            onAvailabilitySaved(result.faculty);
+                          }
+                          setAvailabilityMessage("");
+                          setAvailabilityError("");
+                        }}
+                      />{" "}
+                      {day}
+                    </label>
+                  ))}
+                </fieldset>
+
+                <fieldset
+                  disabled={savingAvailability}
+                  style={{ marginTop: "16px" }}
+                >
+                  <legend>Consultation hours</legend>
+                  <p>The same hours apply to each selected day.</p>
+
+                  <label style={{ display: "block", marginBottom: "12px" }}>
+                    Start time{" "}
+                    <input
+                      type="time"
+                      required
+                      step="60"
+                      value={availabilityStart}
+                      onChange={(event) => {
+                        setAvailabilityStart(event.target.value);
+                        setAvailabilityMessage("");
+                        setAvailabilityError("");
+                      }}
+                    />
+                  </label>
+
+                  <label style={{ display: "block", marginBottom: "12px" }}>
+                    End time{" "}
+                    <input
+                      type="time"
+                      required
+                      step="60"
+                      value={availabilityEnd}
+                      onChange={(event) => {
+                        setAvailabilityEnd(event.target.value);
+                        setAvailabilityMessage("");
+                        setAvailabilityError("");
+                      }}
+                    />
+                  </label>
+                </fieldset>
+
+                {availabilityError && <p role="alert">{availabilityError}</p>}
+                {availabilityMessage && (
+                  <p role="status">{availabilityMessage}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={savingAvailability}
+                  style={{ marginTop: "16px" }}
+                >
+                  {savingAvailability ? "Saving..." : "Save Availability"}
+                </button>
+              </form>
             </div>
           )}
           {page === "profile" && (
@@ -633,7 +795,10 @@ export default function FacultyDashboard({
                   ["Subject", details.subject],
                   ["Date", formatDate(dateKey(details))],
                   ["Time", timeLabel(details)],
-                  ["Location", details.location],
+                  [
+                    "Location",
+                    details.location || details.room || faculty?.room,
+                  ],
                   ["Status", statusOf(details)],
                 ].map(([label, value]) => (
                   <div key={label}>
@@ -642,6 +807,17 @@ export default function FacultyDashboard({
                   </div>
                 ))}
               </dl>
+
+              {isStatus(details, "Confirmed") && (
+                <button
+                  type="button"
+                  className="fd-outline"
+                  disabled={busy}
+                  onClick={() => run(completeConsultation, details.id)}
+                >
+                  {busy ? "Saving..." : "Mark as Completed"}
+                </button>
+              )}
             </div>
           )}
           <p className="fd-footer">

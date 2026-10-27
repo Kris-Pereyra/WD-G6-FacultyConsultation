@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   getFaculty,
+  getFacultyOccupiedSlots,
   signup,
   login,
   createBooking,
@@ -9,6 +10,7 @@ import {
   getAllBookings,
   updateBookingStatus,
   clearAuthToken,
+  cancelBooking,
 } from "./api";
 import FacultyDashboard from "./FacultyDashboard";
 import "./App.css";
@@ -260,10 +262,9 @@ function slotStart(dateKey, time) {
 }
 
 function bookingStart(booking) {
-  return slotStart(
-    booking.date_key || booking.dateKey,
-    booking.time_slot || booking.time,
-  );
+  const date = String(booking.date_key || booking.dateKey || "").slice(0, 10);
+
+  return slotStart(date, booking.time_slot || booking.time || "");
 }
 
 function getTimeSlots(facultyList, dateKey) {
@@ -381,6 +382,37 @@ function App() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [selectedfacultyForBooking, setselectedfacultyForBooking] =
     useState(null);
+  const [occupiedSlots, setOccupiedSlots] = useState([]);
+  const [occupiedSlotsLoading, setOccupiedSlotsLoading] = useState(true);
+  const [occupiedSlotsError, setOccupiedSlotsError] = useState("");
+
+  useEffect(() => {
+    if (!selectedfacultyForBooking) return;
+
+    let cancelled = false;
+    setOccupiedSlots([]);
+    setOccupiedSlotsLoading(true);
+    setOccupiedSlotsError("");
+
+    getFacultyOccupiedSlots(selectedfacultyForBooking.id)
+      .then((slots) => {
+        if (!cancelled) setOccupiedSlots(slots);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setOccupiedSlotsError(
+            error.message || "Failed to load occupied slots.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setOccupiedSlotsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedfacultyForBooking]);
   const availabilityRef = useRef(null);
   useEffect(() => {
     if (!selectedfacultyForBooking) return;
@@ -473,6 +505,54 @@ function App() {
   const [facultyList, setFacultyList] = useState([]);
   const [currentStudent, setCurrentStudent] = useState(null);
   const [token, setToken] = useState(null);
+  useEffect(() => {
+    if (!token || currentPage !== "dashboard") return;
+    if (currentRole !== "student" && currentRole !== "faculty") return;
+    if (currentRole === "student" && !currentStudent?.id) return;
+
+    let stopped = false;
+    let loading = false;
+
+    async function refreshBookings() {
+      if (stopped || loading || document.hidden) return;
+
+      loading = true;
+
+      try {
+        const data =
+          currentRole === "faculty"
+            ? await getAllBookings()
+            : await getStudentBookings(currentStudent.id);
+
+        if (stopped) return;
+
+        if (currentRole === "faculty") {
+          setAllBookings(data);
+        } else {
+          setBookings(data);
+        }
+      } catch (error) {
+        if (!stopped) {
+          console.error("Booking refresh failed:", error.message);
+        }
+      } finally {
+        loading = false;
+      }
+    }
+
+    refreshBookings();
+
+    const timer = window.setInterval(refreshBookings, 10000);
+    window.addEventListener("focus", refreshBookings);
+    document.addEventListener("visibilitychange", refreshBookings);
+
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshBookings);
+      document.removeEventListener("visibilitychange", refreshBookings);
+    };
+  }, [token, currentPage, currentRole, currentStudent?.id]);
   useEffect(() => {
     getFaculty()
       .then((data) => setFacultyList(data))
@@ -741,14 +821,33 @@ function App() {
     window.scrollTo(0, 0);
   }
 
-  function openFacultyAvailability(faculty) {
+  async function openFacultyAvailability(faculty) {
     setBookingError("");
     setBookingNotice("");
-    setselectedfacultyForBooking(faculty);
-    const dates = getFacultyDates(faculty);
-    setSelectedBookingDate(dates[0]?.key || "");
-    setSelectedBookingTime("");
-    setBookingSubject("");
+
+    try {
+      const latestFaculty = await getFaculty();
+      setFacultyList(latestFaculty);
+
+      const updatedFaculty = latestFaculty.find(
+        (member) => String(member.id) === String(faculty.id),
+      );
+
+      if (!updatedFaculty) {
+        throw new Error("This faculty member is no longer available.");
+      }
+
+      const dates = getFacultyDates(updatedFaculty);
+
+      setSelectedBookingDate(dates[0]?.key || "");
+      setSelectedBookingTime("");
+      setBookingSubject("");
+      setselectedfacultyForBooking(updatedFaculty);
+    } catch (error) {
+      window.alert(
+        error.message || "Failed to load availability. Please try again.",
+      );
+    }
   }
 
   function closeFacultyAvailability() {
@@ -761,6 +860,32 @@ function App() {
   async function handleCreateBooking(event) {
     event.preventDefault();
     const subject = bookingSubject.trim();
+
+    if (occupiedSlotsLoading || occupiedSlotsError) {
+      setBookingError(
+        occupiedSlotsLoading
+          ? "Please wait while availability is checked."
+          : "Availability could not be checked. Close this window and try again.",
+      );
+      return;
+    }
+
+    const slotReserved = occupiedSlots.some(
+      (slot) =>
+        Math.abs(
+          slotStart(String(slot.date_key).slice(0, 10), slot.time_slot) -
+            slotStart(selectedBookingDate, selectedBookingTime),
+        ) <
+        30 * 60 * 1000,
+    );
+
+    if (slotReserved) {
+      setBookingError(
+        "This consultation slot is already reserved. Please choose another time.",
+      );
+      setSelectedBookingTime("");
+      return;
+    }
     if (
       !selectedfacultyForBooking ||
       !selectedBookingDate ||
@@ -816,25 +941,32 @@ function App() {
     }
   }
 
-  function handleCancelBooking(id) {
+  async function handleCancelBooking(id) {
     const booking = bookings.find((item) => item.id === id);
-    if (!booking || !isActive(booking) || bookingStart(booking) <= Date.now())
+
+    if (!booking || !isActive(booking) || bookingStart(booking) <= Date.now()) {
       return;
+    }
+
     if (!window.confirm("Cancel this consultation request?")) return;
-    setBookings((current) =>
-      current.map((item) =>
-        item.id === id && isActive(item) && bookingStart(item) > Date.now()
-          ? {
-              ...item,
-              status: "Cancelled",
-              cancelledAt: new Date().toISOString(),
-            }
-          : item,
-      ),
-    );
-    setBookingNotice(
-      "Booking cancelled. You may request another available time.",
-    );
+
+    setBookingNotice("");
+
+    try {
+      const result = await cancelBooking(id);
+
+      setBookings((current) =>
+        current.map((item) =>
+          item.id === id ? { ...item, ...result.booking } : item,
+        ),
+      );
+
+      setBookingNotice(
+        "Booking cancelled. You may request another available time.",
+      );
+    } catch (error) {
+      setBookingNotice(error.message || "Failed to cancel booking.");
+    }
   }
 
   function handleLearnMore() {
@@ -1698,6 +1830,19 @@ function App() {
           }
           allBookings={allBookings}
           loadAllBookings={loadAllBookings}
+          onAvailabilitySaved={(updatedFaculty) => {
+            setCurrentFaculty((current) =>
+              current ? { ...current, ...updatedFaculty } : current,
+            );
+
+            setFacultyList((current) =>
+              current.map((member) =>
+                String(member.id) === String(updatedFaculty.id)
+                  ? { ...member, ...updatedFaculty }
+                  : member,
+              ),
+            );
+          }}
           handleAccept={handleAccept}
           handleDecline={handleDecline}
           handleLogout={handleLogout}
@@ -2554,11 +2699,28 @@ function App() {
                                   selectedfacultyForBooking,
                                   selectedBookingDate,
                                 ).map((time) => {
-                                  const conflict = hasConflict(
-                                    bookings,
-                                    selectedBookingDate,
-                                    time,
-                                  );
+                                  const conflict =
+                                    occupiedSlotsLoading ||
+                                    Boolean(occupiedSlotsError) ||
+                                    hasConflict(
+                                      bookings,
+                                      selectedBookingDate,
+                                      time,
+                                    ) ||
+                                    occupiedSlots.some(
+                                      (slot) =>
+                                        Math.abs(
+                                          slotStart(
+                                            String(slot.date_key).slice(0, 10),
+                                            slot.time_slot,
+                                          ) -
+                                            slotStart(
+                                              selectedBookingDate,
+                                              time,
+                                            ),
+                                        ) <
+                                        30 * 60 * 1000,
+                                    );
                                   return (
                                     <button
                                       className={
@@ -2580,9 +2742,13 @@ function App() {
                                     >
                                       <strong>{time}</strong>
                                       <span>
-                                        {conflict
-                                          ? "Conflicts with your booking"
-                                          : "30 minutes"}
+                                        {occupiedSlotsLoading
+                                          ? "Checking availability..."
+                                          : occupiedSlotsError
+                                            ? "Availability check failed"
+                                            : conflict
+                                              ? "Unavailable"
+                                              : "30 minutes"}
                                       </span>
                                     </button>
                                   );
@@ -2809,6 +2975,18 @@ function App() {
                           <BookIcon />
                           {booking.subject || "Consultation"}
                         </div>
+
+                        {isActive(booking) &&
+                          bookingStart(booking) > Date.now() && (
+                            <button
+                              type="button"
+                              className="bookings-find-button"
+                              onClick={() => handleCancelBooking(booking.id)}
+                            >
+                              Cancel Booking
+                            </button>
+                          )}
+
                         <div className="booking-details-row">
                           <span>
                             <CalendarIcon />
